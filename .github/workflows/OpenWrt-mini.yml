@@ -2,15 +2,15 @@ name: OpenWrt-mini-CI
 
 on:
   repository_dispatch:
-  release:
-    types: published
-#  push:
-#    branches:
-#      - main
-#    paths:
-#      - '5.config'
-  schedule:
-    - cron: 0 22 */2 * * 
+  workflow_dispatch:
+    inputs:
+      ssh:
+        description: 'SSH connection to Actions'
+        required: false
+        default: 'false'
+#  schedule:
+#    - cron: 0 21 */7 * * 
+
   watch:
     types: started
 jobs:
