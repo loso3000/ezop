@@ -1,154 +1,114 @@
 #!/bin/bash
-#
-# Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
-#
-# This is free software, licensed under the MIT License.
-# See /LICENSE for more information.
-#
-# https://github.com/P3TERX/Actions-OpenWrt
-# File name: diy-part2.sh
-# Description: OpenWrt DIY script part 2 (After Update feeds)
-#
+#=================================================
+# Description: Build OpenWrt using GitHub Actions
+rm -rf ./package/lean/luci-theme-argon
+rm -rf ./package/lean/luci-theme-opentomcat
+# echo '替换aria2'
+rm -rf feeds/luci/applications/luci-app-aria2 && svn co https://github.com/sirpdboy/sirpdboy-package/trunk/luci-app-aria2 feeds/luci/applications/luci-app-aria2
+rm -rf feeds/packages/net/aria2 && svn co https://github.com/sirpdboy/sirpdboy-package/trunk/aria2 feeds/packages/net/aria2
+rm -rf feeds/packages/net/ariang && svn co https://github.com/sirpdboy/sirpdboy-package/trunk/ariang feeds/packages/net/ariang
+# rm -rf package/diy/aria2
+# rm -rf package/diy/ariang
+# rm -rf package/diy/luci-app-aria2
+# echo '替换transmission'
+rm -rf feeds/luci/applications/luci-app-transmission && svn co https://github.com/sirpdboy/sirpdboy-package/trunk/luci-app-transmission feeds/luci/applications/luci-app-transmission
+rm -rf feeds/packages/net/transmission && svn co https://github.com/sirpdboy/sirpdboy-package/trunk/transmission feeds/packages/net/transmission
+rm -rf feeds/packages/net/transmission-web-control && svn co https://github.com/sirpdboy/sirpdboy-package/trunk/transmission-web-control feeds/packages/net/transmission-web-control
+# echo 'qBittorrent'
+sed -i 's/+qbittorrent/+qbittorrent +python3/g' ./package/lean/luci-app-qbittorrent/Makefile
+rm -rf package/lean/luci-app-qbittorrent
+rm -rf package/lean/qt5
+rm -rf package/lean/qBittorrent
+rm -rf package/lean/luci-app-baidupcs-web && git clone https://github.com/garypang13/luci-app-baidupcs-web ./package/lean/luci-app-baidupcs-web
 
-# Modify default IP
-sed -i 's/192.168.1.1/192.168.10.1/g' package/base-files/files/bin/config_generate
+echo '替换smartdns'
+rm -rf ./feeds/packages/net/smartdns&& svn co https://github.com/sirpdboy/sirpdboy-package/trunk/smartdns ./package/diy/smartdns
+rm -rf ./package/lean/luci-app-netdata && svn co https://github.com/sirpdboy/sirpdboy-package/trunk/luci-app-netdata ./package/lean/luci-app-netdata
+rm -rf ./feeds/packages/admin/netdata && svn co https://github.com/sirpdboy/sirpdboy-package/trunk/netdata ./feeds/packages/admin/netdata
+rm -rf ./feeds/packages/net/mwan3 && svn co https://github.com/sirpdboy/sirpdboy-package/trunk/mwan3 ./feeds/packages/net/mwan3
+rm -rf ./feeds/packages/net/https-dns-proxy  && svn co https://github.com/Lienol/openwrt-packages/trunk/net/https-dns-proxy ./feeds/packages/net/https-dns-proxy
+#rm -rf ./package/diy/autocore
+#rm -rf ./package/diy/default-settings
+rm -rf ./package/lean/automount
+rm -rf ./package/lean/autosamba
+rm -rf ./package/diy/netdata
+rm -rf ./package/diy/mwan3
+rm -rf ./package/lean/autocore
+rm -rf ./package/lean/default-settings
+#curl -fsSL  https://raw.githubusercontent.com/sirpdboy/sirpdboy-package/master/set/sysctl.conf > ./package/base-files/files/etc/sysctl.conf
+curl -fsSL  https://raw.githubusercontent.com/loso3000/other/master/patch/poweroff/poweroff.htm > ./feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_system/poweroff.htm 
+curl -fsSL  https://raw.githubusercontent.com/loso3000/other/master/patch/poweroff/system.lua > ./feeds/luci/modules/luci-mod-admin-full/luasrc/controller/admin/system.lua
+sed -i 's/网络存储/存储/g' package/lean/luci-app-vsftpd/po/zh-cn/vsftpd.po
+sed -i 's/Turbo ACC 网络加速/ACC网络加速/g' package/lean/luci-app-flowoffload/po/zh-cn/flowoffload.po
+sed -i 's/Turbo ACC 网络加速/ACC网络加速/g' package/lean/luci-app-sfe/po/zh-cn/sfe.po
+sed -i 's/解锁网易云灰色歌曲/解锁灰色歌曲/g' package/lean/luci-app-unblockmusic/po/zh-cn/unblockmusic.po
+sed -i 's/家庭云//g' package/lean/luci-app-familycloud/luasrc/controller/familycloud.lua
+cp -f ./package/diy/banner ./package/base-files/files/etc/
+date1='Ipv6-S'`TZ=UTC-8 date +%Y.%m.%d -d +"8"hour`
+sed -i 's/$(VERSION_DIST_SANITIZED)/$(shell TZ=UTC-8 date +%Y%m%d -d +8hour)-Ipv6/g' include/image.mk
+echo "DISTRIB_REVISION='${date1} by Sirpdboy'" > ./package/base-files/files/etc/openwrt_release1
+echo ${date1}' by Sirpdboy ' >> ./package/base-files/files/etc/banner
+echo '---------------------------------' >> ./package/base-files/files/etc/banner
+sed -i 's/带宽监控/监控/g' feeds/luci/applications/luci-app-nlbwmon/po/zh-cn/nlbwmon.po
+sed -i 's/root::0:0:99999:7:::/root:$1$V4UetPzk$CYXluq4wUazHjmCDBCqXF.:0:0:99999:7:::/g' ./package/base-files/files/etc/shadow
+sed -i 's/a.default = "0"/a.default = "1"/g' ./package/lean/luci-app-cifsd/luasrc/controller/cifsd.lua
+echo  "        option tls_enable 'true'" >> ./package/lean/luci-app-frpc/root/etc/config/frp
+sed -i 's/invalid/# invalid/g' package/lean/samba4/files/smb.conf.template
+sed -i 's/invalid/# invalid/g' package/network/services/samba36/files/smb.conf.template
+sed -i '/filter_/d' package/network/services/dnsmasq/files/dhcp.conf
+#内核设置
+##sed -i '/CONFIG_NVME_MULTIPATH /d' ./package/target/linux/x86/config-5.4
+#sed -i '/CONFIG_NVME_TCP /d' ./package/target/linux/x86/config-5.4
+#echo  'CONFIG_BINFMT_MISC=y' >> ./package/target/linux/x86/config-5.4
+#echo  'CONFIG_EXTRA_FIRMWARE="i915/kbl_dmc_ver1_04.bin"'   >> ./package/target/linux/x86/config-5.4
+#echo  'CONFIG_EXTRA_FIRMWARE_DIR="/lib/firmware"'  >> ./package/target/linux/x86/config-5.4
+#echo  'CONFIG_NVME_FABRICS=y'  >> ./package/target/linux/x86/config-5.4
+#echo  'CONFIG_NVME_FC=y' >> ./package/target/linux/x86/config-5.4
+#echo  'CONFIG_NVME_MULTIPATH=y' >> ./package/target/linux/x86/config-5.4
+#echo  'CONFIG_NVME_TCP=y' >> ./package/target/linux/x86/config-5.4
 
-# Clone community packages to package/community
-mkdir package/community
-pushd package/community
+git clone https://github.com/garypang13/luci-app-bypass.git package/luci-app-bypass
+find package/*/ feeds/*/ -maxdepth 2 -path "*luci-app-bypass/Makefile" | xargs -i sed -i 's/shadowsocksr-libev-ssr-redir/shadowsocksr-libev-alt/g' {}
+find package/*/ feeds/*/ -maxdepth 2 -path "*luci-app-bypass/Makefile" | xargs -i sed -i 's/shadowsocksr-libev-ssr-server/shadowsocksr-libev-server/g' {}
+#git clone https://github.com/garypang13/luci-app-dnsfilter.git package/luci-app-dnsfilter
+rm -rf package/lean/luci-app-jd-dailybonus && git clone https://github.com/jerrykuku/luci-app-jd-dailybonus.git package/diy/luci-app-jd-dailybonus
+svn co https://github.com/vernesong/OpenClash/trunk/luci-app-openclash package/diy/luci-app-openclash
+git clone https://github.com/xiaorouji/openwrt-passwall package/diy1
+#git clone https://github.com/AlexZhuo/luci-app-bandwidthd /package/diy/luci-app-bandwidthd
+git clone -b master --single-branch https://github.com/tty228/luci-app-serverchan ./package/diy/luci-app-serverchan
+git clone -b master --single-branch https://github.com/destan19/OpenAppFilter ./package/diy/OpenAppFilter
 
-# Add Lienol's Packages
-git clone --depth=1 https://github.com/Lienol/openwrt-package
+svn co https://github.com/fw876/helloworld/trunk/luci-app-ssr-plus  package/diy/luci-app-ssr-plus
+svn co https://github.com/jerrykuku/luci-app-vssr/trunk/  package/diy/luci-app-vssr
 
-# Add OpenWrt's Packages
-git clone --depth=1 https://github.com/openwrt/luci/tree/master/applications/luci-app-acme
-git clone --depth=1 https://github.com/openwrt/packages/tree/master/net/acme
+sed -i '/status/am:section(SimpleSection).template = "openclash/myip"' ./package/hw/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client.lua
+#sed -i '/get("@global_other/i\m:section(SimpleSection).template = "openclash/myip"' package/diy1/luci-app-passwall/luasrc/model/cbi/passwall/client/global.lua
+#else
+#	cp -vr package/diy/myip.htm ./package/hw/luci-app-ssr-plus/luasrc/view
+#	sed -i '/status/am:section(SimpleSection).template = "myip"'  ./package/hw/luci-app-ssr-plus/luasrc/model/cbi/shadowsocksr/client.lua
+#	sed -i '/get("@global_other/i\m:section(SimpleSection).template = "myip"'  package/diy1/luci-app-passwall/luasrc/model/cbi/passwall/client/global.lua
 
-# Add dnsfilter
-git clone --depth=1 https://github.com/garypang13/luci-app-dnsfilter
-
-# Add luci-app-passwall
-git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall
-
-# Add luci-app-vssr <M>
-git clone --depth=1 https://github.com/jerrykuku/lua-maxminddb.git
-git clone --depth=1 https://github.com/jerrykuku/luci-app-vssr
-
-# Add mentohust & luci-app-mentohust
-git clone --depth=1 https://github.com/BoringCat/luci-app-mentohust
-git clone --depth=1 https://github.com/KyleRicardo/MentoHUST-OpenWrt-ipk
-
-# Add minieap & luci-proto-minieap
-git clone --depth=1 https://github.com/ysc3839/luci-proto-minieap
-svn co https://github.com/project-openwrt/openwrt/trunk/package/ntlf9t/minieap
-
-# Add ServerChan
-git clone --depth=1 https://github.com/tty228/luci-app-serverchan
-
-# Add OpenClash
-git clone --depth=1 -b master https://github.com/vernesong/OpenClash
-
-# Add luci-app-onliner (need luci-app-nlbwmon)
-git clone --depth=1 https://github.com/rufengsuixing/luci-app-onliner
-
-# Add luci-app-adguardhome
-svn co https://github.com/immortalwrt/immortalwrt/trunk/package/ctcgfw/luci-app-adguardhome
-svn co https://github.com/immortalwrt/packages/trunk/net/adguardhome
-
-# Add luci-app-diskman
-git clone --depth=1 https://github.com/SuLingGG/luci-app-diskman
-mkdir parted
-cp luci-app-diskman/Parted.Makefile parted/Makefile
-
-# Add luci-app-dockerman
-rm -rf ../lean/luci-app-docker
-git clone --depth=1 https://github.com/KFERMercer/luci-app-dockerman
-git clone --depth=1 https://github.com/lisaac/luci-lib-docker
-
-# Add luci-app-gowebdav
-git clone --depth=1 https://github.com/project-openwrt/openwrt-gowebdav
-
-# Add luci-theme-argon
-git clone --depth=1 -b 18.06 https://github.com/jerrykuku/luci-theme-argon
-git clone --depth=1 https://github.com/jerrykuku/luci-app-argon-config
-rm -rf ../lean/luci-theme-argon
-
-# Use immortalwrt's luci-app-netdata & netdata
-rm -rf ../lean/luci-app-netdata
-rm -rf ../../feeds/packages/admin/netdata
-svn co https://github.com/immortalwrt/immortalwrt/trunk/package/ntlf9t/luci-app-netdata
-svn co https://github.com/immortalwrt/packages/trunk/admin/netdata
-
-# Add luci-theme-rosy
-git clone --depth=1 -b openwrt-18.06 https://github.com/shiyu1314/luci-theme-rosy
-rm -rf ../lean/luci-theme-rosy
-
-# Add tmate
-git clone --depth=1 https://github.com/project-openwrt/openwrt-tmate
-
-# Add subconverter
-git clone --depth=1 https://github.com/tindy2013/openwrt-subconverter
-
-# Add gotop
-svn co https://github.com/project-openwrt/openwrt/trunk/package/ctcgfw/gotop
-
-# Add smartdns
-svn co https://github.com/pymumu/smartdns/trunk/package/openwrt ../smartdns
-svn co https://github.com/project-openwrt/openwrt/trunk/package/ntlf9t/luci-app-smartdns ../luci-app-smartdns
-
-# Add luci-udptools
-git clone --depth=1 https://github.com/zcy85611/openwrt-luci-kcp-udp
-
-# Add OpenAppFilter
-git clone --depth=1 https://github.com/destan19/OpenAppFilter
-
-# Add luci-app-oled (R2S Only)
-git clone --depth=1 https://github.com/NateLol/luci-app-oled
+# svn co https://github.com/jerrykuku/luci-app-ttnode/trunk/  package/diy/luci-app-ttnode
+# sed -i 's/KERNEL_PATCHVER:=5.4/KERNEL_PATCHVER:=4.19/g' ./target/linux/x86/Makefile
+# sed -i 's/KERNEL_TESTING_PATCHVER:=5.4/KERNEL_TESTING_PATCHVER:=4.19/g' ./target/linux/x86/Makefile
+#sed -i "/mediaurlbase/d" package/*/luci-theme*/root/etc/uci-defaults/*
+#sed -i "/mediaurlbase/d" feed/*/luci-theme*/root/etc/uci-defaults/*
 
 # Add driver for rtl8821cu & rtl8812au-ac
-svn co https://github.com/project-openwrt/openwrt/branches/master/package/ctcgfw/rtl8812au-ac
-svn co https://github.com/project-openwrt/openwrt/branches/master/package/ctcgfw/rtl8821cu
-popd
-
-# Mod zzz-default-settings
-pushd package/lean/default-settings/files
-sed -i '/http/d' zzz-default-settings
-export orig_version="$(cat "zzz-default-settings" | grep DISTRIB_REVISION= | awk -F "'" '{print $2}')"
-sed -i "s/${orig_version}/${orig_version} ($(date +"%Y-%m-%d"))/g" zzz-default-settings
-popd
-
-# Fix libssh
-pushd feeds/packages/libs
-rm -rf libssh
-svn co https://github.com/openwrt/packages/trunk/libs/libssh
-popd
-
-# Use Lienol's https-dns-proxy package
-pushd feeds/packages/net
-rm -rf https-dns-proxy
-svn co https://github.com/Lienol/openwrt-packages/trunk/net/https-dns-proxy
-popd
-
-# Use snapshots syncthing package
-pushd feeds/packages/utils
-rm -rf syncthing
-svn co https://github.com/openwrt/packages/trunk/utils/syncthing
-popd
-
-# Fix mt76 wireless driver
-pushd package/kernel/mt76
-sed -i '/mt7662u_rom_patch.bin/a\\techo mt76-usb disable_usb_sg=1 > $\(1\)\/etc\/modules.d\/mt76-usb' Makefile
-popd
-
-# Add po2lmo
-git clone https://github.com/openwrt-dev/po2lmo.git
-pushd po2lmo
-make && sudo make install
-popd
-
-# Change default shell to zsh
-sed -i 's/\/bin\/ash/\/usr\/bin\/zsh/g' package/base-files/files/etc/passwd
-
-# 修复核心及添加温度显示
-sed -i 's|pcdata(boardinfo.system or "?")|luci.sys.exec("uname -m") or "?"|g' feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
-sed -i 's/or "1"%>/or "1"%> ( <%=luci.sys.exec("expr `cat \/sys\/class\/thermal\/thermal_zone0\/temp` \/ 1000") or "?"%> \&#8451; ) /g' feeds/luci/modules/luci-mod-admin-full/luasrc/view/admin_status/index.htm
+# svn co https://github.com/project-openwrt/openwrt/branches/master/package/ctcgfw/rtl8812au-ac ./package/ctcgfw
+# svn co https://github.com/project-openwrt/openwrt/branches/master/package/ctcgfw/rtl8821cu ./package/ctcgfw
+rm -rf package/lean/luci-app-docker
+rm -rf package/lean/luci-app-dockerman
+rm -rf package/lean/luci-lib-docker
+# rm -rf ./package/diy1/trojan
+# rm -rf ./package/diy1/v2ray
+# rm -rf ./package/diy1/v2ray-plugin
+#  rm -rf package/lean/parted
+# rm -rf package/diy1/tcping
+rm -rf ./package/lean/trojan
+rm -rf ./package/lean/v2ray-plugin
+rm -rf package/diy/vssr
+./scripts/feeds update -i
+#git clone https://github.com/openwrt-dev/po2lmo.git
+#cd po2lmo
+#make && sudo make install
