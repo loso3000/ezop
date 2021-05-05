@@ -100,6 +100,16 @@ sed -i '/status/am:section(SimpleSection).template = "openclash/myip"' ./package
 
 svn co https://github.com/jerrykuku/luci-app-vssr/trunk/  package/diy/luci-app-vssr
 
+# Add luci-app-oled (R2S Only)
+git clone --depth=1 https://github.com/NateLol/luci-app-oled   package/diy/luci-app-oled
+# Add driver for rtl8821cu & rtl8812au-ac
+svn co https://github.com/project-openwrt/openwrt/branches/master/package/ctcgfw/rtl8812au-ac  package/diy/rtl8812au-ac
+svn co https://github.com/project-openwrt/openwrt/branches/master/package/ctcgfw/rtl8821cu  package/diy/rtl8821cu
+# Fix mt76 wireless driver
+sed -i '/mt7662u_rom_patch.bin/a\\techo mt76-usb disable_usb_sg=1 > $\(1\)\/etc\/modules.d\/mt76-usb' package/kernel/mt76/Makefile
+feeds/packages/utils
+rm -rf feeds/packages/utils/syncthing
+svn co https://github.com/openwrt/packages/trunk/utils/syncthing feeds/packages/utils/syncthing
 #sed -i '/get("@global_other/i\m:section(SimpleSection).template = "openclash/myip"' package/diy1/luci-app-passwall/luasrc/model/cbi/passwall/client/global.lua
 #else
 #	cp -vr package/diy/myip.htm ./package/hw/luci-app-ssr-plus/luasrc/view
@@ -112,9 +122,6 @@ git clone https://github.com/jerrykuku/luci-app-ttnode.git     package/diy/luci-
 #sed -i "/mediaurlbase/d" package/*/luci-theme*/root/etc/uci-defaults/*
 #sed -i "/mediaurlbase/d" feed/*/luci-theme*/root/etc/uci-defaults/*
 
-# Add driver for rtl8821cu & rtl8812au-ac
-# svn co https://github.com/project-openwrt/openwrt/branches/master/package/ctcgfw/rtl8812au-ac ./package/ctcgfw
-# svn co https://github.com/project-openwrt/openwrt/branches/master/package/ctcgfw/rtl8821cu ./package/ctcgfw
 rm -rf package/lean/luci-app-docker
 rm -rf package/lean/luci-app-dockerman
 rm -rf package/lean/luci-lib-docker
