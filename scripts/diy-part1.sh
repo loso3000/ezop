@@ -18,6 +18,6 @@
 # sed -i '$a src-git diy https://github.com/CCnut/feed-netkeeper.git;LUCI-LUA-UCITRACK' feeds.conf.default
 git clone https://github.com/sirpdboy/sirpdboy-package ./openwrt/package/diy
 # Add luci-theme-argon
-git clone https://github.com/sirpdboy/build ./openwrt/package/build
+# git clone https://github.com/sirpdboy/build ./openwrt/package/build
 # git clone --depth=1 -b 18.06 https://github.com/jerrykuku/luci-theme-argon
 rm -rf ../lean/luci-theme-argon
