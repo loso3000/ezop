@@ -58,11 +58,12 @@ EOF
 
 cat>ez.sh<<-\EOOF
 #!/bin/bash
-ez_version="`date '+%y%m%d%H%M'`_sta_Len yu" 
+ez_version="Ipv6-Super-Vip `date '+%y%m%d%H%M'`by sirpdboy" 
 echo $ez_version >  wget/DISTRIB_REVISION1 
 echo $ez_version | cut -d _ -f 1 >  files/etc/ez_version  
 new_DISTRIB_REVISION=`cat  wget/DISTRIB_REVISION1`
 #
+
 grep "Check_Update.sh"  package/emortal/default-settings/files/99-default-settings
 if [ $? != 0 ]; then
 	sed -i 's/exit 0/ /'  package/emortal/default-settings/files/99-default-settings
