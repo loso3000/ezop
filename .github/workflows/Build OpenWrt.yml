@@ -207,8 +207,6 @@ jobs:
         name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: ${{ env.FIRMWARE }}
 
-
-
     - name: Upload firmware to release
       uses: softprops/action-gh-release@v1
       if: steps.tag.outputs.status == 'success' && !cancelled()
@@ -223,5 +221,5 @@ jobs:
       uses: Blueplanet20120/delete-workflow-runs@main
       with:
         retain_days: 1
-        keep_minimum_runs: 5
+        keep_minimum_runs: 1
 
