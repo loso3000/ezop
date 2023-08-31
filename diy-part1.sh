@@ -22,6 +22,7 @@ touch wget/DISTRIB_REVISION3
 touch files/usr/share/Check_Update.sh
 touch files/usr/share/ez-auto.sh
 
+sed -i "s/ImmortalWrt/OpenWrt/" {package/base-files/files/bin/config_generate,include/version.mk}
 
 cat>rename.sh<<-\EOF
 #!/bin/bash
