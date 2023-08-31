@@ -89,7 +89,7 @@ EOOF
 
 cat>files/usr/share/Check_Update.sh<<-\EOF
 #!/bin/bash
-# https://github.com/Blueplanet20120/Actions-OpenWrt-x86
+# https://github.com/sirpdboy/OpenWrt
 # Actions-OpenWrt-x86 By ez 20210505
 #path=$(dirname $(readlink -f $0))
 # cd ${path}
@@ -259,10 +259,10 @@ cloud_version=`cat /tmp/cloud_ts_version | cut -d _ -f 1`
 cloud_kernel=`cat /tmp/cloud_ts_version | cut -d _ -f 2`
 #固件下载地址
 new_version=`cat /tmp/cloud_ts_version` # 2208052057_5.4.203
-DEV_URL=https://github.com/Blueplanet20120/openwrt/releases/download/${new_version}/openwrt_x86-64-${new_version}_sta_ez.img.gz
-DEV_UEFI_URL=https://github.com/Blueplanet20120/openwrt/releases/download/${new_version}/openwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img.gz
-openwrt_sta=https://github.com/Blueplanet20120/openwrt/releases/download/${new_version}/openwrt_sta.md5
-openwrt_sta_uefi=https://github.com/Blueplanet20120/openwrt/releases/download/${new_version}/openwrt_sta_uefi.md5
+DEV_URL=https://github.com/sirpdboy/openwrt/releases/download/${new_version}/openwrt_x86-64-${new_version}_sta_ez.img.gz
+DEV_UEFI_URL=https://github.com/sirpdboy/openwrt/releases/download/${new_version}/openwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img.gz
+openwrt_sta=https://github.com/sirpdboy/openwrt/releases/download/${new_version}/openwrt_sta.md5
+openwrt_sta_uefi=https://github.com/sirpdboy/openwrt/releases/download/${new_version}/openwrt_sta_uefi.md5
 else
 echo "请检测网络或重试！"
 exit 1
