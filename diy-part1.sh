@@ -30,32 +30,32 @@ cat>rename.sh<<-\EOF
 #!/bin/bash
 rm -rf  bin/targets/x86/64/config.buildinfo
 rm -rf  bin/targets/x86/64/feeds.buildinfo
-rm -rf  bin/targets/x86/64/immortalwrt-x86-64-generic-kernel.bin
-rm -rf  bin/targets/x86/64/immortalwrt-x86-64-generic-squashfs-rootfs.img.gz
-rm -rf  bin/targets/x86/64/immortalwrt-x86-64-generic-rootfs.tar.gz
-rm -rf  bin/targets/x86/64/immortalwrt-x86-64-generic.manifest
+rm -rf  bin/targets/x86/64/openwrt-x86-64-generic-kernel.bin
+rm -rf  bin/targets/x86/64/openwrt-x86-64-generic-squashfs-rootfs.img.gz
+rm -rf  bin/targets/x86/64/openwrt-x86-64-generic-rootfs.tar.gz
+rm -rf  bin/targets/x86/64/openwrt-x86-64-generic.manifest
 rm -rf bin/targets/x86/64/sha256sums
 rm -rf  bin/targets/x86/64/version.buildinfo
-rm -rf bin/targets/x86/64/immortalwrt-x86-64-generic-ext4-rootfs.img.gz
-rm -rf bin/targets/x86/64/immortalwrt-x86-64-generic-ext4-combined-efi.img.gz
-rm -rf bin/targets/x86/64/immortalwrt-x86-64-generic-ext4-combined.img.gz
+rm -rf bin/targets/x86/64/openwrt-x86-64-generic-ext4-rootfs.img.gz
+rm -rf bin/targets/x86/64/openwrt-x86-64-generic-ext4-combined-efi.img.gz
+rm -rf bin/targets/x86/64/openwrt-x86-64-generic-ext4-combined.img.gz
 sleep 2
 rename_version=`cat files/etc/ez_version`
 str1=`grep "KERNEL_PATCHVER:="  target/linux/x86/Makefile | cut -d = -f 2` #判断当前默认内核版本号如5.10
 ver54=`grep "LINUX_VERSION-5.4 ="  include/kernel-5.4 | cut -d . -f 3`
 sleep 2
-mv  bin/targets/x86/64/immortalwrt-x86-64-generic-squashfs-combined.img.gz       bin/targets/x86/64/immortalwrt_x86-64-${rename_version}_${str1}.${ver54}_sta_ez.img.gz
-mv  bin/targets/x86/64/immortalwrt-x86-64-generic-squashfs-combined-efi.img.gz   bin/targets/x86/64/immortalwrt_x86-64-${rename_version}_${str1}.${ver54}_uefi-gpt_sta_ez.img.gz
+mv  bin/targets/x86/64/openwrt-x86-64-generic-squashfs-combined.img.gz       bin/targets/x86/64/openwrt-64-${rename_version}_${str1}.${ver54}_sta_ez.img.gz
+mv  bin/targets/x86/64/openwrt-x86-64-generic-squashfs-combined-efi.img.gz   bin/targets/x86/64/openwrt-64-${rename_version}_${str1}.${ver54}_uefi-gpt_sta_ez.img.gz
 sleep 2
 ls bin/targets/x86/64 | grep "gpt_sta_ez.img" | cut -d - -f 3 | cut -d _ -f 1-2 > wget/op_version1
 #md5
 ls -l  "bin/targets/x86/64" | awk -F " " '{print $9}' > wget/open_sta_md5
 sta_version=`grep "_uefi-gpt_sta_ez.img.gz" wget/open_sta_md5 | cut -d - -f 3 | cut -d _ -f 1-2`
-immortalwrt_sta=immortalwrt_x86-64-${sta_version}_sta_ez.img.gz
-immortalwrt_sta_uefi=immortalwrt_x86-64-${sta_version}_uefi-gpt_sta_ez.img.gz
+openwrt_sta=openwrt_x86-64-${sta_version}_sta_ez.img.gz
+openwrt_sta_uefi=openwrt_x86-64-${sta_version}_uefi-gpt_sta_ez.img.gz
 cd bin/targets/x86/64
-md5sum $immortalwrt_sta > immortalwrt_sta.md5
-md5sum $immortalwrt_sta_uefi > immortalwrt_sta_uefi.md5
+md5sum $openwrt_sta > openwrt_sta.md5
+md5sum $openwrt_sta_uefi > openwrt_sta_uefi.md5
 exit 0
 EOF
 
@@ -103,23 +103,23 @@ fi
 rm -f /tmp/cloud_version
 # 获取固件云端版本号、内核版本号信息
 current_version=`cat /etc/ez_version`
-curl -s https://api.github.com/repos/Blueplanet20120/immortalwrt-86/releases/latest | grep 'tag_name' | cut -d\" -f4 > /tmp/cloud_ts_version
+curl -s https://api.github.com/repos/sirpdboy/openwrt/releases/latest | grep 'tag_name' | cut -d\" -f4 > /tmp/cloud_ts_version
 sleep 3
 if [ -s  "/tmp/cloud_ts_version" ]; then
 	cloud_version=`cat /tmp/cloud_ts_version | cut -d _ -f 1`
 	cloud_kernel=`cat /tmp/cloud_ts_version | cut -d _ -f 2`
 	#固件下载地址
 	new_version=`cat /tmp/cloud_ts_version`
-	DEV_URL=https://github.com/Blueplanet20120/immortalwrt-86/releases/download/${new_version}/immortalwrt_x86-64-${new_version}_sta_ez.img.gz
-	DEV_UEFI_URL=https://github.com/Blueplanet20120/immortalwrt-86/releases/download/${new_version}/immortalwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img.gz
-	immortalwrt_sta=https://github.com/Blueplanet20120/immortalwrt-86/releases/download/${new_version}/immortalwrt_sta.md5
-	immortalwrt_sta_uefi=https://github.com/Blueplanet20120immortalwrt-86/releases/download/${new_version}/immortalwrt_sta_uefi.md5
+	DEV_URL=https://github.com/sirpdboy/openwrt/releases/download/${new_version}/openwrt_x86-64-${new_version}_sta_ez.img.gz
+	DEV_UEFI_URL=https://github.com/sirpdboy/openwrt/releases/download/${new_version}/openwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img.gz
+	openwrt_sta=https://github.com/sirpdboy/openwrt/releases/download/${new_version}/openwrt_sta.md5
+	openwrt_sta_uefi=https://github.com/sirpdboy/openwrt/releases/download/${new_version}/openwrt_sta_uefi.md5
 else
 	echo "请检测网络或重试！"
 	exit 1
 fi
 ####
-Firmware_Type="$(grep 'DISTRIB_ARCH=' /etc/immortalwrt_release | cut -d \' -f 2)"
+Firmware_Type="$(grep 'DISTRIB_ARCH=' /etc/openwrt_release | cut -d \' -f 2)"
 echo $Firmware_Type > /etc/ez_firmware_type
 echo
 if [[ "$cloud_kernel" =~ "4.19" ]]; then
@@ -131,9 +131,9 @@ fi
 #md5值验证，固件类型判断
 if [ ! -d /sys/firmware/efi ];then
 	if [ "$current_version" != "$cloud_version" ];then
-		wget -P /tmp "$DEV_URL" -O /tmp/immortalwrt_x86-64-${new_version}_sta_ez.img.gz
-		wget -P /tmp "$immortalwrt_sta" -O /tmp/immortalwrt_sta.md5
-		cd /tmp && md5sum -c immortalwrt_sta.md5
+		wget -P /tmp "$DEV_URL" -O /tmp/openwrt_x86-64-${new_version}_sta_ez.img.gz
+		wget -P /tmp "$openwrt_sta" -O /tmp/openwrt_sta.md5
+		cd /tmp && md5sum -c openwrt_sta.md5
 		if [ $? != 0 ]; then
       echo "您下载文件失败，请检查网络重试…"
       sleep 4
@@ -147,9 +147,9 @@ if [ ! -d /sys/firmware/efi ];then
 	fi
 else
 	if [ "$current_version" != "$cloud_version" ];then
-		wget -P /tmp "$DEV_UEFI_URL" -O /tmp/immortalwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img.gz
-		wget -P /tmp "$immortalwrt_sta_uefi" -O /tmp/immortalwrt_sta_uefi.md5
-		cd /tmp && md5sum -c immortalwrt_sta_uefi.md5
+		wget -P /tmp "$DEV_UEFI_URL" -O /tmp/openwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img.gz
+		wget -P /tmp "$openwrt_sta_uefi" -O /tmp/openwrt_sta_uefi.md5
+		cd /tmp && md5sum -c openwrt_sta_uefi.md5
 		if [ $? != 0 ]; then
       echo "您下载文件失败，请检查网络重试…"
       sleep 4
@@ -176,11 +176,11 @@ case $num1 in
 	echo
 	sleep 3
 	if [ ! -d /sys/firmware/efi ];then
-		gzip -d immortalwrt_x86-64-${new_version}_sta_ez.img.gz
-		sysupgrade /tmp/immortalwrt_x86-64-${new_version}_sta_ez.img
+		gzip -d openwrt_x86-64-${new_version}_sta_ez.img.gz
+		sysupgrade /tmp/openwrt_x86-64-${new_version}_sta_ez.img
 	else
-		gzip -d immortalwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img.gz
-		sysupgrade /tmp/immortalwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img
+		gzip -d openwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img.gz
+		sysupgrade /tmp/openwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img
 	fi
     ;;
     n|N)
@@ -189,11 +189,11 @@ case $num1 in
     echo
     sleep 3
 	if [ ! -d /sys/firmware/efi ];then
-		gzip -d immortalwrt_x86-64-${new_version}_sta_ez.img.gz
-		sysupgrade -n  /tmp/immortalwrt_x86-64-${new_version}_sta_ez.img
+		gzip -d openwrt_x86-64-${new_version}_sta_ez.img.gz
+		sysupgrade -n  /tmp/openwrt_x86-64-${new_version}_sta_ez.img
 	else
-		gzip -d immortalwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img.gz
-		sysupgrade -n  /tmp/immortalwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img
+		gzip -d openwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img.gz
+		sysupgrade -n  /tmp/openwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img
 	fi
     ;;
     *)
@@ -236,7 +236,7 @@ EOF
 
 cat>files/usr/share/ez-auto.sh<<-\EOF
 #!/bin/bash
-# https://github.com/Blueplanet20120/immortalwrt-86
+# https://github.com/sirpdboy/openwrt
 # Actions-OpenWrt-x86 By ez 20210505
 #path=$(dirname $(readlink -f $0))
 # cd ${path}
@@ -250,19 +250,19 @@ fi
 rm -f /tmp/cloud_version
 # 获取固件云端版本号、内核版本号信息
 current_version=`cat /etc/ez_version`
-# wget -qO- -T2 "https://api.github.com/repos/Blueplanet20120/immortalwrt-86/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g;s/v//g'  > /tmp/cloud_ts_version
-# 因immortalwrt不支持上述格式.
-curl -s https://api.github.com/repos/Blueplanet20120/immortalwrt-86/releases/latest | grep 'tag_name' | cut -d\" -f4 > /tmp/cloud_ts_version
+# wget -qO- -T2 "https://api.github.com/repos/sirpdboy/openwrt/releases/latest" | grep "tag_name" | head -n 1 | awk -F ":" '{print $2}' | sed 's/\"//g;s/,//g;s/ //g;s/v//g'  > /tmp/cloud_ts_version
+# 因openwrt不支持上述格式.
+curl -s https://api.github.com/repos/sirpdboy/openwrt/releases/latest | grep 'tag_name' | cut -d\" -f4 > /tmp/cloud_ts_version
 sleep 3
 if [ -s  "/tmp/cloud_ts_version" ]; then
 cloud_version=`cat /tmp/cloud_ts_version | cut -d _ -f 1`
 cloud_kernel=`cat /tmp/cloud_ts_version | cut -d _ -f 2`
 #固件下载地址
 new_version=`cat /tmp/cloud_ts_version` # 2208052057_5.4.203
-DEV_URL=https://github.com/Blueplanet20120/immortalwrt-86/releases/download/${new_version}/immortalwrt_x86-64-${new_version}_sta_ez.img.gz
-DEV_UEFI_URL=https://github.com/Blueplanet20120/immortalwrt-86/releases/download/${new_version}/immortalwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img.gz
-immortalwrt_sta=https://github.com/Blueplanet20120/immortalwrt-86/releases/download/${new_version}/immortalwrt_sta.md5
-immortalwrt_sta_uefi=https://github.com/Blueplanet20120/immortalwrt-86/releases/download/${new_version}/immortalwrt_sta_uefi.md5
+DEV_URL=https://github.com/Blueplanet20120/openwrt/releases/download/${new_version}/openwrt_x86-64-${new_version}_sta_ez.img.gz
+DEV_UEFI_URL=https://github.com/Blueplanet20120/openwrt/releases/download/${new_version}/openwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img.gz
+openwrt_sta=https://github.com/Blueplanet20120/openwrt/releases/download/${new_version}/openwrt_sta.md5
+openwrt_sta_uefi=https://github.com/Blueplanet20120/openwrt/releases/download/${new_version}/openwrt_sta_uefi.md5
 else
 echo "请检测网络或重试！"
 exit 1
@@ -280,16 +280,16 @@ fi
 #md5值验证，固件类型判断
 if [ ! -d /sys/firmware/efi ];then
 if [ "$current_version" != "$cloud_version" ];then
-wget -P /tmp "$DEV_URL" -O /tmp/immortalwrt_x86-64-${new_version}_sta_ez.img.gz
-wget -P /tmp "$immortalwrt_sta" -O /tmp/immortalwrt_sta.md5
-cd /tmp && md5sum -c immortalwrt_sta.md5
+wget -P /tmp "$DEV_URL" -O /tmp/openwrt_x86-64-${new_version}_sta_ez.img.gz
+wget -P /tmp "$openwrt_sta" -O /tmp/openwrt_sta.md5
+cd /tmp && md5sum -c openwrt_sta.md5
 if [ $? != 0 ]; then
   echo "您下载文件失败，请检查网络重试…"
   sleep 4
   exit
 fi
-gzip -d /tmp/immortalwrt_x86-64-${new_version}_sta_ez.img.gz
-sysupgrade /tmp/immortalwrt_x86-64-${new_version}_sta_ez.img
+gzip -d /tmp/openwrt_x86-64-${new_version}_sta_ez.img.gz
+sysupgrade /tmp/openwrt_x86-64-${new_version}_sta_ez.img
 else
 echo -e "\033[32m 本地已经是最新版本，还更个鸡巴毛啊… \033[0m"
 echo
@@ -297,16 +297,16 @@ exit
 fi
 else
 if [ "$current_version" != "$cloud_version" ];then
-wget -P /tmp "$DEV_UEFI_URL" -O /tmp/immortalwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img.gz
-wget -P /tmp "$immortalwrt_sta_uefi" -O /tmp/immortalwrt_sta_uefi.md5
-cd /tmp && md5sum -c immortalwrt_sta_uefi.md5
+wget -P /tmp "$DEV_UEFI_URL" -O /tmp/openwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img.gz
+wget -P /tmp "$openwrt_sta_uefi" -O /tmp/openwrt_sta_uefi.md5
+cd /tmp && md5sum -c openwrt_sta_uefi.md5
 if [ $? != 0 ]; then
 echo "您下载文件失败，请检查网络重试…"
 sleep 1
 exit
 fi
-gzip -d /tmp/immortalwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img.gz
-sysupgrade /tmp/immortalwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img
+gzip -d /tmp/openwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img.gz
+sysupgrade /tmp/openwrt_x86-64-${new_version}_uefi-gpt_sta_ez.img
 else
 echo -e "\033[32m 本地已经是最新版本，还更个鸡巴毛啊… \033[0m"
 echo
