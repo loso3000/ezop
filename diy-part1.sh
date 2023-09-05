@@ -61,7 +61,7 @@ EOF
 
 cat>ez.sh<<-\EOOF
 #!/bin/bash
-ez_version="Ipv6-Super-Vip `date '+%y%m%d%H%M'`by sirpdboy" 
+ez_version="Ipv6-Super-Vip `date '+%y%m%d'`by sirpdboy" 
 echo $ez_version >  wget/DISTRIB_REVISION1 
 echo $ez_version | cut -d _ -f 1 >  files/etc/ez_version  
 new_DISTRIB_REVISION=`cat  wget/DISTRIB_REVISION1`
