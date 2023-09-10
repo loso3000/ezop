@@ -102,8 +102,8 @@ jobs:
         ls 
         ls ./sc
         ls ./sc/.github
-        ls ./sc/.github/workflows/tmp
-        mv ./sc/.github/workflows/tmp/* ./openwrt/*
+        ls ./sc/.github/tmp
+        mv ./sc/.github/tmp/* ./openwrt/*
    
     - name: Cache
       uses: klever1988/cachewrtbuild@main
