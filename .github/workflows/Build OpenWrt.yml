@@ -136,7 +136,8 @@ jobs:
    
     - name: ez
       run: |
-        cd openwrt 
+        cd openwrt
+        
         bash  ez.sh
 
     - name: Update feeds
@@ -152,6 +153,8 @@ jobs:
         chmod +x $DIY_P2_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
+        
+         chmod -R 755 .
 
     - name: SSH connection to Actions
       uses: P3TERX/ssh2actions@v1.0.0
