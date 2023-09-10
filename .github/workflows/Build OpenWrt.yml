@@ -117,7 +117,7 @@ jobs:
     - name: luci-theme-argonn
       run: |
         cd openwrt/package 		
-        git clone -b 18.06 https://github.com/jerrykuku/luci-theme-argon.git luci-theme-argonn
+        # git clone -b 18.06 https://github.com/jerrykuku/luci-theme-argon.git luci-theme-argonn
         git clone -b js https://github.com/gngpp/luci-theme-design.git luci-theme-design
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jsplus luci-app-advancedplus
         svn export https://github.com/loso3000/mypk/trunk/up/luci-theme-catjs luci-theme-kucat
@@ -125,6 +125,7 @@ jobs:
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jswizard luci-app-wizard
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jspoweroffdevice luci-app-poweroffdevice
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jseqos luci-app-eqos
+        svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jstimeset luci-app-autotimeset
     - name: luci-app-romupdate
       run: |
         cd openwrt/package    
