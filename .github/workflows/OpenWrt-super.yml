@@ -97,9 +97,13 @@ jobs:
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
-        git clone https://github.com/fkuetgjfbj/sc sc
-        mv ./sc/.github/workflows/tmp/* ./openwrt/
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        git clone https://github.com/fkuetgjfbj/sc sc
+        ls 
+        ls ./sc
+        ls ./sc/.github
+        ls ./sc/.github/workflows/tmp
+        mv ./sc/.github/workflows/tmp/* ./openwrt/*
    
     - name: Cache
       uses: klever1988/cachewrtbuild@main
