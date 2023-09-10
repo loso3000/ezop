@@ -122,6 +122,9 @@ jobs:
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jsplus luci-app-advancedplus
         svn export https://github.com/loso3000/mypk/trunk/up/luci-theme-catjs luci-theme-kucat
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-gk-jzgk luci-app-parentcontrol
+        svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jswizard luci-app-wizard
+        svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jspoweroffdevice luci-app-poweroffdevice
+        svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jseqos luci-app-eqos
     - name: luci-app-romupdate
       run: |
         cd openwrt/package    
