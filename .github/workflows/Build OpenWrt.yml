@@ -126,6 +126,7 @@ jobs:
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jspoweroffdevice luci-app-poweroffdevice
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jseqos luci-app-eqos
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jstimeset luci-app-autotimeset
+        svn export https://github.com/loso3000/other/trunk/up/pass/luci-app-bypass luci-app-bypass
     - name: luci-app-romupdate
       run: |
         cd openwrt/package    
