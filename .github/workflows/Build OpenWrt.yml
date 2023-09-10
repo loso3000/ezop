@@ -122,15 +122,17 @@ jobs:
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jsplus luci-app-advancedplus
         svn export https://github.com/loso3000/mypk/trunk/up/luci-theme-catjs luci-theme-kucat
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-gk-jzgk luci-app-parentcontrol
-        svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jswizard luci-app-wizard
+        svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jswizard luci-app-netwizard
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jspoweroffdevice luci-app-poweroffdevice
-        svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jseqos luci-app-eqos
+        svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jseqos luci-app-eqosplus
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jstimeset luci-app-autotimeset
-        svn export https://github.com/loso3000/other/trunk/up/pass/luci-app-bypass luci-app-bypass
     - name: luci-app-romupdate
       run: |
         cd openwrt/package    
-        git clone -b immor https://github.com/Blueplanet20120/luci-app-romupdate.git
+        
+        svn export https://github.com/loso3000/other/trunk/up/pass/luci-app-bypass luci-app-bypass
+        rm ./luci-app-bypass/po/zh_Hans && mv ./luci-app-bypass/po/zh-cn ./luci-app-bypass/po/zh_Hans
+        # git clone -b immor https://github.com/Blueplanet20120/luci-app-romupdate.git
    
     - name: ez
       run: |
