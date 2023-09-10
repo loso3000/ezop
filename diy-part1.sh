@@ -25,7 +25,12 @@ touch files/usr/share/ez-auto.sh
 sed -i "s/ImmortalWrt/OpenWrt/" {package/base-files/files/bin/config_generate,include/version.mk}
 
 echo "修改默认主题"
-sed -i 's/+luci-theme-bootstrap/+luci-theme-argon/g' feeds/luci/collections/luci/Makefile
+sed -i 's/+luci-theme-bootstrap/+luci-theme-kucat/g' feeds/luci/collections/luci/Makefile
+
+sed -i '/45)./d' feeds/luci/applications/luci-app-zerotier/luasrc/controller/zerotier.lua  #zerotier
+sed -i 's/vpn/services/g' feeds/luci/applications/luci-app-zerotier/luasrc/controller/zerotier.lua   #zerotier
+sed -i 's/vpn/services/g' feeds/luci/applications/luci-app-zerotier/luasrc/view/zerotier/zerotier_status.htm   #zerotier
+
 cat>rename.sh<<-\EOF
 #!/bin/bash
 rm -rf  bin/targets/x86/64/config.buildinfo
@@ -61,7 +66,7 @@ EOF
 
 cat>ez.sh<<-\EOOF
 #!/bin/bash
-ez_version="Ipv6-Super-Vip `date '+%y%m%d'`by sirpdboy" 
+ez_version="Ipv6-Super-Vip `date '+%y%m%d'` by sirpdboy" 
 echo $ez_version >  wget/DISTRIB_REVISION1 
 echo $ez_version | cut -d _ -f 1 >  files/etc/ez_version  
 new_DISTRIB_REVISION=`cat  wget/DISTRIB_REVISION1`
