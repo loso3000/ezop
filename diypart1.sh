@@ -2,6 +2,7 @@
 #=================================================
 # cp -Rf ./.github/tmp/*  .
 ls -a
+chmod +x ../lede/*.sh
 cp -Rf ../lede/*.sh openwrt
 echo '#================start======================='
 ls -a
