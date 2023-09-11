@@ -3,8 +3,8 @@
 # cp -Rf ./.github/tmp/*  .
 ls -a
 chmod +x ../lede/*.sh
-cp -Rf ../lede/*.sh openwrt
+cp -Rf ../lede/*.sh .
 echo '#================start======================='
 ls -a
 chmod +x diypart1.sh
-[ -e $diypart1.sh ] && ./diypart1.sh || ./diy.sh
+[ -e diypart1.sh ] && ./diypart1.sh || ./diy.sh
