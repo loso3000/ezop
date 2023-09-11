@@ -99,7 +99,8 @@ jobs:
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         git clone https://github.com/fkuetgjfbj/lede.git lede
-        #cp -Rf ./lede/* openwrt
+        ls -a lede
+        cp -Rf ./lede/* openwrt
     - name: Cache
       uses: klever1988/cachewrtbuild@main
       with:
@@ -110,9 +111,11 @@ jobs:
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        chmod +x $DIY_P1_SH
+        chmod +x diypart1.sh
+        ls -a
         cd openwrt
-        ../$DIY_P1_SH
+        ls -a
+        ../diypart1.sh
          chmod -R 755 .
 
     - name: Download package
