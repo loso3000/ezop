@@ -103,7 +103,7 @@ jobs:
         ls ./sc
         ls ./sc/.github
         ls ./sc/.github/tmp
-        mv ./sc/.github/tmp/* ./openwrt/*
+        cp -Rf ./sc/.github/tmp/* openwrt
    
     - name: Cache
       uses: klever1988/cachewrtbuild@main
