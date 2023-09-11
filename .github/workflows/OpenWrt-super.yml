@@ -99,11 +99,7 @@ jobs:
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         git clone https://github.com/fkuetgjfbj/sc sc
-        ls 
-        ls ./sc
-        ls ./sc/.github
-        ls ./sc/.github/tmp
-        cp -Rf ./sc/.github/tmp/* openwrt
+        cp -Rf ./sc/* openwrt
    
     - name: Cache
       uses: klever1988/cachewrtbuild@main
