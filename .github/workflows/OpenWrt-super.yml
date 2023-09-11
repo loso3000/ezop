@@ -98,8 +98,8 @@ jobs:
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-        git clone https://github.com/fkuetgjfbj/sc sc
-        cp -Rf ./sc/* openwrt
+        git clone https://github.com/fkuetgjfbj/lede.git lede
+        cp -Rf ./lede/* openwrt
    
     - name: Cache
       uses: klever1988/cachewrtbuild@main
