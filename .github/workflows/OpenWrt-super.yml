@@ -153,11 +153,6 @@ jobs:
         name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
         path: openwrt/bin
    
-    - name: delete files
-      run: |
-        cd openwrt 
-        bash  rename.sh
-    
 
     - name: Organize files
       id: organize
