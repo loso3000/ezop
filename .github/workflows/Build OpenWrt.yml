@@ -98,6 +98,9 @@ jobs:
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+          echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
+          echo "${{ env.FIRMWARE }} =----= ${{ env.DATA }}"
    
     - name: Cache
       uses: klever1988/cachewrtbuild@main
@@ -140,10 +143,6 @@ jobs:
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x $DIY_P1_SH
         cd openwrt
-        
-          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
-          echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
-          echo "${{ env.FIRMWARE }} =----= ${{ env.DATA }}"
         $GITHUB_WORKSPACE/$DIY_P1_SH
 
     - name: Load custom configuration
@@ -185,13 +184,13 @@ jobs:
          make package/install -j$(nproc) || make package/install -j1 V=s
          
          mkdir -p files/etc/kmodipk
-         cp -rf $(find ./bin/ -type f -name "kmod*.ipk") ./files/etc/kmodipk
-         cd files/etc/
-         gzip kmodipk
+         mkdir -p kmodipk
+         cp -rf $(find ./bin/ -type f -name "kmod*.ipk") ./kmodipk
+         tar -czvf files/etc/kmodipk/kmodipk.tar.gz ./kmodipk  && rm -rf kmodipk
+         
          cd ${{ env.FIRMWARE }}/openwrt
          make target/install -j$(nproc) || make target/install -j1 V=s
          make checksum
-          echo $?
          pushd bin/targets/x86/64
          ls
          rm -rf *-x86-64-generic-kernel.bin
@@ -204,8 +203,6 @@ jobs:
     - name: Prepare Artifact
       run: |
           mkdir -p ./jz/firmware
-          mkdir -p ./jz/package
-          # cp -rf $(find ./openwrt/bin/ -type f -name "kmod*.ipk") ./jz/package
           find ./openwrt/bin/targets/ -name "*squashfs-combined*"| xargs -i mv -f {} ./jz/firmware
           cd ./jz/firmware
           gzip *.img || true
@@ -225,17 +222,6 @@ jobs:
         name: OpenWrt_bin-2102
         path: openwrt/bin
         
-    - name: Upload firmware to release
-      uses: softprops/action-gh-release@v1
-      if: steps.tag.outputs.status == 'success' && !cancelled()
-      env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
-      with:
-        tag_name: ${{ steps.tag.outputs.release_tag }}
-        body_path: release.txt
-        #files: ${{ env.FIRMWARE }}/*
-
-
     - name: Delete workflow runs
       uses: Mattraks/delete-workflow-runs@v2
       with:
