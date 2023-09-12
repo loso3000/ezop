@@ -129,6 +129,9 @@ jobs:
     - name: luci-app-romupdate
       run: |
         cd openwrt/package
+        
+        svn export https://github.com/loso3000/other/trunk/up/pass/luci-app-bypass luci-app-bypass
+        rm ./luci-app-bypass/po/zh_Hans && mv ./luci-app-bypass/po/zh-cn ./luci-app-bypass/po/zh_Hans
         # git clone -b immor https://github.com/Blueplanet20120/luci-app-romupdate.git
    
     
@@ -179,34 +182,38 @@ jobs:
       if: (!cancelled())
       run: df -hT
 
-    - name: Upload bin directory
-      uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
-      with:
-        name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: openwrt/bin
-   
-    - name: delete files
+    - name: Generate Firmware
       run: |
-        cd openwrt 
-        #bash  rename.sh
-    
-
-    - name: Organize files
-      id: organize
-      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+         df -h
+         cd openwrt 
+         mkdir -p files/etc/uci-defaults/
+         $GITHUB_WORKSPACE/$DIY_P2_SH amd64
+         cp $GITHUB_WORKSPACE/scriptx/init-settings.sh files/etc/uci-defaults/99-init-settings
+         make package/install -j$(nproc) || make package/install -j1 V=s
+         make target/install -j$(nproc) || make target/install -j1 V=s
+         make checksum
+    - name: Prepare Artifact
       run: |
-        cd openwrt/bin/targets/*/*
-        rm -rf packages
-        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
-        echo "status=success" >> $GITHUB_OUTPUT
-
-    - name: Upload firmware directory
+          mkdir -p ./jz/firmware
+          mkdir -p ./jz/package
+          cp -rf $(find ./openwrt/bin/ -type f -name "*.ipk") ./jz/package
+          find ./openwrt/bin/targets/ -name "*squashfs-combined*"| xargs -i mv -f {} ./jz/firmware
+          cd ./jz/firmware
+          gzip *.img || true
+          echo -e "Sirpdboy-Ipv6-Super-Vip-${{ env.DATA }}-极致通用版--【efi通用不区分引导方式】\n" > 版本日期和MD5信息.txt
+          echo -e "【固件插件说明与各版本下载链接】：https://github.com/sirpdboy/openwrt/ \n" >> 版本日期和MD5信息.txt
+          echo -e "MD5: \n" >> 版本日期和MD5信息.txt
+          md5sum *img* >> 版本日期和MD5信息.txt
+    - name: Upload Firmware
       uses: actions/upload-artifact@main
-      if: steps.organize.outputs.status == 'success' && !cancelled()
-      with:
-        name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: ${{ env.FIRMWARE }}
+        with:
+          name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-Super-Firmware
+          path: ./jz/firmware
+      - name: Upload  IPK
+        uses: actions/upload-artifact@main
+        with:
+          name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-Super-Ipk
+          path: ./jz/package
 
     - name: Upload firmware to release
       uses: softprops/action-gh-release@v1
