@@ -66,17 +66,8 @@ sed -i "s/enabled '0'/enabled '1'/g" feeds/packages/utils/irqbalance/files/irqba
 git clone https://github.com/yaof2/luci-app-ikoolproxy.git package/luci-app-ikoolproxy
 sed -i 's/, 1).d/, 11).d/g' ./package/luci-app-ikoolproxy/luasrc/controller/koolproxy.lua
 
-svn export https://github.com/loso3000/other/trunk/up/pass/luci-app-bypass ./package/luci-app-bypass
-rm ./package/luci-app-bypass/po/zh_Hans && mv ./package/luci-app-bypass/po/zh-cn ./package/luci-app-bypass/po/zh_Hans
-
 #设置
-sed -i 's/option enabled.*/option enabled 0/' feeds/*/*/*/*/upnpd.config
-
-# 预处理下载相关文件，保证打包固件不用单独下载
-for sh_file in `ls ${GITHUB_WORKSPACE}/common/*.sh`;do
-    source $sh_file
-done
-
+# sed -i 's/option enabled.*/option enabled 0/' feeds/*/*/*/*/upnpd.config
 
 # echo '默认开启 Irqbalance'
 ver1=`grep "KERNEL_PATCHVER:="  target/linux/x86/Makefile | cut -d = -f 2` #判断当前默认内核版本号如5.10
@@ -101,9 +92,6 @@ echo ${date1}' by Sirpdboy ' >> ./package/base-files/files/etc/banner
 echo '---------------------------------' >> ./package/base-files/files/etc/banner
 
 ./scripts/feeds update -i
-./scripts/feeds install -a
-cat  ./x86_64/x86_64  > .config
-cat  ./x86_64/comm  >> .config
 
 cat>rename.sh<<-\EOF
 #!/bin/bash
