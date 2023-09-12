@@ -140,6 +140,10 @@ jobs:
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x $DIY_P1_SH
         cd openwrt
+        
+          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+          echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
+          echo "${{ env.FIRMWARE }} =----= ${{ env.DATA }}"
         $GITHUB_WORKSPACE/$DIY_P1_SH
 
     - name: Load custom configuration
@@ -159,40 +163,68 @@ jobs:
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-    - name: Compile the firmware
+
+    - name: Compile Packages
       id: compile
       run: |
-        cd openwrt
-        echo -e "$(nproc) thread compile"
-        make -j$(nproc) || make -j1 || make -j1 V=s
-        echo "status=success" >> $GITHUB_OUTPUT
-        grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
-        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
-        echo "FILE_DATE=_$(date +"%Y%m%d_%H")" >> $GITHUB_ENV
+         df -h
+         cd openwrt
+         echo -e "$(nproc) thread compile"
+         make tools/compile -j$(nproc) || make tools/compile -j72
+         make toolchain/compile -j$(nproc) || make toolchain/compile -j72
+         make target/compile -j$(nproc) || make target/compile -j72 IGNORE_ERRORS=1
+         make diffconfig
+         make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
+         make package/index
+    - name: Generate Firmware
+      run: |
+         df -h
+         cd openwrt 
+         # mkdir -p files/etc/uci-defaults/
+         # cp ./init-settings.sh files/etc/uci-defaults/99-init-settings
+         make package/install -j$(nproc) || make package/install -j1 V=s
+         
+         mkdir -p files/etc/kmodipk
+         cp -rf $(find ./bin/ -type f -name "kmod*.ipk") ./files/etc/kmodipk
+         cd files/etc/
+         gzip kmodipk
+         cd ${{ env.FIRMWARE }}/openwrt
+         make target/install -j$(nproc) || make target/install -j1 V=s
+         make checksum
+          echo $?
+         pushd bin/targets/x86/64
+         ls
+         rm -rf *-x86-64-generic-kernel.bin
+         rm -rf *t-x86-64-generic-rootfs.tar.gz
+         rm -rf *-x86-64-generic-squashfs-rootfs.img.gz
+         rm -rf *-x86-64-generic-squashfs-combined-efi.vmdk
+         rm -rf *-x86-64-generic.manifest
+         popd
 
     - name: Prepare Artifact
       run: |
           mkdir -p ./jz/firmware
           mkdir -p ./jz/package
-          cp -rf $(find ./openwrt/bin/ -type f -name "*.ipk") ./jz/package
+          # cp -rf $(find ./openwrt/bin/ -type f -name "kmod*.ipk") ./jz/package
           find ./openwrt/bin/targets/ -name "*squashfs-combined*"| xargs -i mv -f {} ./jz/firmware
           cd ./jz/firmware
           gzip *.img || true
-          echo -e "Sirpdboy-Ipv6-Super-Vip-${{ env.DATA }}-极致通用版--【efi通用不区分引导方式】\n" > 版本日期和MD5信息.txt
+          echo -e "Sirpdboy-Ipv6-Super-Vip-2102-${{ env.DATA }}-极致通用版--【efi通用不区分引导方式】\n" > 版本日期和MD5信息.txt
           echo -e "【固件插件说明与各版本下载链接】：https://github.com/sirpdboy/openwrt/ \n" >> 版本日期和MD5信息.txt
           echo -e "MD5: \n" >> 版本日期和MD5信息.txt
           md5sum *img* >> 版本日期和MD5信息.txt
     - name: Upload Firmware
       uses: actions/upload-artifact@main
       with:
-          name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-Super-Firmware
+          name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-Super-2102-Firmware
           path: ./jz/firmware
-    - name: Upload  IPK
+
+    - name: Upload bin directory
       uses: actions/upload-artifact@main
       with:
-          name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-Super-Ipk
-          path: ./jz/package
-
+        name: OpenWrt_bin-2102
+        path: openwrt/bin
+        
     - name: Upload firmware to release
       uses: softprops/action-gh-release@v1
       if: steps.tag.outputs.status == 'success' && !cancelled()
@@ -201,7 +233,7 @@ jobs:
       with:
         tag_name: ${{ steps.tag.outputs.release_tag }}
         body_path: release.txt
-        files: ${{ env.FIRMWARE }}/*
+        #files: ${{ env.FIRMWARE }}/*
 
 
     - name: Delete workflow runs
