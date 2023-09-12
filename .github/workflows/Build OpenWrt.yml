@@ -141,12 +141,6 @@ jobs:
         chmod +x $DIY_P1_SH
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
-    
-    - name: ez
-      run: |
-        cd openwrt
-        
-        #bash  ez.sh
 
     - name: Load custom configuration
       run: |
@@ -155,7 +149,6 @@ jobs:
         chmod +x $DIY_P2_SH
         cd openwrt
         # $GITHUB_WORKSPACE/$DIY_P2_SH
-        
 
     - name: Download package
       id: package
@@ -166,7 +159,6 @@ jobs:
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-
     - name: Compile the firmware
       id: compile
       run: |
@@ -178,20 +170,6 @@ jobs:
         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
         echo "FILE_DATE=_$(date +"%Y%m%d_%H")" >> $GITHUB_ENV
 
-    - name: Check space usage
-      if: (!cancelled())
-      run: df -hT
-
-    - name: Generate Firmware
-      run: |
-         df -h
-         cd openwrt 
-         mkdir -p files/etc/uci-defaults/
-         $GITHUB_WORKSPACE/$DIY_P2_SH amd64
-         cp $GITHUB_WORKSPACE/scriptx/init-settings.sh files/etc/uci-defaults/99-init-settings
-         make package/install -j$(nproc) || make package/install -j1 V=s
-         make target/install -j$(nproc) || make target/install -j1 V=s
-         make checksum
     - name: Prepare Artifact
       run: |
           mkdir -p ./jz/firmware
@@ -206,12 +184,12 @@ jobs:
           md5sum *img* >> 版本日期和MD5信息.txt
     - name: Upload Firmware
       uses: actions/upload-artifact@main
-        with:
+      with:
           name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-Super-Firmware
           path: ./jz/firmware
-      - name: Upload  IPK
-        uses: actions/upload-artifact@main
-        with:
+    - name: Upload  IPK
+      uses: actions/upload-artifact@main
+      with:
           name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-Super-Ipk
           path: ./jz/package
 
