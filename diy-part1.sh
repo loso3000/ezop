@@ -19,10 +19,11 @@ sed -i 's/+luci-theme-bootstrap/+luci-theme-kucat/g' feeds/luci/collections/luci
 
 sed -i 's,media .. \"\/b,resource .. \"\/b,g' ./feeds/luci/themes/luci-theme-argon/luasrc/view/themes/argon/sysauth.htm
 
-curl -fsSL  https://raw.githubusercontent.com/loso3000/other/master/patch/banner > ./package/base-files/files/etc/banner
-curl -fsSL  https://raw.githubusercontent.com/loso3000/other/master/patch/profile > ./package/base-files/files/etc/profile
-curl -fsSL  https://raw.githubusercontent.com/loso3000/other/master/patch/profiles > ./package/base-files/files/etc/profiles
-curl -fsSL  https://raw.githubusercontent.com/loso3000/other/master/patch/sysctl.conf > ./package/base-files/files/etc/sysctl.conf
+svn export https://github.com/loso3000/other/trunk/patch  patch
+cat  patch/banner > ./package/base-files/files/etc/banner
+cat  patch/profile > ./package/base-files/files/etc/profile
+cat  patch/profiles > ./package/base-files/files/etc/profiles
+cat  patch/sysctl.conf > ./package/base-files/files/etc/sysctl.conf
 
 #修改默认IP地址
 sed -i 's/192.168.1.1/192.168.10.1/g' package/base-files/files/bin/config_generate
@@ -120,7 +121,6 @@ wget -qO- $GEOIP_URL > files/etc/openclash/GeoIP.dat
 wget -qO- $GEOSITE_URL > files/etc/openclash/GeoSite.dat
 chmod +x files/etc/openclash/core/clash*
 
-./scripts/feeds update -i
 
 mkdir -p files/root
 pushd files/root
@@ -140,3 +140,6 @@ cp  -f ../../profiles .
 popd
 mv -f ./z.zshrc ./files/root/.zshrc
 mv -f ./profiles ./files/etc/
+
+./scripts/feeds update -i
+exit
