@@ -106,14 +106,12 @@ jobs:
        clean:  'false'  # 'false'
        prefix: ${{ github.workspace }}/openwrt
     
-    
-    - name: Load custom feeds
-      run: |
-        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        chmod +x $DIY_P1_SH
-        cd openwrt
-        $GITHUB_WORKSPACE/$DIY_P1_SH
-    
+    - name: Update feeds
+      run: cd openwrt && ./scripts/feeds update -a
+
+    - name: Install feeds
+      run: cd openwrt && ./scripts/feeds install -a
+
     - name: luci-theme-argonn
       run: |
         cd openwrt/package 		
@@ -130,23 +128,22 @@ jobs:
         svn export https://github.com/loso3000/mypk/trunk/up/emortal emortal2
     - name: luci-app-romupdate
       run: |
-        cd openwrt/package    
-        
-        svn export https://github.com/loso3000/other/trunk/up/pass/luci-app-bypass luci-app-bypass
-        rm ./luci-app-bypass/po/zh_Hans && mv ./luci-app-bypass/po/zh-cn ./luci-app-bypass/po/zh_Hans
+        cd openwrt/package
         # git clone -b immor https://github.com/Blueplanet20120/luci-app-romupdate.git
    
+    
+    - name: Load custom feeds
+      run: |
+        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        chmod +x $DIY_P1_SH
+        cd openwrt
+        $GITHUB_WORKSPACE/$DIY_P1_SH
+    
     - name: ez
       run: |
         cd openwrt
         
-        bash  ez.sh
-
-    - name: Update feeds
-      run: cd openwrt && ./scripts/feeds update -a
-
-    - name: Install feeds
-      run: cd openwrt && ./scripts/feeds install -a
+        #bash  ez.sh
 
     - name: Load custom configuration
       run: |
@@ -154,16 +151,8 @@ jobs:
         [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
         chmod +x $DIY_P2_SH
         cd openwrt
-        $GITHUB_WORKSPACE/$DIY_P2_SH
+        # $GITHUB_WORKSPACE/$DIY_P2_SH
         
-         chmod -R 755 .
-
-    - name: SSH connection to Actions
-      uses: P3TERX/ssh2actions@v1.0.0
-      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
-      env:
-        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 
     - name: Download package
       id: package
@@ -200,7 +189,7 @@ jobs:
     - name: delete files
       run: |
         cd openwrt 
-        bash  rename.sh
+        #bash  rename.sh
     
 
     - name: Organize files
