@@ -124,12 +124,12 @@ jobs:
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jspoweroffdevice luci-app-poweroffdevice
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jseqos luci-app-eqosplus
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jstimeset luci-app-autotimeset
+        #svn export https://github.com/loso3000/mypk/trunk/up/netspeedtest netspeedtest
         rm -rf ./emortal/autocore  && rm -rf ./emortal/default-settings
         svn export https://github.com/loso3000/mypk/trunk/up/emortal emortal2
     - name: luci-app-romupdate
       run: |
         cd openwrt/package
-        
         svn export https://github.com/loso3000/other/trunk/up/pass/luci-app-bypass luci-app-bypass
         rm ./luci-app-bypass/po/zh_Hans && mv ./luci-app-bypass/po/zh-cn ./luci-app-bypass/po/zh_Hans
         # git clone -b immor https://github.com/Blueplanet20120/luci-app-romupdate.git
