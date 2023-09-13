@@ -128,8 +128,8 @@ jobs:
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jseqos luci-app-eqosplus
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jstimeset luci-app-autotimeset
         #svn export https://github.com/loso3000/mypk/trunk/up/netspeedtest netspeedtest
-        rm -rf ./emortal/autocore  && rm -rf ./emortal/default-settings
-        svn export https://github.com/loso3000/mypk/trunk/up/emortal emortal2
+        # rm -rf ./emortal/autocore  && rm -rf ./emortal/default-settings
+        # svn export https://github.com/loso3000/mypk/trunk/up/emortal emortal2
     - name: luci-app-romupdate
       run: |
         cd openwrt/package
