@@ -178,26 +178,27 @@ jobs:
     - name: Generate Firmware
       run: |
          df -h
-         cd openwrt 
+         
          # mkdir -p files/etc/uci-defaults/
-         # cp ./init-settings.sh files/etc/uci-defaults/99-init-settings
+         # cp ./openwrt/init-settings.sh openwrt/files/etc/uci-defaults/99-init-settings
+         mkdir -p openwrt/files/etc/kmodlib
+         mkdir -p kmodlib
+         cp -rf $(find ./openwrt/bin/ -type f -name "kmod*.ipk") ./kmodlib
+         ls ./kmodlib
+         tar -czvf openwrt/files/etc/kmodipk/kmodlib.tar.gz ./kmodlib  && rm -rf kmodlib
+         ls openwrt/files/etc/
+         cd openwrt 
          make package/install -j$(nproc) || make package/install -j1 V=s
-         
-         mkdir -p files/etc/kmodipk
-         mkdir -p kmodipk
-         cp -rf $(find ./bin/ -type f -name "kmod*.ipk") ./kmodipk
-         tar -czvf files/etc/kmodipk/kmodipk.tar.gz ./kmodipk  && rm -rf kmodipk
-         
-         cd ${{ env.FIRMWARE }}/openwrt
          make target/install -j$(nproc) || make target/install -j1 V=s
          make checksum
          pushd bin/targets/x86/64
-         ls
+         ls -a
          rm -rf *-x86-64-generic-kernel.bin
          rm -rf *t-x86-64-generic-rootfs.tar.gz
          rm -rf *-x86-64-generic-squashfs-rootfs.img.gz
          rm -rf *-x86-64-generic-squashfs-combined-efi.vmdk
          rm -rf *-x86-64-generic.manifest
+         ls -a
          popd
 
     - name: Prepare Artifact
@@ -205,7 +206,9 @@ jobs:
           mkdir -p ./jz/firmware
           find ./openwrt/bin/targets/ -name "*squashfs-combined*"| xargs -i mv -f {} ./jz/firmware
           cd ./jz/firmware
+          ls -a
           gzip *.img || true
+          ls -a
           echo -e "Sirpdboy-Ipv6-Super-Vip-2102-${{ env.DATA }}-极致通用版--【efi通用不区分引导方式】\n" > 版本日期和MD5信息.txt
           echo -e "【固件插件说明与各版本下载链接】：https://github.com/sirpdboy/openwrt/ \n" >> 版本日期和MD5信息.txt
           echo -e "MD5: \n" >> 版本日期和MD5信息.txt
