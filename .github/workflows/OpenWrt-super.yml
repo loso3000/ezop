@@ -99,8 +99,9 @@ jobs:
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         git clone https://github.com/fkuetgjfbj/lede.git lede
-        [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
-        echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
+          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+          echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
+          echo "${{ env.FIRMWARE }} =----= ${{ env.DATA }}"
         ls -a lede
         cp -Rf ./lede/* openwrt
         ls -a openwrt
@@ -169,12 +170,12 @@ jobs:
     - name: Upload Firmware
       uses: actions/upload-artifact@main
       with:
-          name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-Super-L-Firmware
+          name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-Super-Le-Firmware
           path: ./jz/firmware
     - name: Upload  IPK
       uses: actions/upload-artifact@main
       with:
-          name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-Super-L-Ipk
+          name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-Super-Le-Ipk
           path: ./jz/package
 
 
