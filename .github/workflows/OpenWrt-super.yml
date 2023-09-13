@@ -102,10 +102,7 @@ jobs:
           echo "FIRMWARE=$PWD" >> $GITHUB_ENV
           echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
           echo "${{ env.FIRMWARE }} =----= ${{ env.DATA }}"
-        ls -a lede
         cp -Rf ./lede/* openwrt
-        ls -a openwrt
-        ls -a openwrt/.github
     - name: Cache
       uses: klever1988/cachewrtbuild@main
       with:
