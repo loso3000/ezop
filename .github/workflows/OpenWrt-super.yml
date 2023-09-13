@@ -131,15 +131,43 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
-    - name: Compile the firmware
+    - name: Compile Packages
       id: compile
       run: |
-        cd openwrt
-        echo -e "$(nproc) thread compile"
-        make -j$(nproc) || make -j1 || make -j1 V=s
-        echo "status=success" >> $GITHUB_OUTPUT
-        grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
-
+         df -h
+         cd openwrt
+         echo -e "$(nproc) thread compile"
+         make tools/compile -j$(nproc) || make tools/compile -j72
+         make toolchain/compile -j$(nproc) || make toolchain/compile -j72
+         make target/compile -j$(nproc) || make target/compile -j72 IGNORE_ERRORS=1
+         make diffconfig
+         make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
+         make package/index
+    - name: Generate Firmware
+      run: |
+         df -h
+         
+         # mkdir -p files/etc/uci-defaults/
+         # cp ./openwrt/init-settings.sh openwrt/files/etc/uci-defaults/99-init-settings
+         mkdir -p openwrt/files/etc/kmodlib
+         # mkdir -p kmodlib
+         cp -rf $(find ./openwrt/bin/ -type f -name "kmod*.ipk") ./openwrt/files/etc/kmodlib
+         ls ./openwrt/files/etc/kmodlib
+         #tar -czvf openwrt/files/etc/kmodipk/kmodlib.tar.gz ./kmodlib  && rm -rf kmodlib
+         ls openwrt/files/etc/
+         cd openwrt 
+         make package/install -j$(nproc) || make package/install -j1 V=s
+         make target/install -j$(nproc) || make target/install -j1 V=s
+         make checksum
+         pushd bin/targets/x86/64
+         ls -a
+         rm -rf *-x86-64-generic-kernel.bin
+         rm -rf *t-x86-64-generic-rootfs.tar.gz
+         rm -rf *-x86-64-generic-squashfs-rootfs.img.gz
+         rm -rf *-x86-64-generic-squashfs-combined-efi.vmdk
+         rm -rf *-x86-64-generic.manifest
+         ls -a
+         popd
     - name: Check space usage
       if: (!cancelled())
       run: df -hT
