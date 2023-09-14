@@ -129,16 +129,22 @@ CONFIG_PACKAGE_kmod-ixgbevf=y
 
 CONFIG_PACKAGE_kmod-bcm63xx-cfe
 CONFIG_PACKAGE_kmod-ath10k=y
-CONFIG_PACKAGE_kmod-ath10k-ct=y
+# CONFIG_PACKAGE_kmod-ath10k-ct=y  #err
 CONFIG_PACKAGE_kmod-bcm27xx-gpu-fw=y
 CONFIG_PACKAGE_kmod-broadcom-wl=y
 CONFIG_PACKAGE_kmod-ice=y
-CONFIG_PACKAGE_kmod-iavf-vendor=y
-CONFIG_PACKAGE_kmod-i40e=y
+CONFIG_PACKAGE_kmod-iavf=y
+#  CONFIG_PACKAGE_kmod-i40e=y  #err
 CONFIG_PACKAGE_kmod-rtc-rv5c386a=y
 CONFIG_PACKAGE_kmod-mt7601u-ap=y
 CONFIG_PACKAGE_kmod-mt76=y
 CONFIG_PACKAGE_kmod-mwlwifi=y
+
+# ipv6
+CONFIG_PACKAGE_ipv6helper=y
+CONFIG_PACKAGE_dnsmasq_full_dhcpv6=y
+CONFIG_PACKAGE_ip6tables-extra=y
+CONFIG_PACKAGE_ip6tables-mod-nat=y
 
 
 CONFIG_PACKAGE_kmod-inet-diag=y
