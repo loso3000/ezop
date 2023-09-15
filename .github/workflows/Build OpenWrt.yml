@@ -128,6 +128,7 @@ jobs:
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jseqos luci-app-eqosplus
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jstimeset luci-app-autotimeset
         svn export https://github.com/loso3000/mypk/trunk/up/wrtbwmon wrtbwmon
+        svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jschatgpt luci-app-chatgpt
         rm -rf ./emortal/autocore  && rm -rf ./emortal/default-settings
         svn export https://github.com/loso3000/mypk/trunk/up/emortal emortal2
     - name: luci-app-romupdate
