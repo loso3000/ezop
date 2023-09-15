@@ -103,6 +103,11 @@ wget -qO- $GEOSITE_URL > files/etc/openclash/GeoSite.dat
 chmod +x files/etc/openclash/core/clash*
 
 mkdir -p files/root
+[ -f ./file/root/.zshrc ] || cp  -rf patch/z.zshrc ./file/root/.zshrc
+[ -f ./file/root/.zshrc ] || cp  -rf ./z.zshrc ./file/root/.zshrc
+[ -f ./file/root/.zshrc ] || cp  -rf ../z.zshrc ./file/root/.zshrc
+[ -f ./file/root/.zshrc ] && echo ------------------no zshrc---------------------
+
 pushd files/root
 ## Install oh-my-zsh
 git clone https://github.com/ohmyzsh/ohmyzsh ./.oh-my-zsh
@@ -111,10 +116,6 @@ git clone https://github.com/zsh-users/zsh-autosuggestions ./.oh-my-zsh/custom/p
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ./.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 git clone https://github.com/zsh-users/zsh-completions ./.oh-my-zsh/custom/plugins/zsh-completions
 popd
-cp  -Rf patch/z.zshrc ./file/root/.zshrc
-[ -f ./file/root/.zshrc ] || cp  -Rf ../z.zshrc ./file/root/.zshrc
-[ -f ./file/root/.zshrc ] && echo ------------------no zshrc---------------------
-[ -f ./file/root/.zshrc ] && echo ------------------no zshrc---------------------
 ./scripts/feeds update -i
 
 cat>buildmd5.sh<<-\EOF
