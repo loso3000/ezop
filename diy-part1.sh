@@ -113,4 +113,38 @@ git clone https://github.com/zsh-users/zsh-completions ./.oh-my-zsh/custom/plugi
 popd
 cp  -f patch/z.zshrc ./file/root/.zshrc
 ./scripts/feeds update -i
+
+cat>rename.sh<<-\EOF
+#!/bin/bash
+rm -rf  bin/targets/x86/64/config.buildinfo
+rm -rf  bin/targets/x86/64/feeds.buildinfo
+rm -rf  bin/targets/x86/64/*x86-64-generic-kernel.bin
+rm -rf  bin/targets/x86/64/*x86-64-generic-squashfs-rootfs.img.gz
+rm -rf  bin/targets/x86/64/*x86-64-generic-rootfs.tar.gz
+rm -rf  bin/targets/x86/64/*x86-64-generic.manifest
+rm -rf bin/targets/x86/64/sha256sums
+rm -rf  bin/targets/x86/64/version.buildinfo
+rm -rf bin/targets/x86/64/*x86-64-generic-ext4-rootfs.img.gz
+rm -rf bin/targets/x86/64/*x86-64-generic-ext4-combined-efi.img.gz
+rm -rf bin/targets/x86/64/*x86-64-generic-ext4-combined.img.gz
+sleep 2
+rename_version=`cat files/etc/ezopenwrt_version`
+str1=`grep "KERNEL_PATCHVER:="  target/linux/x86/Makefile | cut -d = -f 2` #判断当前默认内核版本号如5.10
+ver54=`grep "LINUX_VERSION-5.4 ="  include/kernel-5.4 | cut -d . -f 3`
+sleep 2
+mv  bin/targets/x86/64/*-x86-64-generic-squashfs-combined.img.gz       bin/targets/x86/64/EzOpenWrt-${rename_version}_${str1}.${ver54}-x86-64-generic-squashfs-combined.img.gz   
+mv  bin/targets/x86/64/*-x86-64-generic-squashfs-combined-efi.img.gz   bin/targets/x86/64/EzOpenWrt-${rename_version}_${str1}.${ver54}_x86-64-generic-squashfs-combined-efi.img.gz
+sleep 2
+ls bin/targets/x86/64 | grep "gpt_sta_ez.img" | cut -d - -f 3 | cut -d _ -f 1-2 > wget/op_version1
+#md5
+ls -l  "bin/targets/x86/64" | awk -F " " '{print $9}' > wget/open_sta_md5
+sta_version=`grep "_uefi-gpt_sta_ez.img.gz" wget/open_sta_md5 | cut -d - -f 3 | cut -d _ -f 1-2`
+immortalwrt_sta=immortalwrt_x86-64-${sta_version}_sta_ez.img.gz
+immortalwrt_sta_uefi=immortalwrt_x86-64-${sta_version}_uefi-gpt_sta_ez.img.gz
+cd bin/targets/x86/64
+md5sum $immortalwrt_sta > immortalwrt_sta.md5
+md5sum $immortalwrt_sta_uefi > immortalwrt_sta_uefi.md5
+exit 0
+EOF
+
 exit
