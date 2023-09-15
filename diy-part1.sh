@@ -85,7 +85,7 @@ export date1="Super-"`TZ=UTC-8 date +%Y.%m.%d -d +"12"hour`"-${VER1}.${ver54}"
 #sed -i 's/$(VERSION_DIST_SANITIZED)-$(IMG_PREFIX_VERNUM)$(IMG_PREFIX_VERCODE)$(IMG_PREFIX_EXTRA)/$(shell TZ=UTC-8 date +%Y%m%d -d +12hour)-Ipv6-Super-Vip-5.10-/g' include/image.mk
 #sed -i 's/$(VERSION_DIST_SANITIZED)-$(IMG_PREFIX_VERNUM)$(IMG_PREFIX_VERCODE)$(IMG_PREFIX_EXTRA)/20230601-Ipv6-Super-Vip-5.10-/g' include/image.mk
 echo ${date1}'_by_Sirpdboy' > ./package/base-files/files/etc/ezopenwrt_version
-echo "${HOSTNAME} ${date1}_by_Sirpdboy" >> ./package/base-files/files/etc/banner
+echo "EzOpWrt ${date1}_by_Sirpdboy" >> ./package/base-files/files/etc/banner
 echo '---------------------------------' >> ./package/base-files/files/etc/banner
 
 OP=amd64
@@ -110,8 +110,7 @@ git clone https://github.com/ohmyzsh/ohmyzsh ./.oh-my-zsh
 git clone https://github.com/zsh-users/zsh-autosuggestions ./.oh-my-zsh/custom/plugins/zsh-autosuggestions
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ./.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 git clone https://github.com/zsh-users/zsh-completions ./.oh-my-zsh/custom/plugins/zsh-completions
-# cp  -f ../../z.zshrc ./.zshrc
 popd
-cp  -f ../z.zshrc ./file/root/.zshrc
+cp  -f patch/z.zshrc ./file/root/.zshrc
 ./scripts/feeds update -i
 exit
