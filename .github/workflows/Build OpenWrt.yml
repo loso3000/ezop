@@ -122,12 +122,12 @@ jobs:
         git clone -b js https://github.com/gngpp/luci-theme-design.git luci-theme-design
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jsplus luci-app-advancedplus
         svn export https://github.com/loso3000/mypk/trunk/up/luci-theme-catjs luci-theme-kucat
-        svn export https://github.com/loso3000/mypk/trunk/up/luci-app-gk-jzgk luci-app-parentcontrol
+        svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jsjzgk luci-app-jsjzgk
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jswizard luci-app-netwizard
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jspoweroffdevice luci-app-poweroffdevice
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jseqos luci-app-eqosplus
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jstimeset luci-app-autotimeset
-        # svn export https://github.com/loso3000/mypk/trunk/up/netspeedtest netspeedtest
+        svn export https://github.com/loso3000/mypk/trunk/up/wrtbwmon wrtbwmon
         rm -rf ./emortal/autocore  && rm -rf ./emortal/default-settings
         svn export https://github.com/loso3000/mypk/trunk/up/emortal emortal2
     - name: luci-app-romupdate
