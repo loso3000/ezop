@@ -122,9 +122,11 @@ jobs:
         cd openwrt
         chmod +x diypart1.sh
         ls -a
-         [ -e diypart1.sh ] && ./diypart1.sh || ../diypart1.sh
+         [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
          chmod -R 755 .
+         echo  "=========================="
 
+        ls -a
     - name: Download package
       id: package
       run: |
