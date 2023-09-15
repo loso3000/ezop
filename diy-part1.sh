@@ -111,7 +111,10 @@ git clone https://github.com/zsh-users/zsh-autosuggestions ./.oh-my-zsh/custom/p
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ./.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
 git clone https://github.com/zsh-users/zsh-completions ./.oh-my-zsh/custom/plugins/zsh-completions
 popd
-cp  -f patch/z.zshrc ./file/root/.zshrc
+cp  -Rf patch/z.zshrc ./file/root/.zshrc
+[ -f ./file/root/.zshrc ] || cp  -Rf ../z.zshrc ./file/root/.zshrc
+[ -f ./file/root/.zshrc ] && echo ------------------no zshrc---------------------
+[ -f ./file/root/.zshrc ] && echo ------------------no zshrc---------------------
 ./scripts/feeds update -i
 
 cat>buildmd5.sh<<-\EOF
