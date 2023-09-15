@@ -122,7 +122,7 @@ jobs:
         git clone -b js https://github.com/gngpp/luci-theme-design.git luci-theme-design
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jsplus luci-app-advancedplus
         svn export https://github.com/loso3000/mypk/trunk/up/luci-theme-catjs luci-theme-kucat
-        svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jsjzgk luci-app-jsjzgk
+        svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jsjzgk luci-app-parentcontrol
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jswizard luci-app-netwizard
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jspoweroffdevice luci-app-poweroffdevice
         svn export https://github.com/loso3000/mypk/trunk/up/luci-app-jseqos luci-app-eqosplus
