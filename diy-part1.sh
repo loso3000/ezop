@@ -152,8 +152,8 @@ cat>bakkmod.sh<<-\EOF
 bakkmoddir=./file/etc/kmod.d
 bakkmodfile=$bakkmoddir/kmod.source
 nowkmodfile=$bakkmoddir/kmod.now
-[ ! -d $bakkmoddi ] && mkdir -p bakkmoddi 2>/dev/null
-[ -f $bakkmodfile ] || cp -rf ../kmod.source $bakkmodfile
+mkdir -p $bakkmoddi 2>/dev/null
+cp -rf ../kmod.source $bakkmodfile
 while IFS= read -r file; do find ./bin/ -name "${file}*" | xargs -i cp -f {} $bakkmoddir ; done < $bakkmodfile
 sleep 2
 ls $bakkmoddir > $nowkmodfile
@@ -163,7 +163,7 @@ EOF
 cat>./package/base-files/files/etc/kmodreg<<-\EOF
 #!/bin/bash
 # https://github.com/sirpdboy/openWrt
-# Actions-OpenWrt-x86 By sirpdboy
+# ezOpenWrt  By sirpdboy
 nowkmoddir=/etc/kmod.d
 [ ! -d $nowkmoddir ]  || return
 opkg update
