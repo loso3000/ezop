@@ -153,8 +153,8 @@ bakkmoddir=./file/etc/kmod.d
 bakkmodfile=$bakkmoddir/kmod.source
 nowkmodfile=$bakkmoddir/kmod.now
 [ ! -d $bakkmoddi ] && mkdir -p bakkmoddi 2>/dev/null
-[ -f $bakkmodfile ] || cp -rf ./patch/kmod.source $bakkmodfile
-while IFS= read -r file; do find ./bin/ -name "$file" | xargs -i cp -f {} $bakkmoddir ; done < $bakkmodfile
+[ -f $bakkmodfile ] || cp -rf ../kmod.source $bakkmodfile
+while IFS= read -r file; do find ./bin/ -name "${file}*" | xargs -i cp -f {} $bakkmoddir ; done < $bakkmodfile
 sleep 2
 ls $bakkmoddir > $nowkmodfile
 exit
