@@ -78,14 +78,14 @@ sed -i 's/option enabled.*/option enabled 0/' feeds/*/*/*/*/upnpd.config
 
 # echo '默认开启 Irqbalance'
 #ver1=`grep "KERNEL_PATCHVER:="  target/linux/x86/Makefile | cut -d = -f 2` #判断当前默认内核版本号如5.10
-export VER1="$(grep "KERNEL_PATCHVER:="  ./target/linux/x86/Makefile | cut -d = -f 2)"
-#date1=`TZ=UTC-8 date +%Y.%m.%d -d +"12"hour`'-Ipv6-Super-Vip'
-ver54=`grep "LINUX_VERSION-5.4 ="  include/kernel-5.4 | cut -d . -f 3`
-export date1="Super-"`TZ=UTC-8 date +%Y.%m.%d -d +"12"hour`"-${VER1}.${ver54}"
-#sed -i 's/$(VERSION_DIST_SANITIZED)-$(IMG_PREFIX_VERNUM)$(IMG_PREFIX_VERCODE)$(IMG_PREFIX_EXTRA)/$(shell TZ=UTC-8 date +%Y%m%d -d +12hour)-Ipv6-Super-Vip-5.10-/g' include/image.mk
-#sed -i 's/$(VERSION_DIST_SANITIZED)-$(IMG_PREFIX_VERNUM)$(IMG_PREFIX_VERCODE)$(IMG_PREFIX_EXTRA)/20230601-Ipv6-Super-Vip-5.10-/g' include/image.mk
-echo ${date1}'_by_Sirpdboy' > ./package/base-files/files/etc/ezopenwrt_version
-echo "EzOpWrt ${date1}_by_Sirpdboy" >> ./package/base-files/files/etc/banner
+VER1="$(grep "KERNEL_PATCHVER:="  ./target/linux/x86/Makefile | cut -d = -f 2)"
+VER54=`grep "LINUX_VERSION-5.4 ="  include/kernel-5.4 | cut -d . -f 3`
+#export date1=`TZ=UTC-8 date +%Y.%m.%d -d +"12"hour`'-Super-'${VER1}'.'${ver54}''
+# export date1="Super-$(TZ=UTC-8 date +%Y.%m.%d -d +"12"hour)-${VER1}.${ver54}"
+date1="Super-"`TZ=UTC-8 date +%Y.%m.%d -d +"12"hour`"_by_Sirpdboy"
+date2="EzOpWrt Super-"`TZ=UTC-8 date +%Y.%m.%d -d +"12"hour`"-${VER1}.${ver54}_by_Sirpdboy"
+echo "${date1}" > ./package/base-files/files/etc/ezopenwrt_version
+echo "${date2}" >> ./package/base-files/files/etc/banner
 echo '---------------------------------' >> ./package/base-files/files/etc/banner
 
 OP=amd64
@@ -114,7 +114,7 @@ popd
 cp  -f patch/z.zshrc ./file/root/.zshrc
 ./scripts/feeds update -i
 
-cat>rename.sh<<-\EOF
+cat>buildmd5.sh<<-\EOF
 #!/bin/bash
 rm -rf  bin/targets/x86/64/config.buildinfo
 rm -rf  bin/targets/x86/64/feeds.buildinfo
@@ -122,29 +122,54 @@ rm -rf  bin/targets/x86/64/*x86-64-generic-kernel.bin
 rm -rf  bin/targets/x86/64/*x86-64-generic-squashfs-rootfs.img.gz
 rm -rf  bin/targets/x86/64/*x86-64-generic-rootfs.tar.gz
 rm -rf  bin/targets/x86/64/*x86-64-generic.manifest
-rm -rf bin/targets/x86/64/sha256sums
+rm -rf  bin/targets/x86/64/sha256sums
 rm -rf  bin/targets/x86/64/version.buildinfo
 rm -rf bin/targets/x86/64/*x86-64-generic-ext4-rootfs.img.gz
 rm -rf bin/targets/x86/64/*x86-64-generic-ext4-combined-efi.img.gz
 rm -rf bin/targets/x86/64/*x86-64-generic-ext4-combined.img.gz
 sleep 2
-rename_version=`cat files/etc/ezopenwrt_version`
-str1=`grep "KERNEL_PATCHVER:="  target/linux/x86/Makefile | cut -d = -f 2` #判断当前默认内核版本号如5.10
-ver54=`grep "LINUX_VERSION-5.4 ="  include/kernel-5.4 | cut -d . -f 3`
+r_version=`cat ./package/base-files/files/etc/ezopenwrt_version`
+VER1="$(grep "KERNEL_PATCHVER:="  ./target/linux/x86/Makefile | cut -d = -f 2)"
+VER54=`grep "LINUX_VERSION-5.4 ="  include/kernel-5.4 | cut -d . -f 3`
 sleep 2
-mv  bin/targets/x86/64/*-x86-64-generic-squashfs-combined.img.gz       bin/targets/x86/64/EzOpenWrt-${rename_version}_${str1}.${ver54}-x86-64-generic-squashfs-combined.img.gz   
-mv  bin/targets/x86/64/*-x86-64-generic-squashfs-combined-efi.img.gz   bin/targets/x86/64/EzOpenWrt-${rename_version}_${str1}.${ver54}_x86-64-generic-squashfs-combined-efi.img.gz
+mv  bin/targets/x86/64/*-x86-64-generic-squashfs-combined.img.gz       bin/targets/x86/64/EzOpenWrt-${r_version}_${VER1}.${ver54}-x86-64-combined.img.gz   
+mv  bin/targets/x86/64/*-x86-64-generic-squashfs-combined-efi.img.gz   bin/targets/x86/64/EzOpenWrt-${r_version}_${VER1}.${ver54}_x86-64-combined-efi.img.gz
 sleep 2
-ls bin/targets/x86/64 | grep "gpt_sta_ez.img" | cut -d - -f 3 | cut -d _ -f 1-2 > wget/op_version1
 #md5
-ls -l  "bin/targets/x86/64" | awk -F " " '{print $9}' > wget/open_sta_md5
-sta_version=`grep "_uefi-gpt_sta_ez.img.gz" wget/open_sta_md5 | cut -d - -f 3 | cut -d _ -f 1-2`
-immortalwrt_sta=immortalwrt_x86-64-${sta_version}_sta_ez.img.gz
-immortalwrt_sta_uefi=immortalwrt_x86-64-${sta_version}_uefi-gpt_sta_ez.img.gz
+md5_EzOpWrt=EzOpenWrt-${r_version}_${VER1}.${ver54}-x86-64-combined.img.gz   
+md5_EzOpWrt_uefi=EzOpenWrt-${r_version}_${VER1}.${ver54}_x86-64-combined-efi.img.gz
 cd bin/targets/x86/64
-md5sum $immortalwrt_sta > immortalwrt_sta.md5
-md5sum $immortalwrt_sta_uefi > immortalwrt_sta_uefi.md5
+md5sum ${md5_EzOpWrt} > EzOpWrt_combined.md5  || true
+md5sum ${md5_EzOpWrt_uefi} > EzOpWrt_combined-efi.md5 || true
 exit 0
+EOF
+
+cat>bakkmod.sh<<-\EOF
+#!/bash/sh
+bakkmoddir=./file/etc/kmod.d
+bakkmodfile=$bakkmoddir/kmod.source
+nowkmodfile=$bakkmoddir/kmod.now
+[ ! -d $bakkmoddi ] && mkdir -p bakkmoddi 2>/dev/null
+[ -f $bakkmodfile ] || cp -rf ./patch/kmod.source $bakkmodfile
+while IFS= read -r file; do find ./bin/ -name "$file" | xargs -i cp -f {} $bakkmoddir ; done < $bakkmodfile
+sleep 2
+ls $bakkmoddir > $nowkmodfile
+exit
+EOF
+
+cat>./package/base-files/files/etc/kmodreg<<-\EOF
+#!/bin/bash
+# https://github.com/sirpdboy/openWrt
+# Actions-OpenWrt-x86 By sirpdboy
+nowkmoddir=/etc/kmod.d
+[ ! -d $nowkmoddir ]  || return
+opkg update
+sleep 2
+for file in `ls $nowkmoddir/*.ipk`;do
+    opkg install "$file"
+done
+sleep 2
+exit
 EOF
 
 exit
