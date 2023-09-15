@@ -182,21 +182,7 @@ jobs:
          make package/install -j$(nproc) || make package/install -j1 V=s
          make target/install -j$(nproc) || make target/install -j1 V=s
          make checksum
-         
          bash buildmd5.sh
-
-    - name: Prepare Artifact
-      run: |
-          mkdir -p ./jz/firmware
-          find ./openwrt/bin/targets/ -name "*squashfs-combined*"| xargs -i mv -f {} ./jz/firmware
-          cd ./jz/firmware
-          ls -a
-          gzip *.img || true
-          ls -a
-          echo -e "Sirpdboy-Ipv6-Super-Vip-2102-${{ env.DATA }}-极致通用版--【efi通用不区分引导方式】\n" > 版本日期和MD5信息.txt
-          echo -e "【固件插件说明与各版本下载链接】：https://github.com/sirpdboy/openwrt/ \n" >> 版本日期和MD5信息.txt
-          echo -e "MD5: \n" >> 版本日期和MD5信息.txt
-          md5sum *img* >> 版本日期和MD5信息.txt
     - name: Check space usage
       if: (!cancelled())
       run: df -hT
@@ -221,7 +207,7 @@ jobs:
     #  if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
     #  with:
     #    #name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-    #    name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-Super-LeFirmware
+    #    name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-Super-Le-Firmware
      #   path: openwrt/bin
    
 
@@ -251,10 +237,6 @@ jobs:
 
     - name: Delete Artifacts
       uses: geekyeggo/delete-artifact@v2
-      with:
-         name: |
-            bin-archive
-    
       with:
          name: |
             bin-archive
