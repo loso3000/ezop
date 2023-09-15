@@ -127,7 +127,7 @@ CONFIG_PACKAGE_kmod-igbvf=y
 CONFIG_PACKAGE_kmod-ixgbe=y
 CONFIG_PACKAGE_kmod-ixgbevf=y
 
-CONFIG_PACKAGE_kmod-bcm63xx-cfe
+CONFIG_PACKAGE_kmod-bcm63xx-cfe=y
 CONFIG_PACKAGE_kmod-ath10k=y
 # CONFIG_PACKAGE_kmod-ath10k-ct=y  #err
 CONFIG_PACKAGE_kmod-bcm27xx-gpu-fw=y
