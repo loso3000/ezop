@@ -103,10 +103,8 @@ wget -qO- $GEOSITE_URL > files/etc/openclash/GeoSite.dat
 chmod +x files/etc/openclash/core/clash*
 
 mkdir -p files/root
-[ -f ./file/root/.zshrc ] || cp  -rf patch/z.zshrc ./file/root/.zshrc
-[ -f ./file/root/.zshrc ] || cp  -rf ./z.zshrc ./file/root/.zshrc
-[ -f ./file/root/.zshrc ] || cp  -rf ../z.zshrc ./file/root/.zshrc
-[ -f ./file/root/.zshrc ] && echo ------------------no zshrc---------------------
+[ -f ./files/root/.zshrc ] || cp  -rf patch/z.zshrc ./files/root/.zshrc
+[ -f ./files/root/.zshrc ] && echo ------------------no zshrc---------------------
 
 pushd files/root
 ## Install oh-my-zsh
@@ -150,7 +148,7 @@ EOF
 
 cat>bakkmod.sh<<-\EOF
 #!/bin/bash
-bakkmoddir=./file/etc/kmod.d
+bakkmoddir=./files/etc/kmod.d
 bakkmodfile=$bakkmoddir/kmod.source
 nowkmodfile=$bakkmoddir/kmod.now
 mkdir -p $bakkmoddir 2>/dev/null
