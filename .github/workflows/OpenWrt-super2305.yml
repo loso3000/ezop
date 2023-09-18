@@ -150,7 +150,7 @@ jobs:
          make diffconfig
          make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
          make package/index
-         bash  bakkmod.sh
+         # bash  bakkmod.sh
     - name: Generate Firmware
       run: |
          df -h
