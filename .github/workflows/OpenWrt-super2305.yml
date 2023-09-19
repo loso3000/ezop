@@ -102,6 +102,7 @@ jobs:
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
         cp -Rf ./lede/* openwrt
+        ls -a
     - name: Cache
       uses: klever1988/cachewrtbuild@main
       with:
