@@ -99,10 +99,10 @@ jobs:
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         git clone https://github.com/fkuetgjfbj/openwrt lede
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-        echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
         cp -Rf ./lede/* openwrt
         ls -a
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
     - name: Cache
       uses: klever1988/cachewrtbuild@main
       with:
