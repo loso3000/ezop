@@ -101,6 +101,11 @@ jobs:
         git clone https://github.com/fkuetgjfbj/openwrt lede
         cp -Rf ./lede/* openwrt
         ls -a
+        ls -a lede 
+        ls -a lede/.github
+        ls -a lede/.github/tmp
+        cp -Rf lede/.github/tmp/* openwrt
+        ls -a
         ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
     - name: Cache
