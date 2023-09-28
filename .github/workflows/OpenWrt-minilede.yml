@@ -20,7 +20,7 @@ on:
         default: 'mini'
         required: true
         type: choice
-        options: [ mini, super, plus, bypass ]
+        options: [ Mini, Super, Plus, Bypass ]
   
       cpu_s:
         description: 'CPU优选'
