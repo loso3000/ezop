@@ -78,7 +78,6 @@ jobs:
 
     - name: jlumbroso 整理空间
       uses: jlumbroso/free-disk-space@main
-      if: env.FREE_DISK == 'free-disk-space' || env.FREE_DISK == 'plus'
       with:
         dotnet: true
         android: true
