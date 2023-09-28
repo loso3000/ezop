@@ -163,8 +163,6 @@ jobs:
          [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
          chmod -R 755 .
          echo  "=========================="
-
-        ls -
     - name: Generate configuration file
       run: |
          cd openwrt
