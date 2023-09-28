@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: OpenWrt-minilede
+name: OpenWrt-lede
 
 on:
   repository_dispatch:
@@ -177,7 +177,7 @@ jobs:
         cp -Rf ./lede/* openwrt
         cp -Rf lede/.github/tmp/* openwrt
         #ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
-        if if [[ $DATE_S == 'default' ]]; then
+        if [[ $DATE_S == 'default' ]]; then
           echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
         else 
           echo "DATA=$DATE_S" >>$GITHUB_ENV
