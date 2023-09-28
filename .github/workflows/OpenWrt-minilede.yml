@@ -1,0 +1,287 @@
+#
+# Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
+#
+# This is free software, licensed under the MIT License.
+# See /LICENSE for more information.
+#
+# https://github.com/P3TERX/Actions-OpenWrt
+# Description: Build OpenWrt using GitHub Actions
+#
+
+name: OpenWrt-minilede
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+
+      config_s:
+        description: '配置文件'
+        default: 'mini'
+        required: true
+        type: choice
+        options: [ mini, super, plus, bypass ]
+  
+      cpu_s:
+        description: 'CPU优选'
+        required: true
+        default: 'default'
+        type: choice
+        options:
+          - 'default'
+          - '8370C'
+          - '8272CL'
+          - '8171M'
+      date_s:
+        description: '固件日期'
+        default: 'default'
+        required: false
+
+      ssh_s:
+        description: 'SSH远程配置固件'
+        required: false
+        default: 'false'
+        type: boolean
+env:
+
+  REPO_URL: https://github.com/coolsnowwolf/lede
+  REPO_BRANCH: master
+  #REPO_URL: https://github.com/immortalwrt/immortalwrt
+  #REPO_BRANCH: master
+  #REPO_BRANCH: openwrt-23.05
+  FEEDS_CONF: feeds.conf.default
+  CONFIG_FILE: diffconfig
+  DIY_P1_SH: diypart1.sh
+  DIY_P2_SH: diypart2.sh
+  UPLOAD_BIN_DIR: false
+  UPLOAD_FIRMWARE: true
+  UPLOAD_COWTRANSFER: false
+  UPLOAD_WETRANSFER: false
+  UPLOAD_RELEASE: true
+  TZ: Asia/Shanghai
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    if: github.event.repository.owner.id == github.event.sender.id
+
+    env:
+      CONFIG_S: ${{github.event.inputs.config_s}}
+      CPU_S: ${{github.event.inputs.cpu_s}}
+      DATE_S: ${{github.event.inputs.date_s}}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+
+    - name: Check server performance
+      run: |
+         echo "警告⚠"
+         echo "若分配的服务器性能不足，务必及时取消，重新运行！"
+         echo "已知编译成功CPU型号：8370C,8171M"
+         echo "已知性能不足CPU型号：8272CL E5-2673"
+         echo -e "-------------- ------------CPU信息------------------------------------------\n"
+         echo "CPU物理数量:$(cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l)"
+         echo -e "CPU核心及版本信息：$(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c) \n"
+         echo "-------------------------------内存信息-------------------------------------------"
+         echo "已安装内存详细信息："
+         sudo lshw -short -C memory | grep GiB
+         echo -e "\n"
+         echo "-----------------------------硬盘信息---------------------------------------------"
+         echo -e  "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l) \n"
+         echo "硬盘详情："
+         df -Th
+         
+         if grep  "8370" "/proc/cpuinfo" ; then
+          echo "CPU YES！！！"
+          echo "CKCPU=success" >> $GITHUB_ENV
+         else
+             echo "CPU NO！！！"
+             echo "CKCPU=failure" >> $GITHUB_ENV
+             #exit 1
+         fi
+    - name: jlumbroso 整理空间
+      uses: jlumbroso/free-disk-space@main
+      with:
+        dotnet: true
+        android: true
+        haskell: true
+        tool-cache: true
+        swap-storage: true
+        large-packages: true
+
+    - name: losetup 整理空间
+      run: |
+        # 关闭 swap 分区并删除 swap 文件
+        [ -f /mnt/swapfile ] && sudo swapoff -a && sudo rm -f /mnt/swapfile
+        export ROOT_LOOP_BYTES=$((($(df --block-size=1024 --output=avail / | tail -1) - 1024*1024*7) * 1024))
+        # 创建根文件系统的卷
+        sudo fallocate -l $ROOT_LOOP_BYTES /root.img
+        # 将根文件系统关联到一个未使用的循环设备
+        export ROOT_LOOP_DEVNAME=$(sudo losetup -Pf --show /root.img)
+        # 标记循环设备为物理卷
+        sudo pvcreate -f $ROOT_LOOP_DEVNAME
+        
+        # 转换分配给新文件系统的 /mnt 目录的空间大小为字节
+        export MNT_LOOP_BYTES=$((($(df --block-size=1024 --output=avail /mnt | tail -1) - 1024*1024*1) * 1024))
+        # 创建 /mnt 目录的卷
+        sudo fallocate -l $MNT_LOOP_BYTES /mnt/mnt.img
+        # 将 /mnt 目录关联到一个未使用的循环设备
+        export MNT_LOOP_DEVNAME=$(sudo losetup -Pf --show /mnt/mnt.img)
+        # 标记循环设备为物理卷
+        sudo pvcreate -f $MNT_LOOP_DEVNAME
+        # 创建卷组并添加根目录和 /mnt 目录的物理卷
+        sudo vgcreate Actions $ROOT_LOOP_DEVNAME $MNT_LOOP_DEVNAME
+        # 在卷组中创建逻辑卷
+        sudo lvcreate -n disk -l 100%FREE Actions
+        # 获取逻辑卷的设备名称
+        export LV_DEVNAME=$(sudo lvscan | awk -F "'" '{print $2}')
+        # 在逻辑卷上创建 Btrfs 文件系统
+        sudo mkfs.btrfs -L combinedisk $LV_DEVNAME
+        # 挂载逻辑卷到指定目录，并使用 Zstandard 压缩算法
+        sudo mount -o compress=zstd $LV_DEVNAME $GITHUB_WORKSPACE
+        # 更改目录权限为 runner:runner 用户，确保执行者具有适当权限
+        sudo chown -R runner:runner $GITHUB_WORKSPACE
+        # 创建临时目录（如果不存在）
+        mkdir -m 0777 -p $GITHUB_WORKSPACE/tmp
+        # 将 /tmp 目录下的内容复制到临时目录中（如果发生错误，仍继续执行）
+        sudo cp -rp /tmp/* $GITHUB_WORKSPACE/tmp || true
+        # 将临时目录绑定到 /tmp 目录
+        sudo mount -B $GITHUB_WORKSPACE/tmp /tmp
+    - name: 安装编译依赖
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+          sudo -E apt-get -qq update
+          sudo -E apt-get -qq install ack antlr3 aria2 asciidoc autoconf automake autopoint binutils \
+          bison build-essential bzip2 ccache clang cmake cpio curl device-tree-compiler fastjar flex \
+          g++ gawk gcc-multilib gettext git gperf haveged help2man intltool libc6-dev-i386 libelf-dev \
+          libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev \
+          libpython3-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip \
+          p7zip-full patch pkgconf python2.7 python3 python3-distutils python3-pyelftools python3-pip \
+          python3-ply python3-docutils python3-pyelftools quilt re2c rename rsync scons squashfs-tools \
+          subversion swig texinfo uglifyjs unzip upx-ucl vim wget xmlto xxd zip zlib1g-dev
+          sudo -E apt-get -qq purge android* azure-cli dotnet* firefox ghc* google* hhvm llvm* mysql* \
+          openjdk* php* powershell zulu*
+          sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          sudo -E apt-get -qq autoremove --purge
+          sudo -E apt-get -qq clean ) &
+          # sudo bash -c 'bash <(curl -s is.gd/build_environment
+          sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+    - name: Clone source code
+      #working-directory: /workdir
+      run: |
+        df -hT $PWD
+        git clone $REPO_URL -b $REPO_BRANCH openwrt
+        git clone https://github.com/fkuetgjfbj/openwrt lede
+        cp -Rf ./lede/* openwrt
+        cp -Rf lede/.github/tmp/* openwrt
+        #ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        if if [[ $DATE_S == 'default' ]]; then
+          echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
+        else 
+          echo "DATA=$DATE_S" >>$GITHUB_ENV
+        fi
+    - name: Cache
+      uses: klever1988/cachewrtbuild@main
+      with:
+       ccache: 'true'
+       clean:  'false'  # 'false'
+       prefix: ${{ github.workspace }}/openwrt
+    
+    - name: Update feeds
+      run: cd openwrt && ./scripts/feeds update -a
+
+    - name: Install feeds
+      run: cd openwrt && ./scripts/feeds install -a
+    - name: Load custom feeds
+      run: |
+        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        chmod +x diypart1.sh
+        cd openwrt
+        chmod +x diypart1.sh
+         [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
+         chmod -R 755 .
+         echo  "=========================="
+
+        ls -a
+    - name: Download package
+      id: package
+      run: |
+        cd openwrt
+        echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
+        make defconfig
+        make download -j8
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+
+    - name: Compile Packages
+      id: compile
+      run: |
+         df -h
+         cd openwrt
+         echo -e "$(nproc) thread compile"
+         make tools/compile -j$(nproc) || make tools/compile -j72
+         make toolchain/compile -j$(nproc) || make toolchain/compile -j72
+         make target/compile -j$(nproc) || make target/compile -j72 IGNORE_ERRORS=1
+         make diffconfig
+         make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
+         make package/index
+         bash  bakkmod.sh
+    - name: Generate Firmware
+      run: |
+         df -h
+         cd openwrt 
+         make package/install -j$(nproc) || make package/install -j1 V=s
+         make target/install -j$(nproc) || make target/install -j1 V=s
+         make checksum
+         bash buildmd5.sh
+    - name: Check space usage
+      if: (!cancelled())
+      run: df -hT
+
+    - name: Organize files
+      id: organize
+      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+      run: |
+        cd openwrt/bin/targets/*/*
+        rm -rf packages
+        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: Upload firmware directory
+      uses: actions/upload-artifact@main
+      if: steps.organize.outputs.status == 'success' && !cancelled()
+      with:
+        name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-${{ env.CONFIG_S }}-Lede-Firmware
+        path: ${{ env.FIRMWARE }}
+
+    - name: Upload firmware to release
+      uses: softprops/action-gh-release@v1
+      if: steps.tag.outputs.status == 'success' && !cancelled()
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN}}
+      with:
+        tag_name: ${{ steps.tag.outputs.release_tag }}
+        body_path: release.txt
+        files: ${{ env.FIRMWARE }}/*
+
+    - name: Delete workflow runs
+      uses: Mattraks/delete-workflow-runs@v2
+      with:
+          retain_days: 1
+          keep_minimum_runs: 1
+
+    - name: Remove old Releases
+      uses: dev-drprasad/delete-older-releases@v0.2.1
+      with:
+          keep_latest: 1
+          delete_tags: true
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Delete Artifacts
+      uses: geekyeggo/delete-artifact@v2
+      with:
+         name: |
+            bin-archive
