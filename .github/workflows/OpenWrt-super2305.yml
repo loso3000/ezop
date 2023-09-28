@@ -43,11 +43,12 @@ env:
 jobs:
   build:
     runs-on: ubuntu-20.04
-    if: github.event.repository.owner.id == github.event.sender.id
+    if: github.event.repository.owner.id == github.event.sender.id || ! github.event.sender.id
+    name: immortalwrt-super2305
 
     steps:
     - name: Checkout
-      uses: actions/checkout@main
+      uses: actions/checkout@v3.1.0
 
     - name: Check server performance
       run: |
@@ -128,12 +129,22 @@ jobs:
         ls -a
         #ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
+
     - name: Cache
-      uses: klever1988/cachewrtbuild@main
+      uses: stupidloud/cachewrtbuild@main
+      continue-on-error: true
       with:
-       ccache: 'true'
-       clean:  'false'  # 'false'
-       prefix: ${{ github.workspace }}/openwrt
+        ccache: 'true'
+        clean: ${{env.CLEAN}}
+        mixkey: ${{env.CACHE_NAME}}
+        prefix: ${{ github.workspace }}/openwrt
+        
+    #- name: Cache
+    #  uses: klever1988/cachewrtbuild@main
+   #   with:
+    #   ccache: 'true'
+    #   clean:  'false'  # 'false'
+    #   prefix: ${{ github.workspace }}/openwrt
 
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
