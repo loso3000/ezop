@@ -8,26 +8,50 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: OpenWrt-super
+name: OpenWrt-imm
 
 on:
   repository_dispatch:
   workflow_dispatch:
     inputs:
-      ssh:
-        description: 'SSH connection to Actions'
-        required: false
-        default: 'false'
-#   watch:
-#     types: started
-    
-  #schedule:
-     #- cron: 00 22 * * *
-    
+      branch:
+        description: '选择仓库的分支：'
+        default: 'openwrt-21.02'
+        required: true
+        type: choice
+        options: [ openwrt-21.02, master, openwrt-23.05 ]
+      config_s:
+        description: '配置文件'
+        default: 'mini'
+        required: true
+        type: choice
+        options: [ Mini, Super, Plus, Bypass ]
   
+      cpu_s:
+        description: 'CPU优选'
+        required: true
+        default: 'default'
+        type: choice
+        options:
+          - 'default'
+          - '8370C'
+          - '8272CL'
+          - '8171M'
+          
+      target:
+        description: '选择要生成的机型：'
+        default: 'x86_64'
+        required: true
+        type: choice
+        options: [ x86_64, rm2100, xm2100, r2s, r4s, r4se, r5s, r5c ]
+
+      date_s:
+        description: '固件日期'
+        default: 'default'
+        required: false
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
-  REPO_BRANCH: openwrt-21.02
+  #REPO_BRANCH: openwrt-21.02
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: diffconfig
   DIY_P1_SH: diypart1.sh
@@ -43,7 +67,13 @@ jobs:
   build:
     runs-on: ubuntu-latest
     if: github.event.repository.owner.id == github.event.sender.id
-
+    name: immortalwrt-${{github.event.inputs.config_s}}-${{github.event.inputs.target}}-${{github.event.inputs.date_s}}
+    env:
+      CONFIG_S: ${{github.event.inputs.config_s}}
+      CPU_S: ${{github.event.inputs.cpu_s}}
+      DATE_S: ${{github.event.inputs.date_s}}
+      TARGET_DEVICE: ${{github.event.inputs.target}}
+      REPO_BRANCH: ${{github.event.inputs.branch}}
     steps:
     - name: Checkout
       uses: actions/checkout@main
@@ -78,7 +108,6 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-
           docker rmi $(docker images -q)
           sudo -E rm -rf $(cat $GITHUB_WORKSPACE/Depends.txt | sed -n "1{s/\r$//;p;q}")
           sudo -E apt -yqq update
@@ -90,24 +119,23 @@ jobs:
           sudo -E apt -yqq clean
           sudo -E systemctl daemon-reload
           sudo timedatectl set-timezone "Asia/Shanghai"
-          sudo mkdir -p /workdir
-          sudo chown $USER:$GROUPS /workdir
     - name: Clone source code
-      working-directory: /workdir
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         git clone https://github.com/fkuetgjfbj/lede.git lede
-        echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
         cp -Rf ./lede/* openwrt
+        if [[ $DATE_S == 'default' ]]; then
+          echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
+        else 
+          echo "DATA=$DATE_S" >>$GITHUB_ENV
+        fi
     - name: Cache
       uses: klever1988/cachewrtbuild@main
       with:
        ccache: 'true'
        clean:  'false'  # 'false'
        prefix: ${{ github.workspace }}/openwrt
-
     
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
@@ -175,7 +203,7 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
-        name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-Super-Le2102-Firmware
+        name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-${{env.CONFIG_S}}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-Firmware
         path: ${{ env.FIRMWARE }}
 
     #- name: Upload bin directory
@@ -183,7 +211,7 @@ jobs:
     #  if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
     #  with:
     #    #name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-    #    name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-Super-Le2102-Firmware
+    #    name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-${{ env.CONFIG_S }}-${{env.TARGET_DEVICE}}-bin
      #   path: openwrt/bin
    
 
