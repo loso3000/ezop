@@ -76,19 +76,6 @@ jobs:
              #exit 1
          fi
 
-    - name: free Ubuntu
-      uses: jlumbroso/free-disk-space@main
-      with:
-        # this might remove tools that are actually needed,
-        # if set to "true" but frees about 6 GB
-        tool-cache: true
-        # all of these default to true, but feel free to set to
-        # "false" if necessary for your workflow
-        android: true
-        dotnet: true
-        haskell: true
-        large-packages: true
-        swap-storage: true
     
     - name: Initialization environment
       env:
@@ -96,37 +83,30 @@ jobs:
       run: |
 
 
-          #docker rmi $(docker images -q)
-          #sudo -E rm -rf $(cat $GITHUB_WORKSPACE/Depends.txt | sed -n "1{s/\r$//;p;q}")
-          #sudo -E apt -yqq update
-          #sudo -E apt -yqq purge $(cat $GITHUB_WORKSPACE/Depends.txt | sed -n "2{s/\r$//;p;q}")
-          #sudo -E apt -yqq full-upgrade
-          #sudo -E apt -yqq install $(cat $GITHUB_WORKSPACE/Depends.txt | sed -n "3{s/\r$//;p;q}")
-          #sudo -E apt -yqq autoremove --purge
-          #sudo -E apt -yqq autoclean
-          #sudo -E apt -yqq clean
-          #sudo -E systemctl daemon-reload
-          
-          bash <(curl -fsSL https://raw.githubusercontent.com/281677160/common/main/custom/ubuntu.sh)
-          
+          docker rmi $(docker images -q)
+          sudo -E rm -rf $(cat $GITHUB_WORKSPACE/Depends.txt | sed -n "1{s/\r$//;p;q}")
+          sudo -E apt -yqq update
+          sudo -E apt -yqq purge $(cat $GITHUB_WORKSPACE/Depends.txt | sed -n "2{s/\r$//;p;q}")
+          sudo -E apt -yqq full-upgrade
+          sudo -E apt -yqq install $(cat $GITHUB_WORKSPACE/Depends.txt | sed -n "3{s/\r$//;p;q}")
+          sudo -E apt -yqq autoremove --purge
+          sudo -E apt -yqq autoclean
+          sudo -E apt -yqq clean
+          sudo -E systemctl daemon-reload
           sudo timedatectl set-timezone "Asia/Shanghai"
-          sudo mkdir -p /workdir
-          sudo chown $USER:$GROUPS /workdir
+          #sudo mkdir -p /workdir
+          #sudo chown $USER:$GROUPS /workdir
 
     - name: Clone source code
-      working-directory: /workdir
+      # working-directory: /workdir
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         git clone https://github.com/fkuetgjfbj/openwrt lede
         cp -Rf ./lede/* openwrt
-        ls -a
-        ls -a lede 
-        ls -a lede/.github
-        ls -a lede/.github/tmp
         cp -Rf lede/.github/tmp/* openwrt
         ls -a
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        #ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
     - name: Cache
       uses: klever1988/cachewrtbuild@main
