@@ -42,13 +42,13 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     if: github.event.repository.owner.id == github.event.sender.id || ! github.event.sender.id
     name: immortalwrt-super2305
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v3.1.0
+      uses: actions/checkout@v3
 
     - name: Check server performance
       run: |
@@ -77,16 +77,19 @@ jobs:
              #exit 1
          fi
 
-    - name: jlumbroso 整理空间
+    - name: 释放Ubuntu磁盘空间
       uses: jlumbroso/free-disk-space@main
       with:
-        dotnet: true
-        android: true
-        haskell: true
+        # this might remove tools that are actually needed,
+        # if set to "true" but frees about 6 GB
         tool-cache: true
-        swap-storage: true
+        # all of these default to true, but feel free to set to
+        # "false" if necessary for your workflow
+        android: true
+        dotnet: true
+        haskell: true
         large-packages: true
-
+        swap-storage: true
     - name: losetup 整理空间
       run: |
         [ -f /mnt/swapfile ] && sudo swapoff -a && sudo rm -f /mnt/swapfile
@@ -107,19 +110,19 @@ jobs:
         mkdir -m 0777 -p $GITHUB_WORKSPACE/tmp
         sudo cp -rp /tmp/* $GITHUB_WORKSPACE/tmp || true
         sudo mount -B $GITHUB_WORKSPACE/tmp /tmp
-          sudo timedatectl set-timezone "Asia/Shanghai"
-          #sudo mkdir -p /workdir
-          #sudo chown $USER:$GROUPS /workdir
+        
+        sudo timedatectl set-timezone "Asia/Shanghai"
 
     - name: 安装编译依赖
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        wget -qO- is.gd/build_environment | sudo bash
+        bash <(curl -fsSL https://raw.githubusercontent.com/281677160/common/main/custom/ubuntu.sh)
         sudo -E timedatectl set-timezone "Asia/Shanghai"
-
+         sudo mkdir -p /workdir
+         sudo chown $USER:$GROUPS /workdir
     - name: Clone source code
-      # working-directory: /workdir
+      working-directory: /workdir
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
@@ -127,7 +130,7 @@ jobs:
         cp -Rf ./lede/* openwrt
         cp -Rf lede/.github/tmp/* openwrt
         ls -a
-        #ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
 
     - name: Cache
