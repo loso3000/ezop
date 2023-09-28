@@ -62,7 +62,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     if: github.event.repository.owner.id == github.event.sender.id
 
     env:
@@ -99,74 +99,24 @@ jobs:
              echo "CKCPU=failure" >> $GITHUB_ENV
              #exit 1
          fi
-    - name: jlumbroso 整理空间
-      uses: jlumbroso/free-disk-space@main
-      with:
-        dotnet: true
-        android: true
-        haskell: true
-        tool-cache: true
-        swap-storage: true
-        large-packages: true
-
-    - name: losetup 整理空间
-      run: |
-        # 关闭 swap 分区并删除 swap 文件
-        [ -f /mnt/swapfile ] && sudo swapoff -a && sudo rm -f /mnt/swapfile
-        export ROOT_LOOP_BYTES=$((($(df --block-size=1024 --output=avail / | tail -1) - 1024*1024*7) * 1024))
-        # 创建根文件系统的卷
-        sudo fallocate -l $ROOT_LOOP_BYTES /root.img
-        # 将根文件系统关联到一个未使用的循环设备
-        export ROOT_LOOP_DEVNAME=$(sudo losetup -Pf --show /root.img)
-        # 标记循环设备为物理卷
-        sudo pvcreate -f $ROOT_LOOP_DEVNAME
-        
-        # 转换分配给新文件系统的 /mnt 目录的空间大小为字节
-        export MNT_LOOP_BYTES=$((($(df --block-size=1024 --output=avail /mnt | tail -1) - 1024*1024*1) * 1024))
-        # 创建 /mnt 目录的卷
-        sudo fallocate -l $MNT_LOOP_BYTES /mnt/mnt.img
-        # 将 /mnt 目录关联到一个未使用的循环设备
-        export MNT_LOOP_DEVNAME=$(sudo losetup -Pf --show /mnt/mnt.img)
-        # 标记循环设备为物理卷
-        sudo pvcreate -f $MNT_LOOP_DEVNAME
-        # 创建卷组并添加根目录和 /mnt 目录的物理卷
-        sudo vgcreate Actions $ROOT_LOOP_DEVNAME $MNT_LOOP_DEVNAME
-        # 在卷组中创建逻辑卷
-        sudo lvcreate -n disk -l 100%FREE Actions
-        # 获取逻辑卷的设备名称
-        export LV_DEVNAME=$(sudo lvscan | awk -F "'" '{print $2}')
-        # 在逻辑卷上创建 Btrfs 文件系统
-        sudo mkfs.btrfs -L combinedisk $LV_DEVNAME
-        # 挂载逻辑卷到指定目录，并使用 Zstandard 压缩算法
-        sudo mount -o compress=zstd $LV_DEVNAME $GITHUB_WORKSPACE
-        # 更改目录权限为 runner:runner 用户，确保执行者具有适当权限
-        sudo chown -R runner:runner $GITHUB_WORKSPACE
-        # 创建临时目录（如果不存在）
-        mkdir -m 0777 -p $GITHUB_WORKSPACE/tmp
-        # 将 /tmp 目录下的内容复制到临时目录中（如果发生错误，仍继续执行）
-        sudo cp -rp /tmp/* $GITHUB_WORKSPACE/tmp || true
-        # 将临时目录绑定到 /tmp 目录
-        sudo mount -B $GITHUB_WORKSPACE/tmp /tmp
-    - name: 安装编译依赖
+         
+    - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-          sudo -E apt-get -qq update
-          sudo -E apt-get -qq install ack antlr3 aria2 asciidoc autoconf automake autopoint binutils \
-          bison build-essential bzip2 ccache clang cmake cpio curl device-tree-compiler fastjar flex \
-          g++ gawk gcc-multilib gettext git gperf haveged help2man intltool libc6-dev-i386 libelf-dev \
-          libglib2.0-dev libgmp3-dev libltdl-dev libmpc-dev libmpfr-dev libncurses5-dev libncursesw5-dev \
-          libpython3-dev libreadline-dev libssl-dev libtool lrzsz mkisofs msmtp nano ninja-build p7zip \
-          p7zip-full patch pkgconf python2.7 python3 python3-distutils python3-pyelftools python3-pip \
-          python3-ply python3-docutils python3-pyelftools quilt re2c rename rsync scons squashfs-tools \
-          subversion swig texinfo uglifyjs unzip upx-ucl vim wget xmlto xxd zip zlib1g-dev
-          sudo -E apt-get -qq purge android* azure-cli dotnet* firefox ghc* google* hhvm llvm* mysql* \
-          openjdk* php* powershell zulu*
-          sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
-          sudo -E apt-get -qq autoremove --purge
-          sudo -E apt-get -qq clean ) &
-          # sudo bash -c 'bash <(curl -s is.gd/build_environment
-          sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+          docker rmi $(docker images -q)
+          sudo -E rm -rf $(cat $GITHUB_WORKSPACE/Depends.txt | sed -n "1{s/\r$//;p;q}")
+          sudo -E apt -yqq update
+          sudo -E apt -yqq purge $(cat $GITHUB_WORKSPACE/Depends.txt | sed -n "2{s/\r$//;p;q}")
+          sudo -E apt -yqq full-upgrade
+          sudo -E apt -yqq install $(cat $GITHUB_WORKSPACE/Depends.txt | sed -n "3{s/\r$//;p;q}")
+          sudo -E apt -yqq autoremove --purge
+          sudo -E apt -yqq autoclean
+          sudo -E apt -yqq clean
+          sudo -E systemctl daemon-reload
+          sudo timedatectl set-timezone "Asia/Shanghai"
+          sudo mkdir -p /workdir
+          sudo chown $USER:$GROUPS /workdir
 
     - name: Clone source code
       #working-directory: /workdir
