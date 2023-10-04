@@ -22,7 +22,7 @@ on:
         options: [ openwrt-21.02, master, openwrt-23.05 ]
       config_s:
         description: '配置文件'
-        default: 'mini'
+        default: 'Super'
         required: true
         type: choice
         options: [ Mini, Super, Plus, Bypass ]
@@ -159,7 +159,7 @@ jobs:
       id: package
       run: |
         cd openwrt
-        echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
+        # echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
         make defconfig
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
