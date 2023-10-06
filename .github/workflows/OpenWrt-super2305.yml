@@ -26,9 +26,9 @@ on:
     
   
 env:
-  #REPO_URL: https://github.com/immortalwrt/immortalwrt
+  REPO_URL: https://github.com/immortalwrt/immortalwrt
   #REPO_URL: https://github.com/Lienol/openwrt
-  REPO_URL: https://github.com/openwrt/openwrt.git
+  #REPO_URL: https://github.com/openwrt/openwrt.git
   #REPO_BRANCH: master
   #REPO_BRANCH: openwrt-23.05
   REPO_BRANCH: openwrt-23.05
@@ -158,20 +158,21 @@ jobs:
          df -h
          cd openwrt
          echo -e "$(nproc) thread compile"
-         make tools/compile -j$(nproc) || make tools/compile -j72
-         make toolchain/compile -j$(nproc) || make toolchain/compile -j72
-         make target/compile -j$(nproc) || make target/compile -j72 IGNORE_ERRORS=1
-         make diffconfig
-         make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
-         make package/index
+          make buildinfo
+          make diffconfig buildversion feedsversion
+          make target/compile -j$(nproc) IGNORE_ERRORS="m n"
+          make package/kernel/button-hotplug/compile -j$(nproc)
+          make package/compile -j$(nproc) IGNORE_ERRORS="m n"
+          make package/index
          bash  bakkmod.sh
     - name: Generate Firmware
       run: |
          df -h
          cd openwrt 
-         make package/install -j$(nproc) || make package/install -j1 V=s
-         make target/install -j$(nproc) || make target/install -j1 V=s
-         make checksum
+          make package/install -j$(nproc) || make package/install -j1 V=s
+          make target/install -j$(nproc) || make target/install -j1 V=s
+          make json_overview_image_info
+          make checksum
          bash buildmd5.sh
     - name: Check space usage
       if: (!cancelled())
