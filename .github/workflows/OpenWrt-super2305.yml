@@ -137,11 +137,6 @@ jobs:
         sudo chown $USER:$GROUPS /workdir
           sudo timedatectl set-timezone "Asia/Shanghai" 
 
-    - name: Check Files
-      run: |
-          dos2unix $(find ./ -maxdepth 2 -type f -iregex ".*\(txt\|sh\)$")
-          chmod +x $(find ./ -maxdepth 2 -type f -iname "*.sh")
-
     - name: Clone source code
       run: |
         df -h
