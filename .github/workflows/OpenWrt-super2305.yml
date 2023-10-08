@@ -124,8 +124,15 @@ jobs:
           sudo -E rm -rf $(sed -n "3{s/\r$//g;p;q}" $GITHUB_WORKSPACE/repends.txt)
           sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
           sudo timedatectl set-timezone "Asia/Shanghai" 
+
+    - name: Check Files
+      run: |
+          dos2unix $(find ./ -maxdepth 2 -type f -iregex ".*\(txt\|sh\)$")
+          chmod +x $(find ./ -maxdepth 2 -type f -iname "*.sh")
+
     - name: Clone source code
       run: |
+        df -h
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         git clone https://github.com/fkuetgjfbj/openwrt lede
@@ -159,20 +166,16 @@ jobs:
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        df -h
         chmod +x diypart1.sh
-        ls -a
         cd openwrt
         chmod +x diypart1.sh
-        ls -a
          [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
-         chmod -R 755 .
-         echo  "=========================="
-
-        ls -a
     - name: Download package
       id: package
       run: |
         cd openwrt
+        df -h
         # echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
         make defconfig
 
@@ -184,6 +187,7 @@ jobs:
     - name: Download Packages
       run: |
         cd openwrt
+        df -h
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
@@ -220,6 +224,7 @@ jobs:
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf packages
+        df -h
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
