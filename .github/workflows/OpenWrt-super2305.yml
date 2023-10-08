@@ -175,6 +175,14 @@ jobs:
         cd openwrt
         # echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
         make defconfig
+
+    - name: Cleanup Toolchain
+      run: |
+          cd openwrt
+          make dirclean
+
+    - name: Download Packages
+      run: |
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
