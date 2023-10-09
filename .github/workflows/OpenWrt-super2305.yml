@@ -193,12 +193,21 @@ jobs:
          df -h
          cd openwrt
          echo -e "$(nproc) thread compile"
-          make buildinfo
-          make diffconfig buildversion feedsversion
+          #make buildinfo
+          #make diffconfig buildversion feedsversion
           make target/compile -j$(nproc) IGNORE_ERRORS="m n"
+          ls -a
+          echo ============================target
+          echo ============================target
           make package/kernel/button-hotplug/compile -j$(nproc)
+          echo ============================kernel
+          echo ============================kernel
           make package/compile -j$(nproc) IGNORE_ERRORS="m n"
+          echo ============================compile
+          echo ============================compile
           make package/index
+          echo ============================index
+          echo ============================index
          bash  bakkmod.sh
     - name: Generate Firmware
       run: |
