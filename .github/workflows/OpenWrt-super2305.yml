@@ -193,8 +193,10 @@ jobs:
          df -h
          cd openwrt
          echo -e "$(nproc) thread compile"
-          #make buildinfo
-          #make diffconfig buildversion feedsversion
+         make buildinfo
+          make diffconfig buildversion feedsversion
+          echo ============================diffconfig
+          echo ============================diffconfig
           make target/compile -j$(nproc) IGNORE_ERRORS="m n"
           ls -a
           echo ============================target
