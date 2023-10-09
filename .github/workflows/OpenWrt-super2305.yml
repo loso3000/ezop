@@ -71,6 +71,7 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id
     name: immortalwrt-${{github.event.inputs.config_s}}-${{github.event.inputs.target}}-${{github.event.inputs.branch}}-${{github.event.inputs.date_s}}
     env:
       CONFIG_S: ${{github.event.inputs.config_s}}
@@ -79,7 +80,6 @@ jobs:
       TARGET_DEVICE: ${{github.event.inputs.target}}
       REPO_BRANCH: ${{github.event.inputs.branch}}
     steps:
-   
     - name: Checkout
       uses: actions/checkout@main
       
@@ -102,8 +102,7 @@ jobs:
           sudo -E apt -yqq autoclean
           sudo -E apt -yqq clean
           sudo -E systemctl daemon-reload
-          sudo timedatectl set-timezone "Asia/Shanghai"
-
+          sudo timedatectl set-timezone "Asia/Shanghai" 
     - name: Check server performance
       run: |
          echo "警告⚠"
