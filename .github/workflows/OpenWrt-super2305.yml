@@ -179,12 +179,13 @@ jobs:
         cd openwrt
         chmod +x diypart1.sh
          [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
-    - name: Download package
+    - name: set defconfig
       id: package
       run: |
         cd openwrt
         df -h
-        echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
+         chmod -R 755 .
+        #echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
         make defconfig
 
     - name: Download Packages
