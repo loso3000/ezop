@@ -30,10 +30,9 @@ on:
       cpu_s:
         description: 'CPU优选'
         required: true
-        default: ' '
+        default: '8'
         type: choice
         options:
-          - ' '
           - '8'
           - '8370C'
           - '8272CL'
