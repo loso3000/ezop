@@ -32,7 +32,7 @@ on:
         default: 'default'
         type: choice
         options:
-          - 'default'
+          - '8'
           - '8370C'
           - '8272CL'
           - '8171M'
@@ -129,13 +129,13 @@ jobs:
          echo "硬盘详情："
          df -Th
          
-         if grep  "8370" "/proc/cpuinfo" ; then
+         if grep  $CPU_S "/proc/cpuinfo" ; then
           echo "CPU YES！！！"
           echo "CKCPU=success" >> $GITHUB_ENV
          else
              echo "CPU NO！！！"
              echo "CKCPU=failure" >> $GITHUB_ENV
-             #exit 1
+             exit 1
          fi
 
     - name: Clone source code
