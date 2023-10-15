@@ -19,13 +19,13 @@ on:
         default: 'openwrt-23.05'
         required: true
         type: choice
-        options: [ openwrt-21.02, master, 23.05 , openwrt-23.05]
+        options: [ openwrt-21.02, master, 23.05 , openwrt-23.05 ]
       config_s:
         description: '配置文件'
         default: 'Super'
         required: true
         type: choice
-        options: [ Mini, Super, Plus, Bypass ]
+        options: [ Mini, Super, Plus, Bypass ,Vip-Mini, Vip-Super ]
       cpu_s:
         description: 'CPU优选'
         required: true
@@ -237,17 +237,14 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
-        name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-${{env.CONFIG_S}}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-Firmware
+        name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-${{env.CONFIG_S}}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-Firmware
         path: ${{ env.FIRMWARE }}
 
-    #- name: Upload bin directory
-    #  uses: actions/upload-artifact@main
-    #  if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
-    #  with:
-    #    #name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-    #    name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-Super-Le2305-Firmware
-     #   path: openwrt/bin
-   
+    - name: Upload bin directory
+      uses: actions/upload-artifact@main
+      with:
+        name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-${{ env.CONFIG_S }}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-ipk
+        path: ./openwrt/bin/packages/
 
     - name: Upload firmware to release
       uses: softprops/action-gh-release@v1
