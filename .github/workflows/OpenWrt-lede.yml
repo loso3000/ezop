@@ -151,17 +151,18 @@ jobs:
           ./scripts/feeds install -a 
     - name: Load custom feeds
       run: |
-        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        # [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x diypart1.sh
         cd openwrt
         chmod +x diypart1.sh
+         echo  "============start=============="
          [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
          chmod -R 755 .
-         echo  "=========================="
+         echo  "============end=============="
     - name: Generate configuration file
       run: |
          cd openwrt
-         #echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
+         # echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
          make defconfig 
         
     - name: Download package
