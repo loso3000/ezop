@@ -54,9 +54,6 @@ env:
 
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  #REPO_URL: https://github.com/immortalwrt/immortalwrt
-  #REPO_BRANCH: master
-  #REPO_BRANCH: openwrt-23.05
   FEEDS_CONF: feeds.conf.default
   CONFIG_FILE: diffconfig
   DIY_P1_SH: diypart1.sh
@@ -71,8 +68,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: github.event.repository.owner.id == github.event.sender.id
-
     name: lede-${{github.event.inputs.config_s}}-${{github.event.inputs.target}}-${{github.event.inputs.date_s}}
     env:
       CONFIG_S: ${{github.event.inputs.config_s}}
@@ -129,14 +124,14 @@ jobs:
           sudo chown $USER:$GROUPS /workdir
 
     - name: Clone source code
-      working-directory: /workdir
+      #working-directory: /workdir
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         git clone https://github.com/fkuetgjfbj/lede86 lede
         cp -Rf ./lede/* openwrt
         cp -Rf lede/.github/tmp/* openwrt
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        #ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         if [[ $DATE_S == 'default' ]]; then
           echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
         else 
