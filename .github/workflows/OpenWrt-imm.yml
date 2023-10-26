@@ -26,7 +26,6 @@ on:
         required: true
         type: choice
         options: [ Super, Mini, Plus, Vip-Super, Vip-Mini, Vip-Bypass, Vip-Plus ]
-  
       cpu_s:
         description: 'CPU优选'
         required: true
@@ -37,7 +36,6 @@ on:
           - '8370C'
           - '8272CL'
           - '8171M'
-          
       target:
         description: '选择要生成的机型：'
         default: 'x86_64'
@@ -53,7 +51,6 @@ env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
   #REPO_BRANCH: openwrt-21.02
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: diffconfig
   DIY_P1_SH: diypart1.sh
   DIY_P2_SH: diypart2.sh
   UPLOAD_BIN_DIR: false
@@ -95,14 +92,13 @@ jobs:
          echo -e  "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l) \n"
          echo "硬盘详情："
          df -Th
-         
          if grep  $CPU_S "/proc/cpuinfo" ; then
           echo "CPU YES！！！"
           echo "CKCPU=success" >> $GITHUB_ENV
          else
              echo "CPU NO！！！"
              echo "CKCPU=failure" >> $GITHUB_ENV
-             #exit 1
+             exit 1
          fi
     - name: Initialization environment
       env:
@@ -119,10 +115,14 @@ jobs:
           sudo -E apt -yqq clean
           sudo -E systemctl daemon-reload
           sudo timedatectl set-timezone "Asia/Shanghai"
+          sudo mkdir -p /workdir
+          sudo chown $USER:$GROUPS /workdir
     - name: Clone source code
+      working-directory: /workdir
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         git clone https://github.com/fkuetgjfbj/lede.git lede
         cp -Rf ./lede/* openwrt
         if [[ $DATE_S == 'default' ]]; then
@@ -134,37 +134,30 @@ jobs:
       uses: klever1988/cachewrtbuild@main
       with:
        ccache: 'true'
+       mixkey: 'x86_64'
        clean:  'false'  # 'false'
        prefix: ${{ github.workspace }}/openwrt
-    
     - name: Update feeds
-      run: cd openwrt && ./scripts/feeds update -a
-
-    - name: Install feeds
-      run: cd openwrt && ./scripts/feeds install -a
+      run: |
+         ./scripts/feeds update -a
+         ./scripts/feeds install -a
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x diypart1.sh
-        ls -a
         cd openwrt
         chmod +x diypart1.sh
-        ls -a
          [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
          chmod -R 755 .
-         echo  "=========================="
-
-        ls -a
     - name: Download package
       id: package
       run: |
         cd openwrt
-        # echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
+        echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
         make defconfig
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-
     - name: Compile Packages
       id: compile
       run: |
@@ -190,7 +183,6 @@ jobs:
     - name: Check space usage
       if: (!cancelled())
       run: df -hT
-
     - name: Organize files
       id: organize
       if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
@@ -204,16 +196,13 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
-        name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-${{env.CONFIG_S}}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-Firmware
+        name: ${{ env.DATA }}-EzOpnWrt-Ipv6-${{env.CONFIG_S}}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-Firmware
         path: ${{ env.FIRMWARE }}
-
     - name: Upload bin directory
       uses: actions/upload-artifact@main
       with:
-        name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-${{ env.CONFIG_S }}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-ipk
+        name: ${{ env.DATA }}-EzOpnWrt-Ipv6-${{ env.CONFIG_S }}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-ipk
         path: ./openwrt/bin/packages/
-   
-
     - name: Upload firmware to release
       uses: softprops/action-gh-release@v1
       if: steps.tag.outputs.status == 'success' && !cancelled()
@@ -223,13 +212,11 @@ jobs:
         tag_name: ${{ steps.tag.outputs.release_tag }}
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
-
     - name: Delete workflow runs
       uses: Mattraks/delete-workflow-runs@v2
       with:
           retain_days: 1
           keep_minimum_runs: 1
-
     - name: Remove old Releases
       uses: dev-drprasad/delete-older-releases@v0.2.1
       with:
