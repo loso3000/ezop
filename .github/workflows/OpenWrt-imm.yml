@@ -149,10 +149,10 @@ jobs:
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        chmod +x diypart1.sh
+        chmod +x $GITHUB_WORKSPACE/openwrt/$DIY_P1_SH
         cd openwrt
-        chmod +x diypart1.sh
-         [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
+        chmod +x $GITHUB_WORKSPACE/openwrt/$DIY_P1_SH
+         [ -e $GITHUB_WORKSPACE/openwrt/$DIY_P1_SH ] && bash $GITHUB_WORKSPACE/openwrt/$DIY_P1_SH || bash $GITHUB_WORKSPACE/$DIY_P1_SH
          chmod -R 755 .
     - name: Download package
       id: package
