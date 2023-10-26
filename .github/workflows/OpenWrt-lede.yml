@@ -55,9 +55,7 @@ env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: diffconfig
   DIY_P1_SH: diypart1.sh
-  DIY_P2_SH: diypart2.sh
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: false
@@ -124,14 +122,15 @@ jobs:
           sudo chown $USER:$GROUPS /workdir
 
     - name: Clone source code
-      #working-directory: /workdir
+      working-directory: /workdir
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         git clone https://github.com/fkuetgjfbj/lede86 lede
+        rm -rf lede/.github/tmp/package
         cp -Rf ./lede/* openwrt
         cp -Rf lede/.github/tmp/* openwrt
-        #ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         if [[ $DATE_S == 'default' ]]; then
           echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
         else 
@@ -141,6 +140,7 @@ jobs:
       uses: klever1988/cachewrtbuild@main
       with:
        ccache: 'true'
+       mixkey: 'x86_64'
        clean:  'false'  # 'false'
        prefix: ${{ github.workspace }}/openwrt
 
@@ -151,7 +151,7 @@ jobs:
           ./scripts/feeds install -a 
     - name: Load custom feeds
       run: |
-        # [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x diypart1.sh
         cd openwrt
         chmod +x diypart1.sh
@@ -162,7 +162,10 @@ jobs:
     - name: Generate configuration file
       run: |
          cd openwrt
-         # echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
+         
+         cat  ./${TARGET_DEVICE}/${CONFIG_S}  > .config
+         #cat  ./${TARGET_DEVICE}/comm  >> .config
+         echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
          make defconfig 
         
     - name: Download package
@@ -209,7 +212,7 @@ jobs:
     - name: Upload firmware directory
       uses: actions/upload-artifact@main
       with:
-        name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-Vip-${{ env.CONFIG_S }}-${{env.TARGET_DEVICE}}-Firmware
+        name: ${{ env.DATA }}-EzOpWrt-Ipv6-Vip-${{ env.CONFIG_S }}-${{env.TARGET_DEVICE}}-Firmware
         path: ${{ env.FIRMWARE }}
 
     - name: Upload firmware to release
