@@ -119,6 +119,8 @@ jobs:
           sudo -E apt -yqq clean
           sudo -E systemctl daemon-reload
           sudo timedatectl set-timezone "Asia/Shanghai"
+          sudo mkdir -p /workdir
+          sudo chown $USER:$GROUPS /workdir
     - name: Clone source code
       run: |
         df -hT $PWD
@@ -130,13 +132,14 @@ jobs:
         else 
           echo "DATA=$DATE_S" >>$GITHUB_ENV
         fi
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
     - name: Cache
       uses: klever1988/cachewrtbuild@main
       with:
-       ccache: 'true'
-       clean:  'false'  # 'false'
-       prefix: ${{ github.workspace }}/openwrt
-    
+          ccache: 'true'
+          mixkey: 'x86_64'
+          clean:  'false'  # 'false'
+          prefix: ${{ github.workspace }}/openwrt
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
 
@@ -146,19 +149,15 @@ jobs:
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x diypart1.sh
-        ls -a
         cd openwrt
         chmod +x diypart1.sh
-        ls -a
          [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
          chmod -R 755 .
-         echo  "=========================="
-        ls -a
     - name: Download package
       id: package
       run: |
         cd openwrt
-        # echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
+        echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
         make defconfig
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
