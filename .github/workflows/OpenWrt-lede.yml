@@ -20,7 +20,7 @@ on:
         default: 'mini'
         required: true
         type: choice
-        options: [ Mini, Super, Plus, Bypass ]
+        options: [ Mini, Super, Plus, Vip-Mini, Vip-Super, Vip-Plus, Vip-Bypass ]
   
       cpu_s:
         description: 'CPU优选'
@@ -126,7 +126,6 @@ jobs:
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
-        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
         git clone https://github.com/fkuetgjfbj/lede86 lede
         rm -rf lede/.github/tmp/package
         cp -Rf ./lede/* openwrt
@@ -136,6 +135,7 @@ jobs:
         else 
           echo "DATA=$DATE_S" >>$GITHUB_ENV
         fi
+        ln -sf /workdir/openwrt $GITHUB_WORKSPACE/openwrt
     - name: Cache
       uses: klever1988/cachewrtbuild@main
       with:
@@ -164,7 +164,7 @@ jobs:
          cd openwrt
          
          cat  ./${TARGET_DEVICE}/${CONFIG_S}  > .config
-         #cat  ./${TARGET_DEVICE}/comm  >> .config
+         cat  ./${TARGET_DEVICE}/comm  >> .config
          echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
          make defconfig 
         
