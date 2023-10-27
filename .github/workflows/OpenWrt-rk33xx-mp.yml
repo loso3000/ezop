@@ -1,21 +1,22 @@
-name: AOpenWrt-rk33xx-mp
+name: OpenWrt-rk33xx-mp
 
 on:
   repository_dispatch:
   workflow_dispatch:
     inputs:
-      branch:
-        description: '选择仓库的分支：'
-        default: 'stable'
+
+      config_v:
+        description: '授权'
+        default: 'Base'
         required: true
         type: choice
-        options: [ stable, openwrt-21.02, master, openwrt-23.05 ]
+        options: [ Base , Vip ]
       config_s:
         description: '配置文件'
-        default: 'Vip-Mini'
+        default: 'Mini'
         required: true
         type: choice
-        options: [ Mini, Vip-Mini ]
+        options: [ Mini, Plus ]
       cpu_s:
         description: 'CPU优选'
         required: true
@@ -26,12 +27,19 @@ on:
           - '8370C'
           - '8272CL'
           - '8171M'
+      mode_s:
+        description: '类型：'
+        default: 'rockchip'
+        required: true
+        type: choice
+        options: [ rockchip ]
       target:
         description: '选择要生成的机型：'
         default: 'r2s'
         required: true
         type: choice
         options: [ rm2100, xm2100, r2s, r4s, r4se, r5s, r5c ]
+        
       date_s:
         description: '固件日期'
         default: 'default'
@@ -39,7 +47,7 @@ on:
 env:
 
   REPO_URL: https://github.com/DHDAXCW/lede-rockchip
-  #REPO_BRANCH: openwrt-21.02
+  REPO_BRANCH: stable
   FEEDS_CONF: feeds.conf.default
   DIY_P1_SH: diypart1.sh
   UPLOAD_BIN_DIR: false
@@ -54,10 +62,13 @@ jobs:
     runs-on: ubuntu-latest
     name: lede-${{github.event.inputs.config_s}}-${{github.event.inputs.target}}-${{github.event.inputs.date_s}}
     env:
+      CONFIG_SV: ${{github.event.inputs.config_v}}-${{github.event.inputs.config_s}}
       CONFIG_S: ${{github.event.inputs.config_s}}
+      CONFIG_V: ${{github.event.inputs.config_v}}
       CPU_S: ${{github.event.inputs.cpu_s}}
       DATE_S: ${{github.event.inputs.date_s}}
       TARGET_DEVICE: ${{github.event.inputs.target}}
+      MODE_S: ${{github.event.inputs.mode_s}}
     steps:
     - name: Checkout
       uses: actions/checkout@main
@@ -126,7 +137,7 @@ jobs:
       uses: klever1988/cachewrtbuild@main
       with:
        ccache: 'true'
-       mixkey: 'x86_64'
+       mixkey: ${{ env.MODE_S }}
        clean:  'false'  # 'false'
        prefix: ${{ github.workspace }}/openwrt
 
@@ -148,13 +159,17 @@ jobs:
     - name: Generate configuration file
       run: |
          cd openwrt
-         cat  ./config/${TARGET_DEVICE}  > .config
+         cat  ./${MODE_S}/${TARGET_DEVICE}  > .config
+         cat  ./${MODE_S}/${CONFIG_S}  >> .config
+         if [[ ${CONFIG_V} == 'Vip' ]]; then
+               cat  ./${MODE_S}/commwifi  >> .config
+         fi
          echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
-         case "${CONFIG_S}" in
-         "Vip"-*)
-           cat  ./config/commwifi  >> .config
-          ;;
-          esac
+         # case "${CONFIG_S}" in
+         # "Vip"-*)
+         #   cat  ./${MODE_S}/commwifi  >> .config
+         #  ;;
+         #  esac
           
          make defconfig 
         
@@ -202,7 +217,7 @@ jobs:
     - name: Upload firmware directory
       uses: actions/upload-artifact@main
       with:
-        name: ${{ env.DATA }}-EzOpWrt-Ipv6-${{ env.CONFIG_S }}-${{env.TARGET_DEVICE}}-Firmware
+        name: ${{ env.DATA }}-EzOpWrt-Ipv6-${{ env.CONFIG_S }}-${{ env.MODE_S }}-${{env.TARGET_DEVICE}}-Firmware
         path: ${{ env.FIRMWARE }}
 
     - name: Upload firmware to release
