@@ -172,7 +172,7 @@ jobs:
       run: |
          cd openwrt
          cat  ./${TARGET_DEVICE}/${CONFIG_S}  > .config
-          if [[ ${CONFIG_V} == 'Vip' ]]; then
+         if [[ "$CONFIG_V" != "Base" ]]; then
               cat  ./${TARGET_DEVICE}/comm  >> .config
           fi
          echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
