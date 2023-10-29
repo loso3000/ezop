@@ -163,9 +163,12 @@ jobs:
       run: |
          cd openwrt
          cat  ./${TARGET_DEVICE}/${CONFIG_S}  > .config
-         # if [[ "$CONFIG_V" != "Base" ]]; then
-         #     cat  ./${TARGET_DEVICE}/comm  >> .config
-         # fi
+         case "${CONFIG_S}" in
+         "Vip"*)
+              cat  ./${TARGET_DEVICE}/comm  >> .config;;
+          *) 
+          ;;
+          esac
          echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
          make defconfig 
         
@@ -213,7 +216,7 @@ jobs:
     - name: Upload firmware directory
       uses: actions/upload-artifact@main
       with:
-        name: ${{ env.DATA }}-EzOpWrt-Ipv6-${{ env.CONFIG_SV }}-${{env.TARGET_DEVICE}}-Firmware
+        name: ${{ env.DATA }}-EzOpWrt-Ipv6-${{ env.CONFIG_S }}-${{ env.TARGET_DEVICE }}-Firmware
         path: ${{ env.FIRMWARE }}
 
     - name: Upload firmware to release
