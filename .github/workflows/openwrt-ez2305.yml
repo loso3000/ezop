@@ -1,0 +1,269 @@
+#
+# Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
+#
+# This is free software, licensed under the MIT License.
+# See /LICENSE for more information.
+#
+# https://github.com/P3TERX/Actions-OpenWrt
+# Description: Build OpenWrt using GitHub Actions
+#
+
+name: openwrt-ez2305
+
+on:
+  repository_dispatch:
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: '选择仓库的分支：'
+        default: 'openwrt-23.05'
+        required: true
+        type: choice
+        options: [ openwrt-21.02, master, 23.05 , openwrt-23.05 ]
+      config_s:
+        description: '配置文件'
+        default: 'Super'
+        required: true
+        type: choice
+        options: [ Mini, Super, Plus, Bypass ,Vip-Mini, Vip-Super ]
+      cpu_s:
+        description: 'CPU优选'
+        required: true
+        default: '8'
+        type: choice
+        options:
+          - '8'
+          - '8370C'
+          - '8272CL'
+          - '8171M'
+          
+      target:
+        description: '选择要生成的机型：'
+        default: 'x86_64'
+        required: true
+        type: choice
+        options: [ x86_64, rm2100, xm2100, r2s, r4s, r4se, r5s, r5c ]
+
+      date_s:
+        description: '固件日期'
+        default: 'default'
+        required: false
+    
+  
+env:
+  #REPO_URL: https://github.com/immortalwrt/immortalwrt
+  #REPO_URL: https://github.com/Lienol/openwrt
+  REPO_URL: https://github.com/openwrt/openwrt.git
+  #REPO_BRANCH: master
+  #REPO_BRANCH: openwrt-23.05
+  #REPO_BRANCH: openwrt-23.05
+  FEEDS_CONF: feeds.conf.default
+  CONFIG_FILE: diffconfig
+  DIY_P1_SH: diypart1.sh
+  UPLOAD_BIN_DIR: false
+  UPLOAD_FIRMWARE: true
+  UPLOAD_COWTRANSFER: false
+  UPLOAD_WETRANSFER: false
+  UPLOAD_RELEASE: true
+  TZ: Asia/Shanghai
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: immortalwrt-${{github.event.inputs.config_s}}-${{github.event.inputs.target}}-${{github.event.inputs.branch}}-${{github.event.inputs.date_s}}
+    env:
+      CONFIG_S: ${{github.event.inputs.config_s}}
+      CPU_S: ${{github.event.inputs.cpu_s}}
+      DATE_S: ${{github.event.inputs.date_s}}
+      TARGET_DEVICE: ${{github.event.inputs.target}}
+      REPO_BRANCH: ${{github.event.inputs.branch}}
+ 
+    steps:
+    - name: Setup Variables
+      run: |
+          git config --global init.defaultBranch main
+          git config --global advice.detachedHead false
+
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Check server performance
+      run: |
+         echo "警告⚠"
+         echo "若分配的服务器性能不足，务必及时取消，重新运行！"
+         echo "已知编译成功CPU型号：8370C,8171M"
+         echo "已知性能不足CPU型号：8272CL E5-2673"
+         echo -e "-------------- ------------CPU信息------------------------------------------\n"
+         echo "CPU物理数量:$(cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l)"
+         echo -e "CPU核心及版本信息：$(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c) \n"
+         echo "-------------------------------内存信息-------------------------------------------"
+         echo "已安装内存详细信息："
+         sudo lshw -short -C memory | grep GiB
+         echo -e "\n"
+         echo "-----------------------------硬盘信息---------------------------------------------"
+         echo -e  "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l) \n"
+         echo "硬盘详情："
+         df -Th
+         
+         if grep  $CPU_S "/proc/cpuinfo" ; then
+          echo "CPU YES！！！"
+          echo "CKCPU=success" >> $GITHUB_ENV
+         else
+             echo "CPU NO！！！"
+             echo "CKCPU=failure" >> $GITHUB_ENV
+             exit 1
+         fi
+    - name: Free Up Disk Space
+      env:
+          DEBIAN_FRONTEND: noninteractive
+      run: |
+          #echo 'APT::Get::Always-Include-Phased-Updates "false";' | sudo tee /etc/apt/apt.conf.d/99-phased-updates
+          sudo -E apt-get -qq update
+          sudo -E apt-get -qq -y purge ghc* zulu* google* dotnet* mysql* php apache2 azure-cli firefox powershell
+          sudo -E apt-get -y autoremove --purge
+          sudo -E apt-get -y clean
+          sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          docker image prune -a -f
+
+    - name: Initialize Environment
+      env:
+          DEBIAN_FRONTEND: noninteractive
+      run: |
+          sudo -E apt-get -qq -y upgrade
+          sudo -E apt-get -y install $(cat $GITHUB_WORKSPACE/openwrt-env)
+          sudo -E apt-get -y autoremove --purge
+          sudo -E apt-get -y clean
+          sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+
+    - name: Clone source code
+      run: |
+        df -h
+        df -hT $PWD
+        git clone $REPO_URL -b $REPO_BRANCH openwrt
+        git clone https://github.com/fkuetgjfbj/op lede
+        cp -Rf ./lede/* openwrt
+        if [[ $DATE_S == 'default' ]]; then
+          echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
+        else 
+          echo "DATA=$DATE_S" >>$GITHUB_ENV
+        fi
+    - name: Cache
+      uses: stupidloud/cachewrtbuild@main
+      continue-on-error: true
+      with:
+        ccache: 'true'
+        clean: ${{env.CLEAN}}
+        mixkey: ${{env.CACHE_NAME}}
+        prefix: ${{ github.workspace }}/openwrt
+
+    - name: Update feeds
+      run: cd openwrt && ./scripts/feeds update -a
+
+    - name: Install feeds
+      run: cd openwrt && ./scripts/feeds install -a
+    - name: Load custom feeds
+      run: |
+        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        df -h
+        chmod +x diypart1.sh
+        cd openwrt
+        chmod +x diypart1.sh
+         [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
+    - name: set defconfig
+      id: package
+      run: |
+        cd openwrt
+        df -h
+         chmod -R 755 .
+        #echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
+        make defconfig
+
+    - name: Download Packages
+      run: |
+        cd openwrt
+        df -h
+        make download -j8
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+
+    - name: Compile Packages
+      id: compile
+      run: |
+         df -h
+         cd openwrt
+         echo -e "$(nproc) thread compile"
+          make buildinfo
+          make diffconfig buildversion feedsversion
+          make target/compile -j$(nproc) IGNORE_ERRORS="m n"
+          make package/kernel/button-hotplug/compile -j$(nproc)
+          make package/compile -j$(nproc) IGNORE_ERRORS="m n"
+          make package/index
+         bash  bakkmod.sh
+    - name: Generate Firmware
+      run: |
+         df -h
+         cd openwrt 
+         rm -rf ./dl
+          make package/install -j$(nproc) || make package/install -j1 V=s
+          make target/install -j$(nproc) || make target/install -j1 V=s
+          make json_overview_image_info
+          make checksum
+         bash buildmd5.sh
+    - name: Check space usage
+      if: (!cancelled())
+      run: df -hT
+
+    - name: Organize files
+      id: organize
+      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+      run: |
+        cd openwrt/bin/targets/*/*
+        rm -rf packages
+        df -h
+        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+        echo "status=success" >> $GITHUB_OUTPUT
+
+    - name: Upload firmware directory
+      uses: actions/upload-artifact@main
+      if: steps.organize.outputs.status == 'success' && !cancelled()
+      with:
+        name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-${{env.CONFIG_S}}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-Firmware
+        path: ${{ env.FIRMWARE }}
+
+    - name: Upload bin directory
+      uses: actions/upload-artifact@main
+      with:
+        name: ${{ env.DATA }}-SirpdboyOpenWrt-Ipv6-${{ env.CONFIG_S }}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-ipk
+        path: ./openwrt/bin/packages/
+
+    - name: Upload firmware to release
+      uses: softprops/action-gh-release@v1
+      if: steps.tag.outputs.status == 'success' && !cancelled()
+      env:
+        GITHUB_TOKEN: ${{ secrets.TOKEN}}
+      with:
+        tag_name: ${{ steps.tag.outputs.release_tag }}
+        body_path: release.txt
+        files: ${{ env.FIRMWARE }}/*
+
+    - name: Delete workflow runs
+      uses: Mattraks/delete-workflow-runs@v2
+      with:
+          retain_days: 1
+          keep_minimum_runs: 1
+
+    - name: Remove old Releases
+      uses: dev-drprasad/delete-older-releases@v0.2.1
+      with:
+          keep_latest: 1
+          delete_tags: true
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Delete Artifacts
+      uses: geekyeggo/delete-artifact@v2
+      with:
+         name: |
+            bin-archive
