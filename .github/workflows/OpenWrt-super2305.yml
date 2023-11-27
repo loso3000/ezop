@@ -184,8 +184,8 @@ jobs:
       run: |
         cd openwrt
         df -h
-         chmod -R 755 .
-        #echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
+        chmod -R 755 .
+        echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
         make defconfig
 
     - name: Download Packages
