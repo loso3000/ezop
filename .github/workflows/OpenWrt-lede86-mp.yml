@@ -18,7 +18,7 @@ on:
         options: [ master, stable ]
       target:
         description: '机型：'
-        default: 'r2s'
+        default: 'x86_64'
         required: true
         type: choice
         options: [ x86_64, rm2100, xm2100, r2s, r4s, r4se, r5s, r5c ]
@@ -27,7 +27,7 @@ on:
         default: 'Mini'
         required: true
         type: choice
-        options: [ Super, Pass, Mini, Plus ]
+        options: [ Super, Bypass, Mini, Plus ]
       config_v:
         description: '版本:'
         default: 'Free'
