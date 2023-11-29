@@ -1,22 +1,39 @@
-name: OpenWrt-rk33xx-mp
+name: OpenWrt-lede86-mp
 
 on:
   repository_dispatch:
   workflow_dispatch:
     inputs:
-
-      config_v:
-        description: '授权'
-        default: 'Base'
+      souce:
+        description: '源码:'
+        default: 'lede'
         required: true
         type: choice
-        options: [ Base , Vip ]
+        options: [ lede , ledes]
+      branch:
+        description: '仓库的分支：'
+        default: 'stable'
+        required: true
+        type: choice
+        options: [ master, stable ]
+      target:
+        description: '机型：'
+        default: 'r2s'
+        required: true
+        type: choice
+        options: [ x86_64, rm2100, xm2100, r2s, r4s, r4se, r5s, r5c ]
       config_s:
-        description: '配置文件'
+        description: '配置:'
         default: 'Mini'
         required: true
         type: choice
-        options: [ Mini, Plus ]
+        options: [ Super, Pass, Mini, Plus ]
+      config_v:
+        description: '版本:'
+        default: 'Free'
+        required: true
+        type: choice
+        options: [ Free , Vip ]
       cpu_s:
         description: 'CPU优选'
         required: true
@@ -27,27 +44,11 @@ on:
           - '8370C'
           - '8272CL'
           - '8171M'
-      mode_s:
-        description: '类型：'
-        default: 'rockchip'
-        required: true
-        type: choice
-        options: [ rockchip ]
-      target:
-        description: '选择要生成的机型：'
-        default: 'r2s'
-        required: true
-        type: choice
-        options: [ rm2100, xm2100, r2s, r4s, r4se, r5s, r5c ]
-        
       date_s:
         description: '固件日期'
         default: 'default'
         required: false
 env:
-
-  REPO_URL: https://github.com/DHDAXCW/lede-rockchip
-  REPO_BRANCH: stable
   FEEDS_CONF: feeds.conf.default
   DIY_P1_SH: diypart1.sh
   UPLOAD_BIN_DIR: false
@@ -60,15 +61,15 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    name: lede-${{github.event.inputs.config_s}}-${{github.event.inputs.target}}-${{github.event.inputs.date_s}}
+    name: ${{github.event.inputs.souce}}-${{github.event.inputs.config_s}}-${{github.event.inputs.config_v}}-${{github.event.inputs.target}}-${{github.event.inputs.branch}}-${{github.event.inputs.date_s}}
     env:
-      CONFIG_SV: ${{github.event.inputs.config_v}}-${{github.event.inputs.config_s}}
+      SOUCE: ${{github.event.inputs.souce}}
+      REPO_BRANCH: ${{github.event.inputs.branch}}
       CONFIG_S: ${{github.event.inputs.config_s}}
       CONFIG_V: ${{github.event.inputs.config_v}}
+      TARGET_DEVICE: ${{github.event.inputs.target}}
       CPU_S: ${{github.event.inputs.cpu_s}}
       DATE_S: ${{github.event.inputs.date_s}}
-      TARGET_DEVICE: ${{github.event.inputs.target}}
-      MODE_S: ${{github.event.inputs.mode_s}}
     steps:
     - name: Checkout
       uses: actions/checkout@main
@@ -122,6 +123,13 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
+        if [[ $SOUCE == 'lede' ]]; then
+          REPO_URL='https://github.com/coolsnowwolf/lede'
+        elif  [[ $SOUCE == 'im' ]]; then
+          REPO_URL='https://github.com/immortalwrt/immortalwrt'
+        elif  [[ $SOUCE == 'ledes' ]]; then
+          REPO_URL='https://github.com/DHDAXCW/lede-rockchip'
+        fi
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         git clone https://github.com/fkuetgjfbj/lede86 lede
         rm -rf lede/.github/tmp/package
@@ -137,8 +145,8 @@ jobs:
       uses: klever1988/cachewrtbuild@main
       with:
        ccache: 'true'
-       mixkey: ${{ env.MODE_S }}
-       clean:  'false'  # 'false'
+       mixkey: ${{ env.TARGET_DEVICE }}
+       clean:  'false'
        prefix: ${{ github.workspace }}/openwrt
 
     - name: Update feeds
@@ -159,10 +167,11 @@ jobs:
     - name: Generate configuration file
       run: |
          cd openwrt
-         cat  ./${MODE_S}/${TARGET_DEVICE}  > .config
-         cat  ./${MODE_S}/${CONFIG_S}  >> .config
+         cat  ./config/${TARGET_DEVICE}/${TARGET_DEVICE}  > .config
+         cat  ./config/${TARGET_DEVICE}/${CONFIG_S}  >> .config
+         cat  ./config/${TARGET_DEVICE}/comm  >> .config
          if [[ ${CONFIG_V} == 'Vip' ]]; then
-               cat  ./${MODE_S}/commwifi  >> .config
+               cat  ./config/${TARGET_DEVICE}/vip  >> .config
          fi
          echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
          # case "${CONFIG_S}" in
@@ -217,7 +226,7 @@ jobs:
     - name: Upload firmware directory
       uses: actions/upload-artifact@main
       with:
-        name: ${{ env.DATA }}-EzOpWrt-Ipv6-${{ env.CONFIG_S }}-${{ env.MODE_S }}-${{env.TARGET_DEVICE}}-Firmware
+        name: ${{ env.DATA }}-EzOpWrt-Ipv6-${{ env.CONFIG_V }}-${{ env.SOUCE }}-${{ env.CONFIG_S }}-${{env.TARGET_DEVICE}}-Firmware
         path: ${{ env.FIRMWARE }}
 
     - name: Upload firmware to release
