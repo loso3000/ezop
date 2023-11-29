@@ -167,9 +167,9 @@ jobs:
     - name: Generate configuration file
       run: |
          cd openwrt
-         cat  ./config/${TARGET_DEVICE}/${TARGET_DEVICE}  > .config
-         cat  ./config/${TARGET_DEVICE}/${CONFIG_S}  >> .config
-         cat  ./config/${TARGET_DEVICE}/comm  >> .config
+         cat  ./config/${TARGET_DEVICE}  > .config
+         cat  ./config/${CONFIG_S}  >> .config
+         cat  ./config/comm  >> .config
          if [[ ${CONFIG_V} == 'Vip' ]]; then
                cat  ./config/${TARGET_DEVICE}/vip  >> .config
          fi
