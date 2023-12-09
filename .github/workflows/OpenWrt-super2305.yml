@@ -195,7 +195,7 @@ jobs:
         make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-        #make -j1 V=s
+        make -j1 V=s
 
     - name: Compile Packages
       id: compile
