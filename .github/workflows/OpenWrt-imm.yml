@@ -231,8 +231,14 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Delete Artifacts
-      uses: geekyeggo/delete-artifact@v2
+    #- name: Delete Artifacts
+    #  uses: geekyeggo/delete-artifact@v2
+    #  with:
+    #     name: |
+   #         bin-archive
+
+    - name: Remove old artifacts
+      uses: c-hive/gha-remove-artifacts@v1
       with:
-         name: |
-            bin-archive
+        age: '1 day'
+        skip-recent: 3
