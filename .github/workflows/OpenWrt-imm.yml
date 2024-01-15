@@ -65,7 +65,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: github.event.repository.owner.id == github.event.sender.id
     name: immortalwrt-${{github.event.inputs.config_s}}-${{github.event.inputs.target}}-${{github.event.inputs.branch}}-${{github.event.inputs.date_s}}
     env:
@@ -82,8 +82,7 @@ jobs:
       run: |
          echo "警告⚠"
          echo "若分配的服务器性能不足，务必及时取消，重新运行！"
-         echo "已知编译成功CPU型号：8370C,8171M"
-         echo "已知性能不足CPU型号：8272CL E5-2673"
+         echo -e "已知CPU型号(降序): 7763，8370C，8272CL，8171M，E5-2673\n"
          echo -e "-------------- ------------CPU信息------------------------------------------\n"
          echo "CPU物理数量:$(cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l)"
          echo -e "CPU核心及版本信息：$(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c) \n"
@@ -95,7 +94,6 @@ jobs:
          echo -e  "硬盘数量：$(ls /dev/sd* | grep -v [1-9] | wc -l) \n"
          echo "硬盘详情："
          df -Th
-         
          if grep  $CPU_S "/proc/cpuinfo" ; then
           echo "CPU YES！！！"
           echo "CKCPU=success" >> $GITHUB_ENV
@@ -108,40 +106,36 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-          docker rmi $(docker images -q)
-          sudo -E rm -rf $(cat $GITHUB_WORKSPACE/Depends.txt | sed -n "1{s/\r$//;p;q}")
-          sudo -E apt -yqq update
-          sudo -E apt -yqq purge $(cat $GITHUB_WORKSPACE/Depends.txt | sed -n "2{s/\r$//;p;q}")
-          sudo -E apt -yqq full-upgrade
-          sudo -E apt -yqq install $(cat $GITHUB_WORKSPACE/Depends.txt | sed -n "3{s/\r$//;p;q}")
-          sudo -E apt -yqq autoremove --purge
-          sudo -E apt -yqq autoclean
-          sudo -E apt -yqq clean
-          sudo -E systemctl daemon-reload
-          sudo timedatectl set-timezone "Asia/Shanghai"
+        docker rmi $(docker images -q)
+        sudo rm -rf /usr/share/dotnet /etc/apt/sources.list.d /usr/local/lib/android $AGENT_TOOLSDIRECTORY
+        sudo -E apt-get -y purge azure-cli ghc* zulu* llvm* firefox google* dotnet* powershell openjdk* mongodb* moby* || true
+        sudo -E apt-get -y update
+        sudo -E apt-get -y install rename $(curl -fsSL is.gd/depends_ubuntu_2204)
+        sudo -E systemctl daemon-reload
+        sudo -E apt-get -y autoremove --purge
+        sudo -E apt-get -y clean
+        sudo timedatectl set-timezone "Asia/Shanghai"
+          sudo mkdir -p /mnt/workdir
+          sudo chown $USER:$GROUPS /mnt/workdir
     - name: Clone source code
+      working-directory: /mnt/workdir
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         git clone https://github.com/fkuetgjfbj/lede.git lede
         cp -Rf ./lede/* openwrt
+        ln -sf /mnt/workdir/openwrt $GITHUB_WORKSPACE/openwrt
         if [[ $DATE_S == 'default' ]]; then
           echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
         else 
           echo "DATA=$DATE_S" >>$GITHUB_ENV
         fi
-    - name: Cache
-      uses: klever1988/cachewrtbuild@main
-      with:
-       ccache: 'true'
-       clean:  'false'  # 'false'
-       prefix: ${{ github.workspace }}/openwrt
     
     - name: Update feeds
-      run: cd openwrt && ./scripts/feeds update -a
-
-    - name: Install feeds
-      run: cd openwrt && ./scripts/feeds install -a
+      run: |
+          cd openwrt
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
@@ -150,13 +144,21 @@ jobs:
         chmod +x diypart1.sh
          [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
          chmod -R 755 .
+
+    - name: Cache Toolchain
+      if: env.CACHE_TOOLCHAIN == 'true'
+      uses: HiGarfield/cachewrtbuild@main
+      with:
+        ccache: false
+        mixkey: ${{ env.CONFIG_S }}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}
+        prefix: ${{ github.workspace }}/openwrt
     - name: Download package
       id: package
       run: |
         cd openwrt
-        # echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
+        echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
         make defconfig
-        make download -j8
+        make download -j50
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
     - name: Compile Packages
@@ -205,7 +207,6 @@ jobs:
       with:
         name: ${{ env.DATA }}-EzOpWrt-Ipv6-${{ env.CONFIG_S }}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-ipk
         path: ./openwrt/bin/packages/
-   
 
     - name: Upload firmware to release
       uses: softprops/action-gh-release@v1
@@ -230,12 +231,6 @@ jobs:
           delete_tags: true
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    #- name: Delete Artifacts
-    #  uses: geekyeggo/delete-artifact@v2
-    #  with:
-    #     name: |
-   #         bin-archive
 
     - name: Remove old artifacts
       uses: c-hive/gha-remove-artifacts@v1
