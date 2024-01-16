@@ -102,6 +102,17 @@ jobs:
              echo "CKCPU=failure" >> $GITHUB_ENV
              #exit 1
          fi
+
+    - name: cleanup free-disk
+      uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: true
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: true
+        docker-images: true
+        swap-storage: true
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -145,12 +156,13 @@ jobs:
          [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
          chmod -R 755 .
 
-    - name: Cache Toolchain
-      if: env.CACHE_TOOLCHAIN == 'true'
-      uses: HiGarfield/cachewrtbuild@main
+    - name: Cache
+      id: cache
+      uses: stupidloud/cachewrtbuild@main
       with:
-        ccache: false
-        mixkey: ${{ env.CONFIG_S }}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}
+        skip_saving: 'true'
+        ccache: 'true'
+        mixkey: 'x86_64'
         prefix: ${{ github.workspace }}/openwrt
     - name: Download package
       id: package
