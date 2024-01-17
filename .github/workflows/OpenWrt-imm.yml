@@ -128,7 +128,6 @@ jobs:
         else 
           echo "DATA=$DATE_S" >>$GITHUB_ENV
         fi
-    
     - name: Update feeds
       run: |
           cd openwrt
@@ -166,7 +165,7 @@ jobs:
          df -h
          cd openwrt
          echo -e "$(nproc) thread compile"
-         make -j1 V=s
+         make -j$(nproc) || make -j1 V=s
          # make buildinfo
          # make diffconfig buildversion feedsversion
          # make target/compile -j$(nproc) IGNORE_ERRORS="m n"
