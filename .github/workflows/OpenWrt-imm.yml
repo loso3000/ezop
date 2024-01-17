@@ -53,7 +53,6 @@ env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
   #REPO_BRANCH: openwrt-21.02
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: diffconfig
   DIY_P1_SH: diypart1.sh
   DIY_P2_SH: diypart2.sh
   UPLOAD_BIN_DIR: false
@@ -167,22 +166,22 @@ jobs:
          df -h
          cd openwrt
          echo -e "$(nproc) thread compile"
-         make -j1 V=s
-         # make buildinfo
-         # make diffconfig buildversion feedsversion
-         # make target/compile -j$(nproc) IGNORE_ERRORS="m n"
-        #  make package/kernel/button-hotplug/compile -j$(nproc)
-        #  make package/compile -j$(nproc) IGNORE_ERRORS="m n"
-        # make package/index
-        # bash  bakkmod.sh
+         #make -j1 V=s
+          make buildinfo
+          make diffconfig buildversion feedsversion
+          make target/compile -j$(nproc) IGNORE_ERRORS="m n"
+          make package/kernel/button-hotplug/compile -j$(nproc)
+          make package/compile -j$(nproc) IGNORE_ERRORS="m n"
+         make package/index
+         bash  bakkmod.sh
     - name: Generate Firmware
       run: |
          df -h
          cd openwrt 
-         #make package/install -j$(nproc) || make package/install -j1 V=s
-         #make target/install -j$(nproc) || make target/install -j1 V=s
-         #make json_overview_image_info
-         #make checksum
+         make package/install -j$(nproc) || make package/install -j1 V=s
+         make target/install -j$(nproc) || make target/install -j1 V=s
+         make json_overview_image_info
+         make checksum
          bash buildmd5.sh
     - name: Check space usage
       if: (!cancelled())
