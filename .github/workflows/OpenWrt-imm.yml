@@ -172,6 +172,7 @@ jobs:
          # make package/kernel/button-hotplug/compile -j$(nproc)
          # make package/compile -j$(nproc) IGNORE_ERRORS="m n"
          #make package/index
+         rm -rf ./targets/x86/64/*x86-64-combined*
          bash  bakkmod.sh
     - name: Generate Firmware
       run: |
