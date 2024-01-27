@@ -138,6 +138,7 @@ jobs:
         chmod +x diypart1.sh
          [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
          chmod -R 755 .
+         df -h
  
     - name: Cache
       id: cache
@@ -147,12 +148,16 @@ jobs:
         ccache: 'true'
         mixkey: 'x86_64'
         prefix: ${{ github.workspace }}/openwrt
-    - name: Download package
-      id: package
+
+    - name: defconfig
       run: |
         cd openwrt
         echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
         make defconfig
+    - name: Download package
+      id: package
+      run: |
+        cd openwrt
         make download -j50
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
@@ -162,13 +167,13 @@ jobs:
          df -h
          cd openwrt
          echo -e "$(nproc) thread compile"
-         make -j$(nproc)  || make -j1 V=s
-         # make buildinfo
-         # make diffconfig buildversion feedsversion
-         # make target/compile -j$(nproc) IGNORE_ERRORS="m n"
-         #make package/kernel/button-hotplug/compile -j$(nproc)
-         #make package/compile -j$(nproc) IGNORE_ERRORS="m n"
-         #make package/index
+         # make -j$(nproc)  || make -j1 V=s
+         make buildinfo
+         make diffconfig buildversion feedsversion
+         make target/compile -j$(nproc) IGNORE_ERRORS="m n"
+         make package/kernel/button-hotplug/compile -j$(nproc)
+         make package/compile -j$(nproc) IGNORE_ERRORS="m n"
+         make package/index
          #rm -rf ./targets/x86/64/*x86-64-combined*
          bash  bakkmod.sh
     - name: Generate Firmware
@@ -182,7 +187,7 @@ jobs:
          bash buildmd5.sh
     - name: Check space usage
       if: (!cancelled())
-      run: df -hT
+      run: df -h
 
     - name: Organize files
       id: organize
