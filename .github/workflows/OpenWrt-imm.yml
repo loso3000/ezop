@@ -162,11 +162,11 @@ jobs:
          cd openwrt
          echo -e "$(nproc) thread compile"
          # make -j$(nproc)  || make -j1 V=s
-         make buildinfo
-         make diffconfig buildversion feedsversion
-         make target/compile -j$(nproc) IGNORE_ERRORS="m n"
-         make package/kernel/button-hotplug/compile -j$(nproc)
-         make package/compile -j$(nproc) IGNORE_ERRORS="m n"
+         make tools/compile -j$(nproc) || make tools/compile -j72
+         make toolchain/compile -j$(nproc) || make toolchain/compile -j72
+         make target/compile -j$(nproc) || make target/compile -j72 IGNORE_ERRORS=1
+         make diffconfig
+         make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
          make package/index
          #rm -rf ./targets/x86/64/*x86-64-combined*
          bash  bakkmod.sh
@@ -176,7 +176,6 @@ jobs:
          cd openwrt 
          make package/install -j$(nproc) || make package/install -j1 V=s
          make target/install -j$(nproc) || make target/install -j1 V=s
-         make json_overview_image_info
          make checksum
          bash buildmd5.sh
     - name: Check space usage
