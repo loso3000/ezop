@@ -156,6 +156,9 @@ jobs:
       run: |
         echo Start installing feeds...
           cd openwrt
+          echo "Remove git full clone"
+          sed -i "s/src-git-full/src-git/g" feeds.conf.default
+
           ./scripts/feeds update -a
           ./scripts/feeds install -a
           echo Install feeds finished.
