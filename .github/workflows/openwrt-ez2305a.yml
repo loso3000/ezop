@@ -166,12 +166,11 @@ jobs:
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         df -h
-        chmod +x diypart1.sh
+        chmod +x diypart2.sh
         cd openwrt
-        chmod +x diypart1.sh
-        # [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
-        cat  ./x86_64/${CONFIG_S}  > .config
-        
+        chmod +x diypart2.sh
+        [ -e diypart2.sh ] && bash ./diypart2.sh || bash ../diypart2.sh
+         
     - name: set defconfig
       id: package
       run: |
