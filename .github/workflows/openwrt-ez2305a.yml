@@ -151,6 +151,8 @@ jobs:
         sudo mkdir -p /builder
         sudo mount /dev/github/runner /builder
         sudo chown -R runner.runner /builder
+          #sudo mkdir -p /mnt/workdir
+        sudo chown $USER:$GROUPS /builder
         df -Th
         
     - name: Build System Setup
@@ -166,9 +168,7 @@ jobs:
         git config --global user.name 'GitHub Actions' && git config --global user.email 'noreply@github.com'
         df -Th
 
-          #sudo timedatectl set-timezone "$TZ"
-          #sudo mkdir -p /mnt/workdir
-          #sudo chown $USER:$GROUPS /mnt/workdir
+          sudo timedatectl set-timezone "$TZ"
 
           sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
@@ -181,6 +181,7 @@ jobs:
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         git clone https://github.com/fkuetgjfbj/op lede
         cp -Rf ./lede/* openwrt
+        ls -a
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
         if [[ $DATE_S == 'default' ]]; then
           echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
@@ -194,13 +195,15 @@ jobs:
         ccache: 'true'
         clean: ${{env.CLEAN}}
         mixkey: ${{env.CACHE_NAME}}
-        prefix: ${{ github.workspace }}/openwrt
+        prefix: /builder/openwrt
     - name: Update feeds
       run: |
         echo Start installing feeds...
+        ls -a
           cd openwrt
           echo "Remove git full clone"
           sed -i "s/src-git-full/src-git/g" feeds.conf.default
+          ls -a
 
           ./scripts/feeds update -a
           ./scripts/feeds install -a
@@ -208,9 +211,11 @@ jobs:
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        ls -a
         df -h
         chmod +x diypart2.sh
         cd openwrt
+        ls -a
         chmod +x diypart2.sh
         [ -e diypart2.sh ] && bash ./diypart2.sh || bash ../diypart2.sh
          
