@@ -213,11 +213,11 @@ jobs:
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         ls -a
         df -h
-        chmod +x diypart2.sh
+        chmod +x diypart1.sh
         cd openwrt
         ls -a
-        chmod +x diypart2.sh
-        [ -e diypart2.sh ] && bash ./diypart2.sh || bash ../diypart2.sh
+        chmod +x diypart1.sh
+        [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
          
     - name: set defconfig
       id: package
