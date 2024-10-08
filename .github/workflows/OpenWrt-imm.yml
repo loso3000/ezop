@@ -263,6 +263,7 @@ jobs:
           retain_days: 1
           keep_minimum_runs: 1
 
+
     - name: Remove old Releases
       uses: dev-drprasad/delete-older-releases@v0.3.4
       with:
@@ -272,8 +273,4 @@ jobs:
       env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Remove old artifacts
-      uses: c-hive/gha-remove-artifacts@v1
-      with:
-        age: '1 day'
-        skip-recent: 3
+
