@@ -22,7 +22,7 @@ on:
         options: [ openwrt-21.02, master, 23.05 , openwrt-23.05 ]
       config_s:
         description: '配置文件'
-        default: 'Free-Super'
+        default: 'Vip-Super'
         required: true
         type: choice
         options: [ Free-Super,Free-Mini,  Free-Plus, Vip-Super,Vip-Bypass ,Vip-Mini,  Vip-Plus ]
