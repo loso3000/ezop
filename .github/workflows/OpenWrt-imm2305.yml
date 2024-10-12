@@ -25,7 +25,7 @@ on:
         default: 'Vip-Super'
         required: true
         type: choice
-        options: [ Free-Super,Free-Mini,  Free-Plus, Vip-Super,Vip-Bypass ,Vip-Mini,  Vip-Plus ]
+        options: [ Free-Super,Free-Mini,  Free-Plus, Vip-Super,Vip-Mini, Vip-Bypass , Vip-Plus ]
       cpu_s:
         description: 'CPU优选'
         required: true
@@ -55,7 +55,6 @@ env:
   #REPO_BRANCH: master
   #REPO_BRANCH: openwrt-23.05
   FEEDS_CONF: feeds.conf.default
-  CONFIG_FILE: diffconfig
   DIY_P1_SH: diypart1.sh
   DIY_P2_SH: diypart2.sh
   UPLOAD_BIN_DIR: false
@@ -163,13 +162,29 @@ jobs:
         git clone $REPO_URL -b $REPO_BRANCH openwrt
         git clone https://github.com/fkuetgjfbj/openwrt lede
         cp -Rf ./lede/* openwrt
-        ln -sf /mnt/workdir/openwrt $GITHUB_WORKSPACE/openwrt
+        ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
         if [[ $DATE_S == 'default' ]]; then
           echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
         else 
           echo "DATA=$DATE_S" >>$GITHUB_ENV
         fi
 
+
+    - name: Update feeds
+      run: |
+          cd openwrt
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+    - name: Load custom feeds
+      run: |
+        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        chmod +x diypart1.sh
+        cd openwrt
+        chmod +x diypart1.sh
+         [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
+         chmod -R 755 .
+         df -h
+ 
     - name: Cache
       id: cache
       uses: stupidloud/cachewrtbuild@main
@@ -177,35 +192,18 @@ jobs:
         skip_saving: 'true'
         ccache: 'true'
         mixkey: 'x86_64'
-        prefix: ${{ github.workspace }}/openwrt
-
-    - name: Update feeds
-      run: cd openwrt && ./scripts/feeds update -a
-
-    - name: Install feeds
-      run: cd openwrt && ./scripts/feeds install -a
-    - name: Load custom feeds
-      run: |
-        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        df -h
-        chmod +x diypart1.sh
-        cd openwrt
-        chmod +x diypart1.sh
-         [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
-    - name: set defconfig
-      id: package
+        prefix: /builder/openwrt
+    - name: defconfig
       run: |
         cd openwrt
-        df -h
-        chmod -R 755 .
         echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
         make defconfig
 
-    - name: Download Packages
+    - name: Download package
+      id: package
       run: |
         cd openwrt
-        df -h
-        make download -j8
+        make download -j50
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
