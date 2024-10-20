@@ -208,12 +208,6 @@ jobs:
         cd openwrt
         echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
         make defconfig
-
-    - name: SSH 连接到 Actions
-      uses: P3TERX/ssh2actions@v1.0.0
-      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
-      env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN }}
         
     - name: Download package
       id: package
@@ -298,7 +292,6 @@ jobs:
           keep_min_download_counts: 1 # Optional parameters
           delete_tags: true
       env:
-          GITHUB_TOKEN: ${{ env.GITHUB_TOKEN }}
           token: ${{ env.GITHUB_TOKEN }}
 
 
