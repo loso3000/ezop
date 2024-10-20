@@ -65,7 +65,6 @@ env:
   UPLOAD_COWTRANSFER: false
   UPLOAD_WETRANSFER: false
   UPLOAD_RELEASE: true
-  GITHUB_TOKEN: ${{ secrets.TOKEN }}
   TZ: Asia/Shanghai
 
 jobs:
@@ -278,12 +277,14 @@ jobs:
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
 
+
     - name: Delete workflow runs
       uses: Mattraks/delete-workflow-runs@v2
       with:
           retain_days: 1
           keep_minimum_runs: 1
-          token: ${{ env.GITHUB_TOKEN }}
+
+          token: ${{ secrets.TOKEN }}
 
     - name: Remove old Releases
       uses: dev-drprasad/delete-older-releases@master
@@ -292,6 +293,5 @@ jobs:
           keep_min_download_counts: 1 # Optional parameters
           delete_tags: true
       env:
-          token: ${{ env.GITHUB_TOKEN }}
-
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
 
