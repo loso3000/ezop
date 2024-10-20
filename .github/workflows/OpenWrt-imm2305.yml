@@ -76,10 +76,16 @@ jobs:
       TARGET_DEVICE: ${{github.event.inputs.target}}
       REPO_BRANCH: ${{github.event.inputs.branch}}
 
+
     steps:
     - name: Checkout
       uses: actions/checkout@main
-
+      
+    - name: 安装 Go 1.21.1
+      uses: actions/setup-go@v5
+      with:
+        go-version: 'stable'
+        
     - name: Set time zone
       run: sudo timedatectl set-timezone 'Asia/Shanghai'
     - name: Show system
@@ -184,14 +190,14 @@ jobs:
          [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
          chmod -R 755 .
          df -h
- 
     - name: Cache
       id: cache
       uses: stupidloud/cachewrtbuild@main
       with:
-        skip_saving: 'true'
+      
         ccache: 'true'
-        mixkey: 'x86_64'
+        mixkey: x86-64-${{ env.REPO_BRANCH }}
+        skip_saving: 'true'
         prefix: /builder/openwrt
     - name: defconfig
       run: |
@@ -274,9 +280,10 @@ jobs:
           retain_days: 1
           keep_minimum_runs: 1
 
+          token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Remove old Releases
-      uses: dev-drprasad/delete-older-releases@v0.3.4
+      uses: dev-drprasad/delete-older-releases@master
       with:
           keep_latest: 1
           keep_min_download_counts: 1 # Optional parameters
