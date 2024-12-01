@@ -190,6 +190,9 @@ jobs:
         df -h
         chmod +x diypart1.sh
         cd openwrt
+        
+        echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
+        echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
         chmod +x diypart1.sh
          [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
          chmod -R 755 .
@@ -231,6 +234,23 @@ jobs:
          make diffconfig
          make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
          make package/index
+         
+         cd $OPENWRTROOT/bin/packages/*
+         PLATFORM=$(basename `pwd`)
+         echo "PLATFORM=$PLATFORM" >> $GITHUB_ENV
+         echo "::set-output name=PLATFORM::$(echo $PLATFORM)"
+         cd $OPENWRTROOT/bin/targets/*
+         TARGET=$(basename `pwd`)
+         echo "TARGET=$TARGET" >> $GITHUB_ENV
+         echo "::set-output name=TARGET::$(echo $TARGET)"
+         cd *
+         SUBTARGET=$(basename `pwd`)
+         echo "SUBTARGET=$SUBTARGET" >> $GITHUB_ENV
+         echo "::set-output name=SUBTARGET::$(echo $SUBTARGET)"
+         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+         echo "::set-output name=FIRMWARE::$(echo $PWD)"
+         echo "::set-output name=COMPILE_STATUS::success"
+         
          #rm -rf ./targets/x86/64/*x86-64-combined*
          bash  bakkmod.sh
     - name: Generate Firmware
@@ -238,6 +258,11 @@ jobs:
          df -h
          cd openwrt 
          rm -rf ./dl
+         
+          sed -i "s/subtarget/$SUBTARGET/g" ./common/distfeeds*.conf
+          sed -i "s/target\//$TARGET\//g" ./common/distfeeds*.conf
+          sed -i "s/platform/$PLATFORM/g" ./common/distfeeds*.conf
+          cp ./common/distfeeds-1907.conf files/etc/opkg/distfeeds.conf
           make package/install -j$(nproc) || make package/install -j1 V=s
           make target/install -j$(nproc) || make target/install -j1 V=s
           make json_overview_image_info
