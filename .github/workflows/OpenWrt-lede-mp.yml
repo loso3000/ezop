@@ -96,7 +96,6 @@ jobs:
           echo "CPU不为8370C或7763，性能不足，停止执行命令"
           # exit 1
         fi
-
     - name: Set release env
       run: |
         echo WORKDIR="/builder" >> "$GITHUB_ENV"
@@ -116,7 +115,6 @@ jobs:
         sudo sed -i '/NVM_DIR/d;/skel/d' /root/{.bashrc,.profile}
         rm -rf ~/{.cargo,.dotnet,.rustup}
         df -Th
-
     - name: Create VG & LV
       run: |
         mnt_size=$(expr $(df -h /mnt | tail -1 | awk '{print $4}' | sed 's/[[:alpha:]]//g' | sed 's/\..*//') - 1)
@@ -138,7 +136,6 @@ jobs:
           #sudo mkdir -p /mnt/workdir
         sudo chown $USER:$GROUPS /builder
         df -Th
-
     - name: Build System Setup
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -151,7 +148,6 @@ jobs:
         sudo apt-get clean
         git config --global user.name 'GitHub Actions' && git config --global user.email 'noreply@github.com'
         df -Th
-
           sudo timedatectl set-timezone "$TZ"
           sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
     - name: Clone source code
@@ -164,7 +160,6 @@ jobs:
           git clone --depth 1 https://github.com/coolsnowwolf/lede -b $REPO_BRANCH  openwrt
         fi
         git clone -q ${{secrets.url}} lede
-        # git clone https://github.com/fkuetgjfbj/io lede
         cp -Rf ./lede/* openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
         if [[ $DATE_S == 'default' ]]; then
@@ -181,13 +176,13 @@ jobs:
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         df -h
-        chmod +x diypart1.sh
+        chmod +x ${{ DIY_P1_SH }}
         cd openwrt
         
         echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
         echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
-        chmod +x diypart1.sh
-         [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
+        chmod +x ${{ DIY_P1_SH }}
+         [ -e ${{ DIY_P1_SH }} ] && bash ./${{ DIY_P1_SH }} || bash ../${{ DIY_P1_SH }}
          chmod -R 755 .
          df -h
     - name: Cache
@@ -213,7 +208,6 @@ jobs:
         make download -j50
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-
     - name: Compile Packages
       id: compile
       run: |
@@ -227,15 +221,6 @@ jobs:
          make diffconfig
          make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
          make package/index
-         mkdir -p files/etc/opkg
-         echo "src/gz ezopwrt_core https://downloads.immortalwrt.org/releases/23.05-SNAPSHOT/targets/x86/64/packages ">files/etc/opkg/distfeeds.conf 
-         echo "src/gz ezopwrt_base https://downloads.immortalwrt.org/releases/23.05-SNAPSHOT/packages/x86_64/base ">>files/etc/opkg/distfeeds.conf 
-         echo "src/gz ezopwrt_luci https://downloads.immortalwrt.org/releases/23.05-SNAPSHOT/packages/x86_64/luci ">>files/etc/opkg/distfeeds.conf 
-         echo "src/gz ezopwrt_packages https://downloads.immortalwrt.org/releases/23.05-SNAPSHOT/packages/x86_64/packages ">>files/etc/opkg/distfeeds.conf 
-         echo "src/gz ezopwrt_routing https://downloads.immortalwrt.org/releases/23.05-SNAPSHOT/packages/x86_64/routing ">>files/etc/opkg/distfeeds.conf 
-         echo "src/gz ezopwrt_telephony https://downloads.immortalwrt.org/releases/23.05-SNAPSHOT/packages/${{env.TARGET_DEVICE}}/telephony ">>files/etc/opkg/distfeeds.conf 
-         cp files/etc/opkg/distfeeds.conf  files/etc/opkg/distfeeds.conf.bak
-         #rm -rf ./targets/x86/64/*x86-64-combined*
          bash  bakkmod.sh
     - name: Generate Firmware
       run: |
@@ -260,7 +245,6 @@ jobs:
         df -h
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
-
     - name: Upload firmware directory
       uses: actions/upload-artifact@main
       if: steps.organize.outputs.status == 'success' && !cancelled()
