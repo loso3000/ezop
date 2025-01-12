@@ -165,6 +165,9 @@ jobs:
         echo "lede----------------------"
         ls lede
         cp -Rf ./lede/* openwrt
+        
+        echo "openwrt----------------------"
+        ls openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
         if [[ $DATE_S == 'default' ]]; then
           echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
