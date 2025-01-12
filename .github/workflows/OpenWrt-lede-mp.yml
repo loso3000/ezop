@@ -181,17 +181,17 @@ jobs:
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         df -h
-
          chmod +x ./$DIY1
          cd openwrt
         echo "openwrt----------------------"
         echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
         echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
-
         ls
          chmod +x ./$DIY1
          cd openwrt
          $GITHUB_WORKSPACE/$DIY1
+         echo "openwrt2----------------------"
+         ls
          chmod -R 755 .
          df -h
     - name: Cache
