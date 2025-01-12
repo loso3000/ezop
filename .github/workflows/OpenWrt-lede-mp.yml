@@ -49,8 +49,8 @@ env:
   #REPO_BRANCH: master
   #REPO_BRANCH: openwrt-23.05
   FEEDS_CONF: feeds.conf.default
-  DIY_P1_SH: diypart1.sh
-  DIY_P2_SH: diypart2.sh
+  DIY1: diypart1.sh
+  DIY2: diypart2.sh
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: false
@@ -176,13 +176,13 @@ jobs:
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         df -h
-        chmod +x ${{ DIY_P1_SH }}
+        chmod +x $DIY1
         cd openwrt
         
         echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
         echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
-        chmod +x ${{ DIY_P1_SH }}
-         [ -e ${{ DIY_P1_SH }} ] && bash ./${{ DIY_P1_SH }} || bash ../${{ DIY_P1_SH }}
+        chmod +x $DIY1
+         [ -e $DIY1 ] && bash ./$DIY1 || bash ../$DIY1
          chmod -R 755 .
          df -h
     - name: Cache
