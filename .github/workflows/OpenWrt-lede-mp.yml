@@ -162,8 +162,8 @@ jobs:
         git clone -q ${{secrets.url}} lede
 
         ls 
+        echo "lede----------------------"
         ls lede
-        ls openwrt
         cp -Rf ./lede/* openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
         if [[ $DATE_S == 'default' ]]; then
