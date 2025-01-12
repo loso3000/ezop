@@ -159,7 +159,7 @@ jobs:
         else 
           git clone --depth 1 https://github.com/coolsnowwolf/lede -b $REPO_BRANCH  openwrt
         fi
-        git clone -q ${{secrets.url}} lede
+        git clone --depth 1 ${{secrets.url}}   -b master lede
         ls 
         echo "lede----------------------"
         ls lede
