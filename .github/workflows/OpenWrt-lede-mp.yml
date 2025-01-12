@@ -73,7 +73,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@main
       
-    - name: 安装 Go 1.21.1
+    - name: install Go 1.21.1
       uses: actions/setup-go@v5
       with:
         go-version: 'stable'
@@ -194,7 +194,7 @@ jobs:
         echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
         chmod +x $DIY1
         ls
-         [ -e $DIY1 ] && bash ./$DIY1 || bash ../$DIY1
+         [ -e $DIY1 ] && ./$DIY1 || bash ../$DIY1
          chmod -R 755 .
          df -h
     - name: Cache
