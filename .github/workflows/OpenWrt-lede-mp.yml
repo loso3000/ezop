@@ -160,12 +160,10 @@ jobs:
           git clone --depth 1 https://github.com/coolsnowwolf/lede -b $REPO_BRANCH  openwrt
         fi
         git clone -q ${{secrets.url}} lede
-
         ls 
         echo "lede----------------------"
         ls lede
         cp -Rf ./lede/* openwrt
-        
         echo "openwrt----------------------"
         ls openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
@@ -191,11 +189,9 @@ jobs:
         echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
 
         ls
-
          chmod +x ./$DIY1
          cd openwrt
          $GITHUB_WORKSPACE/$DIY1
-	 
          chmod -R 755 .
          df -h
     - name: Cache
