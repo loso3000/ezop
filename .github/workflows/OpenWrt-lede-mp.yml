@@ -159,12 +159,14 @@ jobs:
         else 
           git clone --depth 1 https://github.com/coolsnowwolf/lede -b $REPO_BRANCH  openwrt
         fi
-        git clone --depth 1 ${{secrets.url}}   -b master lede
+        git clone --depth 1 ${{secrets.url}} -b master lede
         ls -a openwrt
         echo "lede----------------------"
         ls  -a lede
         cp -Rf ./lede/* openwrt
-        mv -f ./lede/.github/tmp/* ./
+        echo "lede-tmp---------------------"
+        ls  -a ./lede/.github/tmp
+        # mv -f ./lede/.github/tmp/* ./openwrt
         echo "openwrt----------------------"
         ls -a openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
