@@ -166,7 +166,7 @@ jobs:
         cp -Rf ./lede/.github/tmp/* openwrt
         echo "lede-tmp---------------------"
         ls  -a ./lede/.github/tmp
-        mv -f ./lede/.github/tmp/* openwrt/*
+        #mv -f ./lede/.github/tmp/* openwrt/*
         echo "openwrt----------------------"
         ls -a openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
