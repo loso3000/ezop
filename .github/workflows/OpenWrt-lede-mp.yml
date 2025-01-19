@@ -183,7 +183,6 @@ jobs:
       id: cache
       uses: stupidloud/cachewrtbuild@main
       with:
-      
         ccache: 'true'
         mixkey: x86-64-${{ env.REPO_BRANCH }}
         skip_saving: 'true'
@@ -191,6 +190,7 @@ jobs:
     - name: defconfig
       run: |
          cd openwrt
+         cat  $GITHUB_WORKSPACE/config/${CONFIG_S}  > .config
          echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
          make defconfig 
         
