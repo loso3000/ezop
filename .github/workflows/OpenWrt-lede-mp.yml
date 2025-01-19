@@ -159,7 +159,7 @@ jobs:
           git clone --depth 1 https://github.com/coolsnowwolf/lede -b $REPO_BRANCH  openwrt
         fi
         git clone --depth 1 ${{secrets.url}} -b master lede
-        mv ./lede/d*  ./lede/$DIY1
+        mv -f  lede/d*   lede/$DIY1
         cp -Rf ./lede/* ./openwrt/*
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
         if [[ $DATE_S == 'default' ]]; then
