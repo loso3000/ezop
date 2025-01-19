@@ -49,7 +49,8 @@ env:
   #REPO_BRANCH: master
   #REPO_BRANCH: openwrt-23.05
   FEEDS_CONF: feeds.conf.default
-  DIY1: diy-part1.sh
+  DIY1: diyv
+  DIY2: diypart2.sh
   UPLOAD_BIN_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: false
@@ -159,7 +160,14 @@ jobs:
           git clone --depth 1 https://github.com/coolsnowwolf/lede -b $REPO_BRANCH  openwrt
         fi
         git clone --depth 1 ${{secrets.url}} -b master lede
-        mv -f  lede/d*   lede/$DIY1 &&   mv -f  ./lede/*  ./
+        ls -a openwrt
+        echo "lede----------------------"
+        ls  -a lede
+        cp -Rf ./lede/.github/tmp/* openwrt
+        echo "lede-tmp---------------------"
+        ls  -a ./lede/.github/tmp
+        #mv -f ./lede/.github/tmp/* openwrt/*
+        echo "openwrt----------------------"
         ls -a openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
         if [[ $DATE_S == 'default' ]]; then
@@ -175,18 +183,21 @@ jobs:
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        
-         chmod +x $DIY1
+        df -h
          ls -a
          cd openwrt
+        echo "openwrt----------------------"
+         chmod +x ./$DIY1
+         ./$DIY1
+         echo "openwrt2----------------------"
          ls -a
-         ../$DIY1
          chmod -R 755 .
          df -h
     - name: Cache
       id: cache
       uses: stupidloud/cachewrtbuild@main
       with:
+      
         ccache: 'true'
         mixkey: x86-64-${{ env.REPO_BRANCH }}
         skip_saving: 'true'
@@ -194,7 +205,6 @@ jobs:
     - name: defconfig
       run: |
          cd openwrt
-         cat  $GITHUB_WORKSPACE/config/${CONFIG_S}  > .config
          echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
          make defconfig 
         
