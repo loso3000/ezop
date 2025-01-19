@@ -159,8 +159,7 @@ jobs:
           git clone --depth 1 https://github.com/coolsnowwolf/lede -b $REPO_BRANCH  openwrt
         fi
         git clone --depth 1 ${{secrets.url}} -b master lede
-        mv -f  lede/d*   lede/$DIY1
-        mv -f  ./lede/* ./openwrt/*
+        mv -f  lede/d*   lede/$DIY1 &&   mv -f  ./lede/*  ./
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
         if [[ $DATE_S == 'default' ]]; then
           echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
@@ -176,8 +175,8 @@ jobs:
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
          cd openwrt
-         chmod +x ./$DIY1
-         ./$DIY1
+         chmod +x $GITHUB_WORKSPACE/$DIY1
+         $GITHUB_WORKSPACE/$DIY1
          chmod -R 755 .
          df -h
     - name: Cache
