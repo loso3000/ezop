@@ -160,6 +160,7 @@ jobs:
         fi
         git clone --depth 1 ${{secrets.url}} -b master lede
         mv -f  lede/d*   lede/$DIY1 &&   mv -f  ./lede/*  ./
+        ls -a openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
         if [[ $DATE_S == 'default' ]]; then
           echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
@@ -176,7 +177,9 @@ jobs:
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         
          chmod +x $DIY1
+         ls -a
          cd openwrt
+         ls -a
          ../$DIY1
          chmod -R 755 .
          df -h
