@@ -174,9 +174,10 @@ jobs:
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        
+         chmod +x $DIY1
          cd openwrt
-         chmod +x $GITHUB_WORKSPACE/$DIY1
-         $GITHUB_WORKSPACE/$DIY1
+         ../$DIY1
          chmod -R 755 .
          df -h
     - name: Cache
