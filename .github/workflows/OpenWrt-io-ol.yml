@@ -162,8 +162,8 @@ jobs:
       run: |
         df -hT $PWD
         git clone $REPO_URL -b $REPO_BRANCH openwrt
-        git clone ${{secrets.iourl}} lede
-        # git clone --depth 1 ${{secrets.iourl}} -b master lede
+        # git clone ${{ secrets.iourl }} lede
+        git clone --depth 1 ${{ secrets.IOURL }} -b master lede
         cp -Rf ./lede/* openwrt
         ls -a  openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
@@ -183,7 +183,7 @@ jobs:
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         df -h
-        chmod +x $DIY_P1_SH
+        chmod +x $DIY_P1_SH || true
         
         ls -a  
         cd openwrt
@@ -191,7 +191,7 @@ jobs:
         echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
         echo ======================
         ls -a  
-        chmod +x $DIY_P1_SH
+        chmod +x $DIY_P1_SH  || true
          [ -e $DIY_P1_SH ] && bash ./$DIY_P1_SH || bash ../$DIY_P1_SH
          chmod -R 755 .
          df -h
