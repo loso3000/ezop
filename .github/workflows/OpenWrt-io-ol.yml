@@ -165,6 +165,7 @@ jobs:
         git clone ${{secrets.iourl}} lede
         # git clone --depth 1 ${{secrets.iourl}} -b master lede
         cp -Rf ./lede/* openwrt
+        ls -a  openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
         if [[ $DATE_S == 'default' ]]; then
           echo "DATA=`date +%y%m%d%H%M -d +"12"hour`" >> $GITHUB_ENV
@@ -183,9 +184,13 @@ jobs:
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         df -h
         chmod +x $DIY_P1_SH
+        
+        ls -a  
         cd openwrt
         echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
         echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
+        echo ======================
+        ls -a  
         chmod +x $DIY_P1_SH
          [ -e $DIY_P1_SH ] && bash ./$DIY_P1_SH || bash ../$DIY_P1_SH
          chmod -R 755 .
