@@ -22,7 +22,7 @@ on:
         options: [ istoreos-22.03, istoreos-23.05 ]
       config_s:
         description: '配置文件'
-        default: 'Vip-Mini'
+        default: 'Vip-Super'
         required: true
         type: choice
         options: [ Vip-Mini, Vip-Super ]
@@ -52,14 +52,10 @@ on:
   
 env:
   REPO_URL: https://github.com/istoreos/istoreos
-  #REPO_URL: https://github.com/immortalwrt/immortalwrt
-  #REPO_URL: https://github.com/Lienol/openwrt
-  #REPO_URL: https://github.com/openwrt/openwrt.git
-  #REPO_BRANCH: master
-  #REPO_BRANCH: openwrt-23.05
   FEEDS_CONF: feeds.conf.default
-  DIY_P1_SH: diy.sh
+  DIY_P1_SH: diy
   UPLOAD_BIN_DIR: false
+  UPLOAD_IPK_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
@@ -80,7 +76,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@main
       
-    - name: 安装 Go 1.21.1
+    - name: install Go 1.21.1
       uses: actions/setup-go@v5
       with:
         go-version: 'stable'
@@ -219,7 +215,7 @@ jobs:
         find dl -size -1024c -exec rm -f {} \;
 
     - name: Compile Packages
-      id: compile
+      id: compileopenwrt
       run: |
          df -h
          cd openwrt
@@ -242,6 +238,8 @@ jobs:
          #rm -rf ./targets/x86/64/*x86-64-combined*
          bash  bakkmod.sh
     - name: Generate Firmware
+      id: compile
+      if: steps.compileopenwrt.outputs.status  == 'success'
       run: |
          df -h
          cd openwrt 
@@ -252,13 +250,14 @@ jobs:
           make json_overview_image_info
           make checksum
          bash buildmd5.sh
+         echo "status=success" >> $GITHUB_OUTPUT
     - name: Check space usage
       if: (!cancelled())
       run: df -hT
 
     - name: Organize files
       id: organize
-      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+      if: env.UPLOAD_FIRMWARE == 'true' && steps.compile.outputs.status  == 'success'
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf packages
@@ -268,38 +267,58 @@ jobs:
 
     - name: Upload firmware directory
       uses: actions/upload-artifact@main
-      if: steps.organize.outputs.status == 'success' && !cancelled()
+      if: steps.organize.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true'
       with:
         name: ${{ env.DATA }}-EzOpWrt-Ipv6-${{env.CONFIG_S}}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-Firmware
         path: ${{ env.FIRMWARE }}
 
-    - name: Upload bin directory
+    - name: Upload IPK directory
       uses: actions/upload-artifact@main
+      if: env.UPLOAD_IPK_DIR == 'true' && steps.organize.outputs.status == 'success'
       with:
         name: ${{ env.DATA }}-EzOpWrt-Ipv6-${{ env.CONFIG_S }}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-ipk
         path: ./openwrt/bin/packages/
+ 
+    - name: Upload bin directory
+      uses: actions/upload-artifact@main
+      if: env.UPLOAD_BIN_DIR == 'true' && steps.organize.outputs.status == 'success'
+      with:
+        name: ${{ env.DATA }}-EzOpWrt-Ipv6-${{ env.CONFIG_S }}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-bin
+        path: ./openwrt/bin/
 
+    - name: Generate release tag
+      id: tag
+      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      run: |
+      
+        echo "release_tag=$(cat openwrt/package/base-files/files/etc/ezopenwrt_version  | cut -d _ -f 1)" >> $GITHUB_OUTPUT
+        echo -e "\n* The stable source code has been updated." >> release.txt
+        sed -i '1i ## Firmware Update Log' release.txt
+        touch release.txt
+        echo "status=success" >> $GITHUB_OUTPUT
+        
     - name: Upload firmware to release
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       if: steps.tag.outputs.status == 'success' && !cancelled()
       env:
-        GITHUB_TOKEN: ${{ secrets.TOKEN}}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
       with:
         tag_name: ${{ steps.tag.outputs.release_tag }}
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
 
+
     - name: Delete workflow runs
       uses: Mattraks/delete-workflow-runs@v2
       with:
           retain_days: 1
-          keep_minimum_runs: 1
+          keep_minimum_runs: 5
 
     - name: Remove old Releases
       uses: dev-drprasad/delete-older-releases@v0.3.4
       with:
-          keep_latest: 1
+          keep_latest: 10
           keep_min_download_counts: 1 # Optional parameters
           delete_tags: true
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
