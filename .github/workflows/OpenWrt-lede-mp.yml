@@ -1,3 +1,13 @@
+#
+# Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
+#
+# This is free software, licensed under the MIT License.
+# See /LICENSE for more information.
+#
+# https://github.com/P3TERX/Actions-OpenWrt
+# Description: Build OpenWrt using GitHub Actions
+#
+
 name: OpenWrt-lede-mp
 
 on:
@@ -5,20 +15,20 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: '选择仓库的分支：'
+        description: 'branch：'
         default: 'master'
         required: true
         type: choice
-        options: [ openwrt-21.02, master, stable,  openwrt-23.05 ]
+        options: [ master, openwrt-23.05 ]
       config_s:
-        description: '配置文件'
-        default: 'Free-Plus'
+        description: 'config:'
+        default: ' Vip-Mini'
         required: true
         type: choice
-        options: [ Free-Mini, Free-Plus, Vip-Mini, Vip-Plus]
+        options: [  Vip-Mini ]
   
       cpu_s:
-        description: 'CPU优选'
+        description: 'CPU:'
         required: true
         default: '8'
         type: choice
@@ -29,14 +39,14 @@ on:
           - '8171M'
           
       target:
-        description: '选择要生成的机型：'
+        description: 'target:'
         default: 'x86_64'
         required: true
         type: choice
-        options: [ x86_64, rm2100, xm2100, r2s, r4s, r4se, r5s, r5c ]
+        options: [ x86_64 ]
 
       date_s:
-        description: '固件日期'
+        description: 'date'
         default: 'default'
         required: false
 
@@ -44,14 +54,14 @@ env:
 
   REPO_URL: https://github.com/coolsnowwolf/lede
   #REPO_URL: https://github.com/immortalwrt/immortalwrt
-  #REPO_URL: https://github.com/Lienol/openwrt
+  #REPO_URL: https://github.com/istoreos/istoreos
   #REPO_URL: https://github.com/openwrt/openwrt.git
   #REPO_BRANCH: master
   #REPO_BRANCH: openwrt-23.05
   FEEDS_CONF: feeds.conf.default
-  DIY1: diyv
-  DIY2: diypart2.sh
+  DIY_P1_SH: diy
   UPLOAD_BIN_DIR: false
+  UPLOAD_IPK_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
@@ -81,18 +91,11 @@ jobs:
       run: |
         echo -e "Total CPU cores\t: $(nproc)"
         cat /proc/cpuinfo | grep 'model name'
-        
-        lscpu
         free -h
         df -Th
-        uname -a
         cpu_name=$(cat /proc/cpuinfo | grep "model name" | head -n 1 | awk -F: '{print $2}' | sed 's/^[ \t]*//')
         if [[ "$cpu_name" =~ "8370C" || "$cpu_name" =~ "7763" ]]; then
-          echo "CPU为8370C或7763，继续执行命令"
           ulimit -a
-        else
-          echo "CPU不为8370C或7763，性能不足，停止执行命令"
-          # exit 1
         fi
     - name: Set release env
       run: |
@@ -131,9 +134,7 @@ jobs:
         sudo mkdir -p /builder
         sudo mount /dev/github/runner /builder
         sudo chown -R runner.runner /builder
-          #sudo mkdir -p /mnt/workdir
         sudo chown $USER:$GROUPS /builder
-        df -Th
     - name: Build System Setup
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -152,19 +153,14 @@ jobs:
       working-directory: /builder
       run: |
         df -hT $PWD
-        if [[ $REPO_BRANCH == 'stable' ]]; then
-          git clone --depth 1 https://github.com/DHDAXCW/lede-rockchip -b $REPO_BRANCH openwrt
-        else 
+        if [[ $REPO_BRANCH == 'master' ]]; then
           git clone --depth 1 https://github.com/coolsnowwolf/lede -b $REPO_BRANCH  openwrt
-        fi
-        git clone --depth 1 ${{secrets.url}} -b master lede
-        cp -Rf ./lede/.github/tmp/* openwrt
-        ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
-        if [[ $DATE_S == 'default' ]]; then
-          echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
         else 
-          echo "DATA=$DATE_S" >>$GITHUB_ENV
+          git clone --depth 1 https://github.com/immortalwrt/immortalwrt -b $REPO_BRANCH openwrt
         fi
+        git clone ${{ secrets.URL }} lede
+        cp -Rf ./lede/* openwrt
+        ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
 
@@ -174,22 +170,20 @@ jobs:
       run: |
         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         df -h
-         ls -a
-         cd openwrt
-        echo "openwrt----------------------"
-         chmod +x ./$DIY1
-         ./$DIY1
-         echo "openwrt2----------------------"
-         ls -a
+        chmod +x $DIY_P1_SH || true
+        cd openwrt
+        echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
+        echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
+        chmod +x $DIY_P1_SH  || true
+         [ -e $DIY_P1_SH ] &&  ./$DIY_P1_SH ||  ../$DIY_P1_SH
          chmod -R 755 .
-         df -h
     - name: Cache
       id: cache
       uses: stupidloud/cachewrtbuild@main
       with:
       
         ccache: 'true'
-        mixkey: x86-64-${{ env.REPO_BRANCH }}
+        mixkey: ${{ env.TARGET_DEVICE }}-${{ env.REPO_BRANCH }}
         skip_saving: 'true'
         prefix: /builder/openwrt
     - name: defconfig
@@ -208,11 +202,11 @@ jobs:
       id: package
       run: |
         cd openwrt
-        df -h
         make download -j50
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
     - name: Compile Packages
+      id: compileopenwrt
       run: |
          df -h
          cd openwrt
@@ -225,8 +219,10 @@ jobs:
          make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
          make package/index
          bash  bakkmod.sh
+         echo "status=success" >> $GITHUB_OUTPUT
     - name: Generate Firmware
       id: compile
+      if: steps.compileopenwrt.outputs.status  == 'success'
       run: |
          df -h
          cd openwrt 
@@ -236,10 +232,6 @@ jobs:
           make json_overview_image_info
          make checksum
          bash buildmd5.sh
-         
-         grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
-         [ -s DEVICE_NAME ] && echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
-         echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
          echo "status=success" >> $GITHUB_OUTPUT
     - name: Check space usage
       if: (!cancelled())
@@ -247,38 +239,45 @@ jobs:
 
     - name: Organize files
       id: organize
-      if: steps.compile.outputs.status == 'success'
+      if: env.UPLOAD_FIRMWARE == 'true' && steps.compile.outputs.status  == 'success'
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf packages
         df -h
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
-        
-    - name: Upload firmware directory
-      uses: actions/upload-artifact@main
-      if: steps.organize.outputs.status == 'success'  && env.UPLOAD_FIRMWARE == 'true'
-      with:
-        name: ${{ env.DATA }}-EzOpWrt_firmware-${{ env.CONFIG_S }}-${{env.TARGET_DEVICE}}
-        path: ${{ env.FIRMWARE }}
-        
-    - name: Upload bin directory
-      uses: actions/upload-artifact@main
-      if: steps.organize.outputs.status == 'success'  && env.UPLOAD_BIN_DIR == 'true'
-      with:
-        name: ${{ env.DATA }}-EzOpWrt-Ipv6-${{ env.CONFIG_S }}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-ipk
-        path: ./openwrt/bin/packages/
- 
     - name: Generate release tag
       id: tag
-      if: env.UPLOAD_RELEASE == 'true' && !cancelled()
+      if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.status  == 'success'
       run: |
-        echo "release_tag=$(cat openwrt/file/etc/ezopenwrt_version  | cut -d _ -f 1)" >> $GITHUB_OUTPUT
+        echo "release_tag=$(cat openwrt/package/base-files/files/etc/ezopenwrt_version  | cut -d _ -f 1)" >> $GITHUB_OUTPUT
+        echo "TAG=$(cat openwrt/package/base-files/files/etc/ezopenwrt_version  | cut -d _ -f 1)" >>$GITHUB_ENV
         echo -e "\n* The stable source code has been updated." >> release.txt
         sed -i '1i ## Firmware Update Log' release.txt
         touch release.txt
         echo "status=success" >> $GITHUB_OUTPUT
         
+    - name: Upload firmware directory
+      uses: actions/upload-artifact@main
+      if: steps.organize.outputs.status == 'success'  && env.UPLOAD_FIRMWARE == 'true'
+      with:
+        name: ${{ env.TAG }}-EzOpWrt-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-Firmware
+        path: ${{ env.FIRMWARE }}
+
+    - name: Upload IPK directory
+      uses: actions/upload-artifact@main
+      if: env.UPLOAD_IPK_DIR == 'true' && steps.organize.outputs.status == 'success'
+      with:
+        name: ${{ env.TAG }}-EzOpWrt-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-ipk
+        path: ./openwrt/bin/packages/
+ 
+    - name: Upload bin directory
+      uses: actions/upload-artifact@main
+      if: env.UPLOAD_BIN_DIR == 'true' && steps.organize.outputs.status == 'success'
+      with:
+        name: ${{ env.TAG }}-EzOpWrt-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-bin
+        path: ./openwrt/bin/
+
     - name: Upload firmware to release
       uses: softprops/action-gh-release@v2
       if: steps.tag.outputs.status == 'success' && !cancelled()
