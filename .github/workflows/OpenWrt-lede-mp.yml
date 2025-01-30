@@ -145,10 +145,10 @@ jobs:
       working-directory: /builder
       run: |
         df -hT $PWD
-        if [[ $REPO_BRANCH == 'master' ]]; then
-          git clone --depth 1 https://github.com/coolsnowwolf/lede -b $REPO_BRANCH  openwrt
+        if [[ ${{ env.REPO_BRANCH }} == 'master' ]]; then
+          git clone --depth 1 https://github.com/coolsnowwolf/lede -b ${{ env.REPO_BRANCH }}  openwrt
         else 
-          git clone --depth 1 https://github.com/immortalwrt/immortalwrt -b $REPO_BRANCH openwrt
+          git clone --depth 1 https://github.com/immortalwrt/immortalwrt -b ${{ env.REPO_BRANCH }} openwrt
         fi
         git clone ${{ secrets.URL }} lede
         cp -Rf ./lede/* openwrt
