@@ -161,8 +161,8 @@ jobs:
       working-directory: /builder
       run: |
         df -hT $PWD
-        git clone $REPO_URL -b $REPO_BRANCH openwrt
-        git clone ${{ secrets.IOURL }} lede
+        git clone $REPO_URL -b ${{env.REPO_BRANCH}} openwrt
+        git clone https://github.com/loso3000/io lede
         # git clone --depth 1 ${{ secrets.IOURL }} -b master lede
         
         cp -Rf ./lede/* openwrt
