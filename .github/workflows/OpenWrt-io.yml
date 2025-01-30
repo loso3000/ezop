@@ -71,7 +71,7 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     if: github.event.repository.owner.id == github.event.sender.id
-    name: immortalwrt-${{github.event.inputs.config_s}}-${{github.event.inputs.target}}-${{github.event.inputs.branch}}-${{github.event.inputs.date_s}}
+    name: istoreos-${{github.event.inputs.config_s}}-${{github.event.inputs.target}}-${{github.event.inputs.branch}}-${{github.event.inputs.date_s}}
     env:
       CONFIG_S: ${{github.event.inputs.config_s}}
       CPU_S: ${{github.event.inputs.cpu_s}}
