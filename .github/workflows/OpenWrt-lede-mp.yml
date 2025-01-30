@@ -164,7 +164,6 @@ jobs:
         chmod +x $DIY_P1_SH || true
         cd openwrt
         echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
-        echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
         chmod +x $DIY_P1_SH  || true
          [ -e $DIY_P1_SH ] &&  ./$DIY_P1_SH ||  ../$DIY_P1_SH
          chmod -R 755 .
@@ -174,15 +173,13 @@ jobs:
       with:
       
         ccache: 'true'
-        mixkey: ${{ env.TARGET_DEVICE }}-${{ env.REPO_BRANCH }}
+        mixkey: x86-64
         skip_saving: 'true'
         prefix: /builder/openwrt
     - name: defconfig
       run: |
         cd openwrt
-         echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
          make defconfig 
-        
     - name: Download package
       id: package
       run: |
