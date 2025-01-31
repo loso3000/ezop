@@ -176,9 +176,12 @@ jobs:
         cd openwrt
         make distclean
         cp -Rf ../config/${CONFIG_S} .config
+        
+        make distclean
         ls -a
         cat  .config
          make defconfig 
+         cat /tmp/.config-target.in
     - name: Download package
       id: package
       run: |
