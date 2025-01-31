@@ -157,11 +157,10 @@ jobs:
     - name: Load custom feeds
       run: |
         df -h
-        chmod +x $DIY_P1_SH || true
         cd openwrt
         echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
-        chmod +x $DIY_P1_SH  || true
-         [ -e $DIY_P1_SH ] &&  ./$DIY_P1_SH ||  ../$DIY_P1_SH
+         [ -e $DIY_P1_SH ] && bash ./$DIY_P1_SH || bash  ../$DIY_P1_SH
+         ls -a
          chmod -R 755 .
     - name: Cache
       id: cache
@@ -176,10 +175,8 @@ jobs:
       run: |
         cd openwrt
         cat  ./config/${CONFIG_S}  >  .config
-        case "${CONFIG_S}" in
-        "Vip"*)        
-        #cat  ./config/comm  >>  .config
-        ;;
+        ls a 
+        cat  ./config/${CONFIG_S} 
         esac
          make defconfig 
     - name: Download package
