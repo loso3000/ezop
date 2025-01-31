@@ -148,7 +148,7 @@ jobs:
         git clone --depth 1 https://github.com/coolsnowwolf/lede -b master  openwrt
         git clone ${{ secrets.URL }} lede
         cp -Rf ./lede/* ./
-        ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
+        ln -sf /builder $GITHUB_WORKSPACE
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
 
