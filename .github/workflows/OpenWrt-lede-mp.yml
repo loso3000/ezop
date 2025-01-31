@@ -166,17 +166,18 @@ jobs:
       id: cache
       uses: stupidloud/cachewrtbuild@main
       with:
-      
         ccache: 'true'
         mixkey: x86_64
         skip_saving: 'true'
         prefix: /builder/openwrt
     - name: defconfig
       run: |
+        ls -a
         cd openwrt
+        make distclean
         cp -Rf $GITHUB_WORKSPACE/config/${CONFIG_S} .config
         ls -a
-        cat  $GITHUB_WORKSPACE/openwrt/.config
+        cat  .config
          make defconfig 
     - name: Download package
       id: package
