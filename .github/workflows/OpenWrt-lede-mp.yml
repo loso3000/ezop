@@ -178,13 +178,9 @@ jobs:
         # cp -Rf ./seed/${CONFIG_S} .config
         cat  ./seed/${CONFIG_S}
         cat  ./seed/${CONFIG_S} > .config
-        make distclean
         ls -a
         cat  .config
          make defconfig
-        echo   "CONFIG_TARGET_x86=y" >> .config
-        echo   "CONFIG_TARGET_x86_64=y" >> .config
-        echo   "CONFIG_TARGET_x86_64_DEVICE_generic=y" >> .config
          cat /tmp/.config-target.in
     - name: Download package
       id: package
