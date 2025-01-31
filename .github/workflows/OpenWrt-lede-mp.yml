@@ -168,15 +168,15 @@ jobs:
       with:
       
         ccache: 'true'
-        mixkey: x86-64
+        mixkey: x86_64
         skip_saving: 'true'
         prefix: /builder/openwrt
     - name: defconfig
       run: |
         cd openwrt
-        cp -Rf /builder/openwrt/config/${CONFIG_S} .config
+        cp -Rf $GITHUB_WORKSPACE/config/${CONFIG_S} .config
         ls -a
-        cat  /builder/openwrt/.config
+        cat  $GITHUB_WORKSPACE/openwrt/.config
          make defconfig 
     - name: Download package
       id: package
