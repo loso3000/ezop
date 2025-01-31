@@ -175,7 +175,7 @@ jobs:
       run: |
         cd openwrt
         cat  ./config/${CONFIG_S}  >  .config
-        ls a 
+        ls -a
         cat  ./config/${CONFIG_S} 
          make defconfig 
     - name: Download package
