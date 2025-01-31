@@ -147,7 +147,7 @@ jobs:
         df -hT $PWD
         git clone --depth 1 https://github.com/coolsnowwolf/lede -b master  openwrt
         git clone ${{ secrets.URL }} lede
-        cp -Rf ./lede/* openwrt
+        cp -Rf ./lede/* ./
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
@@ -175,7 +175,7 @@ jobs:
         ls -a
         cd openwrt
         make distclean
-        cp -Rf $GITHUB_WORKSPACE/config/${CONFIG_S} .config
+        cp -Rf ../config/${CONFIG_S} .config
         ls -a
         cat  .config
          make defconfig 
