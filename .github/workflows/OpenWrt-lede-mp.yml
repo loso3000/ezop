@@ -177,7 +177,6 @@ jobs:
         cat  ./config/${CONFIG_S}  >  .config
         ls a 
         cat  ./config/${CONFIG_S} 
-        esac
          make defconfig 
     - name: Download package
       id: package
