@@ -181,7 +181,6 @@ jobs:
         ls -a
         cat  .config
          make defconfig
-         cat /tmp/.config-target.in
     - name: Download package
       id: package
       run: |
