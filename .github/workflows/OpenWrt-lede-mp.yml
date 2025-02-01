@@ -148,7 +148,7 @@ jobs:
       run: |
         df -hT $PWD
         git clone --depth 1 https://github.com/coolsnowwolf/lede -b master  openwrt
-        git clone ${{ secrets.LEDEURL }} lede
+        git clone --depth 1 ${{ secrets.LEDEURL }} -b master lede
         cp -Rf ./lede/* ./openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
     - name: Update feeds
@@ -159,8 +159,9 @@ jobs:
     - name: Load custom feeds
       run: |
         cd openwrt
-        bash ./$DIY_P1_SH
-        chmod -R 755 .
+         chmod +x ./${DIY_P1_SH}
+         ./$DIY_P1_SH
+         chmod -R 755 .
     - name: Cache
       id: cache
       uses: stupidloud/cachewrtbuild@main
