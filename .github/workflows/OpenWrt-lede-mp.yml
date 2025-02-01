@@ -1,13 +1,3 @@
-#
-# Copyright (c) 2019-2020 P3TERX <https://p3terx.com>
-#
-# This is free software, licensed under the MIT License.
-# See /LICENSE for more information.
-#
-# https://github.com/P3TERX/Actions-OpenWrt
-# Description: Build OpenWrt using GitHub Actions
-#
-
 name: OpenWrt-lede-mp
 
 on:
@@ -15,20 +5,19 @@ on:
   workflow_dispatch:
     inputs:
       branch:
-        description: 'branch：'
+        description: '选择仓库的分支：'
         default: 'master'
         required: true
         type: choice
-        options: [ master]
+        options: [ openwrt-21.02, master, stable,  openwrt-23.05 ]
       config_s:
-        description: 'config:'
-        default: ' Vip-Super'
+        description: '配置文件'
+        default: 'Vip-Super'
         required: true
         type: choice
-        options: [  Vip-Super ]
-  
+        options: [ Free-Super, Free-Mini, Free-Plus, Vip-Super,Vip-Bypass,Vip-Mini, Vip-Plus ]
       cpu_s:
-        description: 'CPU:'
+        description: 'CPU优选'
         required: true
         default: '8'
         type: choice
@@ -37,31 +26,32 @@ on:
           - '8370C'
           - '8272CL'
           - '8171M'
-          
       target:
-        description: 'target:'
+        description: '选择要生成的机型：'
         default: 'x86_64'
         required: true
         type: choice
-        options: [ x86_64 ]
-
+        options: [ x86_64, rm2100, xm2100, r2s, r4s, r4se, r5s, r5c ]
       date_s:
-        description: 'date'
+        description: '固件日期'
         default: 'default'
         required: false
-
 env:
-
+  REPO_URL: https://github.com/coolsnowwolf/lede
+  # REPO_URL: https://github.com/DHDAXCW/lede-rockchip
+  #REPO_BRANCH: openwrt-21.02
+  FEEDS_CONF: feeds.conf.default
   DIY_P1_SH: diy.sh
+  APT: apt
   UPLOAD_BIN_DIR: false
   UPLOAD_IPK_DIR: false
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
-
 jobs:
-  build:
+  Build:
     runs-on: ubuntu-22.04
+    if: github.event.repository.owner.id == github.event.sender.id
     name: lede-${{github.event.inputs.config_s}}-${{github.event.inputs.target}}-${{github.event.inputs.branch}}-${{github.event.inputs.date_s}}
     env:
       CONFIG_S: ${{github.event.inputs.config_s}}
@@ -69,6 +59,8 @@ jobs:
       DATE_S: ${{github.event.inputs.date_s}}
       TARGET_DEVICE: ${{github.event.inputs.target}}
       REPO_BRANCH: ${{github.event.inputs.branch}}
+
+
     steps:
     - name: Checkout
       uses: actions/checkout@main
@@ -87,7 +79,11 @@ jobs:
         df -Th
         cpu_name=$(cat /proc/cpuinfo | grep "model name" | head -n 1 | awk -F: '{print $2}' | sed 's/^[ \t]*//')
         if [[ "$cpu_name" =~ "8370C" || "$cpu_name" =~ "7763" ]]; then
+          echo "CPU为8370C或7763，继续执行命令"
           ulimit -a
+        else
+          echo "CPU不为8370C或7763，性能不足，停止执行命令"
+          # exit 1
         fi
     - name: Set release env
       run: |
@@ -145,88 +141,97 @@ jobs:
       working-directory: /builder
       run: |
         df -hT $PWD
-        git clone --depth 1 https://github.com/coolsnowwolf/lede -b master  openwrt
+        if [[ $REPO_BRANCH == 'stable' ]]; then
+          git clone --depth 1 https://github.com/DHDAXCW/lede-rockchip -b $REPO_BRANCH openwrt
+        else 
+          git clone --depth 1 https://github.com/coolsnowwolf/lede -b $REPO_BRANCH  openwrt
+        fi
         git clone ${{ secrets.URL }} lede
         cp -Rf ./lede/* ./openwrt
-        ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
-    - name: Update feeds
-      run: cd openwrt && ./scripts/feeds update -a
 
-    - name: Install feeds
-      run: cd openwrt && ./scripts/feeds install -a
-    - name: Load custom feeds
-      run: |
-        df -h
-        cd openwrt
-        echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
-         [ -e $DIY_P1_SH ] && bash ./$DIY_P1_SH || bash  ../$DIY_P1_SH
-         ls -a
-         chmod -R 755 .
+        ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
+        if [[ $DATE_S == 'default' ]]; then
+          echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
+        else 
+          echo "DATA=$DATE_S" >>$GITHUB_ENV
+        fi
     - name: Cache
-      id: cache
-      uses: stupidloud/cachewrtbuild@main
+      uses: klever1988/cachewrtbuild@main
       with:
-        ccache: 'true'
-        mixkey: x86_64
-        skip_saving: 'true'
-        prefix: /builder/openwrt
-    - name: defconfig
+       ccache: 'true'
+       mixkey: 'x86_64'
+       clean:  'false'  # 'false'
+       prefix: /builder/openwrt
+    - name: Update feeds
+      run: | 
+          cd openwrt
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+    - name: Update package
       run: |
-        ls -a
+         [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+         cd openwrt
+         chmod +x ./${DIY_P1_SH}
+         #[ -e $DIY_P1_SH ] && bash ./$DIY_P1_SH || bash  ../$DIY_P1_SH
+         ./$DIY_P1_SH
+         chmod -R 755 .
+    - name:  defconfig
+      run: |
+
         cd openwrt
-        make distclean
-        # cp -Rf ./seed/${CONFIG_S} .config
-        cat  ./seed/${CONFIG_S}
-        cat  ./seed/${CONFIG_S} > .config
-        ls -a
-        cat  .config
-         make defconfig
-    - name: Download package
-      id: package
+        cat  ./seed/${CONFIG_S}  >  .config
+        case "${CONFIG_S}" in
+        "Vip"*)        
+        cat  ./seed/comm  >>  .config
+        ;;
+        esac
+        make defconfig
+        df -h
+    - name:  Download packages
       run: |
         cd openwrt
-        make download -j50
+        make download -j8
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
+        df -h
     - name: Compile Packages
       id: compileopenwrt
+      # continue-on-error: true
       run: |
-         df -h
-         cd openwrt
-         echo -e "$(nproc) thread compile"
-         # make -j$(nproc)  || make -j1 V=s
-         make tools/compile -j$(nproc) || make tools/compile -j72
-         make toolchain/compile -j$(nproc) || make toolchain/compile -j72
-         make target/compile -j$(nproc) || make target/compile -j72 IGNORE_ERRORS=1
-         make diffconfig
-         make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
-         make package/index
+        cd openwrt
+        df -hT
+        #make -j1 V=s
+        echo -e "$(nproc) thread compile"
+        make tools/compile -j$(nproc) || make tools/compile -j$(nproc)
+        make toolchain/compile -j$(nproc) || make toolchain/compile -j$(nproc)
+        make target/compile -j$(nproc) || make target/compile -j$(nproc) IGNORE_ERRORS=1
+        make diffconfig
+        make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j$(nproc) IGNORE_ERRORS=1
+        make package/index
+         #rm -rf ./targets/x86/64/*x86-64-combined*
          bash  bakkmod.sh
-         echo "status=success" >> $GITHUB_OUTPUT
+        echo "status=success" >> $GITHUB_OUTPUT
     - name: Generate Firmware
+    
       id: compile
       if: steps.compileopenwrt.outputs.status  == 'success'
       run: |
-         df -h
-         cd openwrt 
-         rm -rf ./dl
-         make package/install -j$(nproc) || make package/install -j1 V=s
-         make target/install -j$(nproc) || make target/install -j1 V=s
-          make json_overview_image_info
-         make checksum
-         bash buildmd5.sh
-         echo "status=success" >> $GITHUB_OUTPUT
-    - name: Check space usage
-      if: (!cancelled())
-      run: df -hT
-
+        df -h
+        cd openwrt
+        make package/install -j$(nproc) || make package/install -j1 V=s
+        make target/install -j$(nproc) || make target/install -j1 V=s
+        make checksum
+        bash buildmd5.sh
+        echo "status=success" >> $GITHUB_OUTPUT
     - name: Organize files
       id: organize
       if: env.UPLOAD_FIRMWARE == 'true' && steps.compile.outputs.status  == 'success'
       run: |
         cd openwrt/bin/targets/*/*
+        ls
+        echo "======================="
+        df -hT
         rm -rf packages
-        df -h
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
     - name: Generate release tag
