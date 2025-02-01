@@ -148,7 +148,9 @@ jobs:
       run: |
         df -hT $PWD
         git clone --depth 1 https://github.com/coolsnowwolf/lede -b master  openwrt
-        git clone --depth 1 ${{ secrets.LEDEURL }} -b master lede
+        # git clone --depth 1 ${{ secrets.LEDEURL }} -b master lede
+        git clone --depth 1 https://github.com/loso3000/HarmonyOS -b master lede
+        
         cp -Rf ./lede/* ./openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
 
@@ -167,8 +169,9 @@ jobs:
     - name: Update package
       run: |
          [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-         chmod +x ./${DIY_P1_SH}
          cd openwrt
+         
+         chmod +x ./${DIY_P1_SH}
          ./$DIY_P1_SH
          chmod -R 755 .
     - name: defconfig
