@@ -178,6 +178,7 @@ jobs:
       run: |
         cd openwrt
         cat  ./seed/${CONFIG_S} > .config
+        cat  ./seed/comm >> .config
         make defconfig 
     - name: Download package
       run: |
