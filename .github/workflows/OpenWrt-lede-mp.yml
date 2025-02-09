@@ -57,7 +57,7 @@ env:
   UPLOAD_BIN_DIR: false
   UPLOAD_IPK_DIR: false
   UPLOAD_FIRMWARE: true
-  UPLOAD_RELEASE: false
+  UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
 
 jobs:
@@ -230,7 +230,7 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
     - name: Generate release tag
       id: tag
-      if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.status  == 'success' && !cancelled()
+      if: steps.compile.outputs.status  == 'success' && !cancelled()
       run: |
         echo "release_tag=$(cat openwrt/package/base-files/files/etc/ezopenwrt_version  | cut -d _ -f 1)" >> $GITHUB_OUTPUT
         echo "TAG=$(cat openwrt/package/base-files/files/etc/ezopenwrt_version  | cut -d _ -f 1)" >>$GITHUB_ENV
