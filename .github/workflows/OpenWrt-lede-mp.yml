@@ -19,7 +19,7 @@ on:
         default: 'master'
         required: true
         type: choice
-        options: [ openwrt-21.02, master, stable,  openwrt-23.05 ]
+        options: [ owrt, master, stable,  openwrt-23.05 ]
       config_s:
         description: '配置文件'
         default: 'Vip-Super'
@@ -147,7 +147,8 @@ jobs:
       working-directory: /builder
       run: |
         df -hT $PWD
-        git clone --depth 1 https://github.com/coolsnowwolf/lede -b master  openwrt
+        # git clone --depth 1 https://github.com/coolsnowwolf/lede -b master  openwrt
+        git clone --depth 1 https://github.com/VIKINGYFY/immortalwrt -b owrt  openwrt
         git clone --depth 1 ${{ secrets.LEDEURL }} -b master lede
         # git clone --depth 1 https://github.com/loso3000/HarmonyOS -b master lede
         
