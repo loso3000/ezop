@@ -57,7 +57,7 @@ env:
   UPLOAD_BIN_DIR: false
   UPLOAD_IPK_DIR: false
   UPLOAD_FIRMWARE: true
-  UPLOAD_RELEASE: true
+  UPLOAD_RELEASE: false
   TZ: Asia/Shanghai
 
 jobs:
@@ -234,13 +234,13 @@ jobs:
          make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
          make package/index
          mkdir -p files/etc/opkg
-         echo "src/gz ezopwrt_core https://downloads.immortalwrt.org/releases/23.05-SNAPSHOT/targets/x86/64/packages ">files/etc/opkg/distfeeds.conf 
-         echo "src/gz ezopwrt_base https://downloads.immortalwrt.org/releases/23.05-SNAPSHOT/packages/x86_64/base ">>files/etc/opkg/distfeeds.conf 
-         echo "src/gz ezopwrt_luci https://downloads.immortalwrt.org/releases/23.05-SNAPSHOT/packages/x86_64/luci ">>files/etc/opkg/distfeeds.conf 
-         echo "src/gz ezopwrt_packages https://downloads.immortalwrt.org/releases/23.05-SNAPSHOT/packages/x86_64/packages ">>files/etc/opkg/distfeeds.conf 
-         echo "src/gz ezopwrt_routing https://downloads.immortalwrt.org/releases/23.05-SNAPSHOT/packages/x86_64/routing ">>files/etc/opkg/distfeeds.conf 
-         echo "src/gz ezopwrt_telephony https://downloads.immortalwrt.org/releases/23.05-SNAPSHOT/packages/${{env.TARGET_DEVICE}}/telephony ">>files/etc/opkg/distfeeds.conf 
-         cp files/etc/opkg/distfeeds.conf  files/etc/opkg/distfeeds.conf.bak
+         #echo "src/gz ezopwrt_core https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/targets/x86/64/packages ">files/etc/opkg/distfeeds.conf 
+         #echo "src/gz ezopwrt_base https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/x86_64/base ">>files/etc/opkg/distfeeds.conf 
+         #echo "src/gz ezopwrt_luci https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/x86_64/luci ">>files/etc/opkg/distfeeds.conf 
+         #echo "src/gz ezopwrt_packages https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/x86_64/packages ">>files/etc/opkg/distfeeds.conf 
+         #echo "src/gz ezopwrt_routing https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/x86_64/routing ">>files/etc/opkg/distfeeds.conf 
+         #echo "src/gz ezopwrt_telephony https://downloads.immortalwrt.org/releases/24.10-SNAPSHOT/packages/${{env.TARGET_DEVICE}}/telephony ">>files/etc/opkg/distfeeds.conf 
+         #cp files/etc/opkg/distfeeds.conf  files/etc/opkg/distfeeds.conf.bak
          #rm -rf ./targets/x86/64/*x86-64-combined*
          bash  bakkmod.sh
          echo "status=success" >> $GITHUB_OUTPUT
