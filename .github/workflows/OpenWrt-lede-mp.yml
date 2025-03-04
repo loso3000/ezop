@@ -151,8 +151,8 @@ jobs:
         else 
           git clone --depth 1 https://github.com/coolsnowwolf/lede -b master  openwrt
         fi
-        git clone --depth 1  ${{ secrets.LEDEURL }} -b master  lede
-        # git clone --depth 1 https://github.com/loso3000/HarmonyOS -b master lede
+        # git clone --depth 1  ${{ secrets.LEDEURL }} -b master  lede
+        git clone --depth 1 https://github.com/loso3000/HarmonyOS -b master lede
         cp -Rf ./lede/* ./openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
 
