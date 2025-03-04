@@ -162,8 +162,8 @@ jobs:
       run: |
         df -hT $PWD
         git clone $REPO_URL -b ${{env.REPO_BRANCH}} openwrt
-        git clone https://github.com/loso3000/io lede
-        #git clone --depth 1 ${{ secrets.IOURL }} -b master lede
+        #git clone https://github.com/loso3000/io lede
+        git clone --depth 1 ${{ secrets.iourl }} -b master lede
         
         cp -Rf ./lede/* openwrt
         ls -a  openwrt
