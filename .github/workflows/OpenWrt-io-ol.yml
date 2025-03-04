@@ -242,7 +242,6 @@ jobs:
          df -h
          cd openwrt 
          rm -rf ./dl
-                  
           make package/install -j$(nproc) || make package/install -j1 V=s
           make target/install -j$(nproc) || make target/install -j1 V=s
           make json_overview_image_info
@@ -263,11 +262,6 @@ jobs:
         df -h
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
-        # if [[ $DATE_S == 'default' ]]; then
-        #   echo "DATA=`date +%y%m%d%H%M -d +"12"hour`-${{env.CONFIG_S}}" >> $GITHUB_ENV
-        # else 
-        #   echo "DATA=$DATE_S-${{env.CONFIG_S}}" >>$GITHUB_ENV
-        # fi
     - name: Generate release tag
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.status  == 'success'
