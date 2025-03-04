@@ -87,11 +87,8 @@ jobs:
       run: |
         echo -e "Total CPU cores\t: $(nproc)"
         cat /proc/cpuinfo | grep 'model name'
-        
-        lscpu
         free -h
         df -Th
-        uname -a
         cpu_name=$(cat /proc/cpuinfo | grep "model name" | head -n 1 | awk -F: '{print $2}' | sed 's/^[ \t]*//')
         if [[ "$cpu_name" =~ "8370C" || "$cpu_name" =~ "7763" ]]; then
           echo "CPU为8370C或7763，继续执行命令"
@@ -118,7 +115,6 @@ jobs:
         sudo rm -rf /etc/mysql /etc/php /usr/lib/jvm /usr/libexec/docker /usr/local /usr/src/* /var/lib/docker /var/lib/gems /var/lib/mysql /var/lib/snapd /etc/skel /opt/{microsoft,az,hostedtoolcache,cni,mssql-tools,pipx} /usr/share/{az*,dotnet,swift,miniconda,gradle*,java,kotlinc,ri,sbt} /root/{.sbt,.local,.npm}
         sudo sed -i '/NVM_DIR/d;/skel/d' /root/{.bashrc,.profile}
         rm -rf ~/{.cargo,.dotnet,.rustup}
-        df -Th
       
     - name: Create VG & LV
       run: |
@@ -138,9 +134,7 @@ jobs:
         sudo mkdir -p /builder
         sudo mount /dev/github/runner /builder
         sudo chown -R runner.runner /builder
-          #sudo mkdir -p /mnt/workdir
         sudo chown $USER:$GROUPS /builder
-        df -Th
         
     - name: Build System Setup
       env:
@@ -153,18 +147,14 @@ jobs:
         sudo apt-get install -y build-essential flex bison clang-17 cmake g++ gawk gcc-multilib g++-multilib gettext git libfuse-dev libncurses5-dev libssl-dev python3 python3-pip python3-ply python3-distutils python3-pyelftools rsync unzip zlib1g-dev file wget subversion patch upx-ucl autoconf automake curl asciidoc binutils bzip2 lib32gcc-s1 libc6-dev-i386 uglifyjs msmtp texinfo libreadline-dev libglib2.0-dev xmlto libelf-dev libtool autopoint antlr3 gperf ccache swig coreutils haveged scons libpython3-dev rename
         sudo apt-get clean
         git config --global user.name 'GitHub Actions' && git config --global user.email 'noreply@github.com'
-        df -Th
           sudo timedatectl set-timezone "$TZ"
           sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
     - name: Clone source code
       working-directory: /builder
       run: |
-        df -hT $PWD
         git clone $REPO_URL -b ${{env.REPO_BRANCH}} openwrt
-        #git clone https://github.com/loso3000/io lede
-        git clone --depth 1 ${{ secrets.IOURL }} lede
-        
+        git clone ${{ secrets.IOURL }} lede
         cp -Rf ./lede/* openwrt
         ls -a  openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
@@ -173,8 +163,6 @@ jobs:
         else 
           echo "DATA=$DATE_S" >>$GITHUB_ENV
         fi
-
-
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
 
@@ -183,24 +171,17 @@ jobs:
     - name: Load custom feeds
       run: |
         [ -e $FEEDS_CONF ] && mv -f $FEEDS_CONF openwrt/feeds.conf.default
-        df -h
         chmod +x $DIY_P1_SH || true
-        
-        ls -a  
         cd openwrt
         echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
         echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
-        echo ======================
-        ls -a  
         chmod +x $DIY_P1_SH  || true
          [ -e $DIY_P1_SH ] &&  ./$DIY_P1_SH ||  ../$DIY_P1_SH
          chmod -R 755 .
-         df -h
     - name: Cache
       id: cache
       uses: stupidloud/cachewrtbuild@main
       with:
-      
         ccache: 'true'
         mixkey: x86-64-${{ env.REPO_BRANCH }}
         skip_saving: 'true'
@@ -215,7 +196,6 @@ jobs:
       id: package
       run: |
         cd openwrt
-        df -h
         make download -j50
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
@@ -259,7 +239,6 @@ jobs:
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf packages
-        df -h
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
     - name: Generate release tag
@@ -302,7 +281,6 @@ jobs:
         tag_name: ${{ steps.tag.outputs.release_tag }}
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
-
 
     - name: Delete workflow runs
       uses: Mattraks/delete-workflow-runs@v2
