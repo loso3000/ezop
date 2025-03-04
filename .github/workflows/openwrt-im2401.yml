@@ -51,18 +51,13 @@ on:
 
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
-  #REPO_URL: https://github.com/Lienol/openwrt
-  #REPO_URL: https://github.com/openwrt/openwrt.git
-  #REPO_BRANCH: master
-  #REPO_BRANCH: openwrt-24.10
-  #REPO_BRANCH: openwrt-23.05
   FEEDS_CONF: feeds.conf.default
   DIY_P1_SH: diy
   APT: apt
   UPLOAD_BIN_DIR: false
   UPLOAD_IPK_DIR: false
   UPLOAD_FIRMWARE: true
-  UPLOAD_RELEASE: true
+  UPLOAD_RELEASE: false
   TZ: Asia/Shanghai
 
 jobs:
@@ -147,12 +142,8 @@ jobs:
     - name: Clone source code
       working-directory: /builder
       run: |
-        df -h
-        df -hT $PWD
         git clone $REPO_URL -b ${{ env.REPO_BRANCH }} openwrt
-        # git clone https://github.com/loso3000/lede lede
-        
-        git clone --depth 1 ${{ secrets.LEDEURL }} -b master lede
+        git clone  ${{ secrets.LEDEURL }} lede
         cp -Rf ./lede/* ./openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
     - name: Cache
@@ -165,14 +156,12 @@ jobs:
     - name: Update feeds
       run: | 
           cd openwrt
-          ./scripts/feeds update -a
-          ./scripts/feeds install -a
+          ./scripts/feeds update -a  && ./scripts/feeds install -a
     - name: Update package
       run: |
          [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
          cd openwrt
-         chmod +x ./${DIY_P1_SH}
-         ./$DIY_P1_SH
+         chmod +x ./${DIY_P1_SH} &&./$DIY_P1_SH
          chmod -R 755 .
     - name: defconfig
       run: |
@@ -189,7 +178,6 @@ jobs:
     - name: Compile Packages
       id: compileopenwrt
       run: |
-         df -h
          cd openwrt
          echo -e "$(nproc) thread compile"
          make -j1 V=s   || make -j$(nproc) 
@@ -205,7 +193,6 @@ jobs:
       id: compile
       if: steps.compileopenwrt.outputs.status  == 'success' && !cancelled()
       run: |
-         df -h
          cd openwrt 
          rm -rf ./dl
          make package/install -j$(nproc) || make package/install -j1 V=s
@@ -214,18 +201,13 @@ jobs:
          make checksum
          bash buildmd5.sh
          echo "status=success" >> $GITHUB_OUTPUT
-    - name: Check space usage
-      if: (!cancelled())
-      run: df -hT
 
     - name: Organize files
       id: organize
-      if: env.UPLOAD_FIRMWARE == 'true' && steps.compile.outputs.status  == 'success' && !cancelled()
+      if: steps.compile.outputs.status  == 'success' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
-        ls -a
         rm -rf packages
-        df -h
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
     - name: Generate release tag
