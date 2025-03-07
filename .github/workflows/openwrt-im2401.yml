@@ -146,6 +146,11 @@ jobs:
         git clone  ${{ secrets.LEDEURL }} lede
         cp -Rf ./lede/* ./openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
+                if [[ $DATE_S == 'default' ]]; then
+          echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
+        else 
+          echo "DATA=$DATE_S" >>$GITHUB_ENV
+        fi
     - name: Cache
       uses: klever1988/cachewrtbuild@main
       with:
@@ -180,7 +185,7 @@ jobs:
       run: |
          cd openwrt
          echo -e "$(nproc) thread compile"
-         make -j1 V=s   || make -j$(nproc) 
+         # make -j1 V=s   || make -j$(nproc) 
          make tools/compile -j$(nproc) || make tools/compile -j72
          make toolchain/compile -j$(nproc) || make toolchain/compile -j72
          make target/compile -j$(nproc) || make target/compile -j72 IGNORE_ERRORS=1
@@ -225,7 +230,7 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.organize.outputs.status == 'success'  && env.UPLOAD_FIRMWARE == 'true' && !cancelled()
       with:
-        name: ${{ env.TAG }}-EzOpWrt-${{ env.TARGET_DEVICE }}-${{ env.REPO_BRANCH }}-Firmware
+        name: ${{ env.DATA }}-${{ env.TAG }}-EzOpWrt-${{ env.TARGET_DEVICE }}-${{ env.REPO_BRANCH }}-Firmware
         path: ${{ env.FIRMWARE }}
 
     - name: Upload IPK directory
