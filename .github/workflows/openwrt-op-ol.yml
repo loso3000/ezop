@@ -65,7 +65,7 @@ jobs:
   build:
     runs-on: ubuntu-22.04
     if: github.event.repository.owner.id == github.event.sender.id
-    name: istoreos-${{github.event.inputs.config_s}}-${{github.event.inputs.target}}-${{github.event.inputs.branch}}-${{github.event.inputs.date_s}}
+    name: EZOP-${{github.event.inputs.config_s}}-${{github.event.inputs.target}}-${{github.event.inputs.branch}}-${{github.event.inputs.date_s}}
     env:
       CONFIG_S: ${{github.event.inputs.config_s}}
       CPU_S: ${{github.event.inputs.cpu_s}}
@@ -235,10 +235,6 @@ jobs:
          bash buildmd5.sh
          echo "TAG=$(cat ./package/base-files/files/etc/ezopenwrt_version  | cut -d _ -f 1)" >>$GITHUB_ENV
          echo "status=success" >> $GITHUB_OUTPUT
-    - name: Check space usage
-      if: (!cancelled())
-      run: df -hT
-
     - name: Organize files
       id: organize
       if: env.UPLOAD_FIRMWARE == 'true' && steps.compile.outputs.status  == 'success'
