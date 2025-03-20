@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: OpenWrt-io-ol
+name: OpenWrt-io-im
 
 on:
   repository_dispatch:
