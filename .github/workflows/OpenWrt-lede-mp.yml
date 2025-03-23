@@ -148,8 +148,10 @@ jobs:
         df -hT $PWD
         if [[ $REPO_BRANCH == 'master' ]]; then
           git clone --depth 1 https://github.com/coolsnowwolf/lede -b master  openwrt
-        else 
+        elif  [[ $REPO_BRANCH == 'owrt' ]]; then
           git clone --depth 1 https://github.com/VIKINGYFY/immortalwrt -b owrt  openwrt
+        else 
+          git clone --depth 1 https://github.com/immortalwrt/immortalwrt -b $REPO_BRANCH  openwrt
         fi
         # git clone --depth 1  ${{ secrets.LEDEURL }} -b master  lede
         git clone --depth 1 https://github.com/loso3000/HarmonyOS -b master lede
