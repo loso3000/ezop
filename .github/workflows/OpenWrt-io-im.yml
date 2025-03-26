@@ -19,7 +19,7 @@ on:
         default: 'istoreos-24.10'
         required: true
         type: choice
-        options: [ openwrt-24.10, istoreos-24.10 ]
+        options: [ openwrt-24.10, istoreos-24.10 ,master ]
       config_s:
         description: '配置文件'
         default: 'Vip-Super'
@@ -155,10 +155,10 @@ jobs:
       working-directory: /builder
       run: |
         
-        if [[ ${{env.REPO_BRANCH}} == 'openwrt-24.10' ]]; then
-            git clone $REPO_IM -b ${{env.REPO_BRANCH}} openwrt
-        else
+        if [[ ${{env.REPO_BRANCH}} == 'istoreos-24.10' ]]; then
             git clone $REPO_IO -b ${{env.REPO_BRANCH}} openwrt
+        else
+            git clone $REPO_IM -b ${{env.REPO_BRANCH}} openwrt
         fi
         git clone ${{ secrets.IOURL }} lede
         cp -Rf ./lede/* openwrt
