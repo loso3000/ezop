@@ -239,11 +239,14 @@ jobs:
          bash buildmd5.sh
          echo "TAG=$(cat ./package/base-files/files/etc/ezopenwrt_version  | cut -d _ -f 1)" >>$GITHUB_ENV
          echo "status=success" >> $GITHUB_OUTPUT
+         rm -rf staging_dir/toolchain-*/bin/*openwrt-linux-musl-lto-dump
+         rm -rf staging_dir/toolchain-*/initial
     - name: Organize files
       id: organize
       if: env.UPLOAD_FIRMWARE == 'true' && steps.compile.outputs.status  == 'success'
       run: |
-        cd openwrt/bin/targets/*/*
+        cd openwrt/bin/targets/*/*/
+        ls -a
         rm -rf packages
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
