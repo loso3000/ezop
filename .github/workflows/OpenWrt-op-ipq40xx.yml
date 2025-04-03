@@ -42,7 +42,7 @@ on:
         default: 'ipq40xx'
         required: true
         type: choice
-        options: [ ipq40xx ]
+        options: [ ipq40xx,tr3000 ]
 
       date_s:
         description: '固件日期'
