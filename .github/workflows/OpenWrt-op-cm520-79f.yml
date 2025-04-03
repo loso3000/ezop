@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: OpenWrt-op-ipq40xx
+name: OpenWrt-op-cm520-79f
 
 on:
   repository_dispatch:
@@ -39,10 +39,10 @@ on:
           
       target:
         description: '选择要生成的机型：'
-        default: 'ipq40xx'
+        default: 'cm520-79f'
         required: true
         type: choice
-        options: [ ipq40xx,tr3000 ]
+        options: [ cm520-79f ]
 
       date_s:
         description: '固件日期'
@@ -162,9 +162,9 @@ jobs:
       run: |
       
         if [[ ${{env.REPO_BRANCH}} == 'openwrt-24.10' ]]; then
-            git clone $REPO_OP -b openwrt-24.10 openwrt
-        else
             git clone $REPO_IM -b openwrt-24.10 openwrt
+        else
+            git clone $REPO_OP -b openwrt-24.10 openwrt
         fi
         
         git clone https://github.com/loso3000/lede lede
@@ -201,7 +201,8 @@ jobs:
     - name: defconfig
       run: |
         cd openwrt
-        echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
+        cat  $GITHUB_WORKSPACE/ipq40xx/${TARGET_DEVICE}  > .config
+        # echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
         make defconfig
     - name: Download package
       id: package
