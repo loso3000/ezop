@@ -162,15 +162,12 @@ jobs:
       working-directory: /builder
       run: |
       
-        if [[ ${{env.REPO_BRANCH}} == 'openwrt-24.10' ]]; then
-            # git clone --depth 1 $REPO_IM -b openwrt-24.10 openwrt
-            git clone -b $REPO_BRANCH --single-branch --filter=blob:none $REPO_IM openwrt
-        elif [[ ${{env.REPO_BRANCH}} == 'openwrt-21.02' ]]; then
-            # git clone --depth 1 $REPO_HA -b openwrt-21.02 openwrt
-            git clone -b openwrt-21.02 --single-branch --filter=blob:none $REPO_HA openwrt
-        elSe
-            # git clone --depth 1 $REPO_PA -b ${{env.REPO_BRANCH}} openwrt
-            git clone -b ${{env.REPO_BRANCH}} --single-branch --filter=blob:none $REPO_PA openwrt
+        if [[ $REPO_BRANCH == 'openwrt-24.10' ]]; then
+          git clone -b $REPO_BRANCH --single-branch --filter=blob:none $REPO_IM openwrt
+        elif [[ $REPO_BRANCH == 'openwrt-21.02' ]]; then
+          git clone -b openwrt-21.02 --single-branch --filter=blob:none $REPO_HA openwrt
+        else
+          git clone -b cudy --single-branch --filter=blob:none $REPO_PA openwrt
         fi
         git clone https://github.com/loso3000/lede lede
         cp -Rf ./lede/* openwrt
