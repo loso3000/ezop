@@ -19,7 +19,7 @@ on:
         default: 'openwrt-24.10'
         required: true
         type: choice
-        options: [ openwrt-24.10, ipq50xx-mainline-kernel-5.15-openwrt-23.05 ,2410 ,cudy ]
+        options: [ openwrt-24.10, openwrt-21.02 ,2410 ,cudy ]
       config_s:
         description: '配置文件'
         default: 'Vip-Super'
@@ -54,6 +54,7 @@ env:
   REPO_OP: https://github.com/openwrt/openwrt
   REPO_IM: https://github.com/immortalwrt/immortalwrt
   REPO_HZ: https://github.com/hzyitc/openwrt-redmi-ax3000
+  REPO_HA: https://github.com/hanwckf/immortalwrt-mt798x
   REPO_PA: https://github.com/padavanonly/immortalwrt-mt798x-24.10
   FEEDS_CONF: feeds.conf
   DIY_P1_SH: diy
@@ -166,9 +167,9 @@ jobs:
         if [ "${{env.REPO_BRANCH}}" == "openwrt-24.10" ]; then
             # git clone $REPO_IM -b openwrt-24.10 openwrt
             git clone -b openwrt-24.10 --single-branch --filter=blob:none $REPO_IM openwrt
-        elif [ "${{env.REPO_BRANCH}}" == "ipq50xx-mainline-kernel-5.15-openwrt-23.05" ]; then
+        elif [ "${{env.REPO_BRANCH}}" == "openwrt-21.02" ]; then
             # git clone $REPO_HZ -b ${{env.REPO_BRANCH}} openwrt
-            git clone -b openwrt-24.10 --single-branch --filter=blob:none $REPO_HZ openwrt
+            git clone -b openwrt-21.02 --single-branch --filter=blob:none $REPO_HA openwrt
         else
             # git clone $REPO_PA -b ${{env.REPO_BRANCH}} openwrt
             git clone -b ${{env.REPO_BRANCH}} --single-branch --filter=blob:none $REPO_PA openwrt
