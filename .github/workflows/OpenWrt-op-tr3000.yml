@@ -167,7 +167,7 @@ jobs:
         elif [[ ${{env.REPO_BRANCH}} == 'openwrt-23.05' ]]; then
             git clone $REPO_OP -b openwrt-24.10 openwrt
         elSe
-            git clone $REPO_PA -b $REPO_BRANCH openwrt
+            git clone $REPO_PA openwrt
         fi
         git clone https://github.com/loso3000/lede lede
         cp -Rf ./lede/* openwrt
