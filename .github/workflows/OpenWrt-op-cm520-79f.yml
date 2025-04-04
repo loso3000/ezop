@@ -163,10 +163,10 @@ jobs:
       working-directory: /builder
       run: |
       
-        if [[ ${{env.REPO_BRANCH}} == 'openwrt-24.10' ]]; then
+        if [ "${{env.REPO_BRANCH}}" == "openwrt-24.10" ]; then
             # git clone $REPO_IM -b openwrt-24.10 openwrt
             git clone -b openwrt-24.10 --single-branch --filter=blob:none $REPO_IM openwrt
-        elif [[ ${{env.REPO_BRANCH}} == 'ipq50xx-mainline-kernel-5.15-openwrt-23.05' ]]; then
+        elif [ "${{env.REPO_BRANCH}}" == "ipq50xx-mainline-kernel-5.15-openwrt-23.05" ]; then
             # git clone $REPO_HZ -b ${{env.REPO_BRANCH}} openwrt
             git clone -b openwrt-24.10 --single-branch --filter=blob:none $REPO_HZ openwrt
         else
