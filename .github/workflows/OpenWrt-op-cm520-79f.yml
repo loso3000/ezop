@@ -192,6 +192,7 @@ jobs:
         echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
         chmod +x $DIY_P1_SH  || true
          [ -e $DIY_P1_SH ] &&  ./$DIY_P1_SH ||  ../$DIY_P1_SH
+         ./scripts/feeds update -a && ./scripts/feeds install -a
          chmod -R 755 .
     - name: Cache
       id: cache
