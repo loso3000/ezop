@@ -162,9 +162,9 @@ jobs:
       working-directory: /builder
       run: |
       
-        if [[ $REPO_BRANCH == 'openwrt-24.10' ]]; then
+        if [ $REPO_BRANCH == 'openwrt-24.10' ]; then
           git clone -b $REPO_BRANCH --single-branch --filter=blob:none $REPO_IM openwrt
-        elif [[ $REPO_BRANCH == 'openwrt-21.02' ]]; then
+        elif [ $REPO_BRANCH == 'openwrt-21.02' ]; then
           git clone -b openwrt-21.02 --single-branch --filter=blob:none $REPO_HA openwrt
         else
           git clone -b cudy --single-branch --filter=blob:none $REPO_PA openwrt
@@ -172,7 +172,7 @@ jobs:
         git clone https://github.com/loso3000/lede lede
         cp -Rf ./lede/* openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
-        if [[ $DATE_S == 'default' ]]; then
+        if [ $DATE_S == 'default' ]; then
           echo "DATA=`date +%Y%m%d_%H%M`" >> $GITHUB_ENV
         else 
           echo "DATA=$DATE_S" >>$GITHUB_ENV
