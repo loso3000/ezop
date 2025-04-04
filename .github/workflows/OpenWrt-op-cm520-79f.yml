@@ -164,11 +164,14 @@ jobs:
       run: |
       
         if [[ ${{env.REPO_BRANCH}} == 'openwrt-24.10' ]]; then
-            git clone $REPO_IM -b openwrt-24.10 openwrt
+            # git clone $REPO_IM -b openwrt-24.10 openwrt
+            git clone -b openwrt-24.10 --single-branch --filter=blob:none $REPO_IM openwrt
         elif [[ ${{env.REPO_BRANCH}} == 'ipq50xx-mainline-kernel-5.15-openwrt-23.05' ]]; then
-            git clone $REPO_HZ -b ${{env.REPO_BRANCH}} openwrt
+            # git clone $REPO_HZ -b ${{env.REPO_BRANCH}} openwrt
+            git clone -b openwrt-24.10 --single-branch --filter=blob:none $REPO_HZ openwrt
         else
-            git clone $REPO_PA -b  ${{env.REPO_BRANCH}} openwrt
+            # git clone $REPO_PA -b ${{env.REPO_BRANCH}} openwrt
+            git clone -b ${{env.REPO_BRANCH}} --single-branch --filter=blob:none $REPO_PA openwrt
         fi
         git clone https://github.com/loso3000/lede lede
         cp -Rf ./lede/* openwrt
