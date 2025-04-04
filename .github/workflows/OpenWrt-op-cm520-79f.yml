@@ -19,7 +19,7 @@ on:
         default: 'openwrt-24.10'
         required: true
         type: choice
-        options: [ openwrt-24.10, openwrt-23.05 ]
+        options: [ openwrt-24.10, openwrt-23.05,ipq50xx-mainline-kernel-5.15-openwrt-23.05 ]
       config_s:
         description: '配置文件'
         default: 'Vip-Super'
@@ -53,6 +53,7 @@ on:
 env:
   REPO_OP: https://github.com/openwrt/openwrt
   REPO_IM: https://github.com/immortalwrt/immortalwrt
+  REPO_HZ: https://github.com/hzyitc/openwrt-redmi-ax3000
   FEEDS_CONF: feeds.conf
   DIY_P1_SH: diy
   UPLOAD_BIN_DIR: true
@@ -163,6 +164,8 @@ jobs:
       
         if [[ ${{env.REPO_BRANCH}} == 'openwrt-24.10' ]]; then
             git clone $REPO_IM -b openwrt-24.10 openwrt
+        elif [[ ${{env.REPO_BRANCH}} =='ipq50xx-mainline-kernel-5.15-openwrt-23.05'; then
+            git clone $REPO_IM -b ${{env.REPO_BRANCH}} openwrt
         else
             git clone $REPO_OP -b openwrt-24.10 openwrt
         fi
@@ -182,7 +185,7 @@ jobs:
       run: cd openwrt && ./scripts/feeds install -a
     - name: Load custom feeds
       run: |
-        [ -e $FEEDS_CONF ] && mv -f $FEEDS_CONF openwrt/feeds.conf.default
+        # [ -e $FEEDS_CONF ] && mv -f $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x $DIY_P1_SH || true
         cd openwrt
         echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
@@ -202,6 +205,25 @@ jobs:
       run: |
         cd openwrt
         cat  ./ipq40xx/${TARGET_DEVICE}  > .config
+        if [[ ${{env.REPO_BRANCH}} =='ipq50xx-mainline-kernel-5.15-openwrt-23.05'; then
+          cat <<EOF | sed -E 's/^  //' >.config
+            CONFIG_TARGET_ipq50xx=y
+            CONFIG_TARGET_ipq50xx_arm=y
+            CONFIG_TARGET_MULTI_PROFILE=y
+            CONFIG_TARGET_ALL_PROFILES=y
+            CONFIG_TARGET_PER_DEVICE_ROOTFS=y
+            CONFIG_ATH11K_MEM_PROFILE_256M=y
+            CONFIG_IB=y
+            # CONFIG_IB_STANDALONE is not set
+            CONFIG_SDK=y
+            CONFIG_MAKE_TOOLCHAIN=y
+            CONFIG_REPRODUCIBLE_DEBUG_INFO=y
+            CONFIG_PACKAGE_kmod-qca-nss-ecm-standard=y
+            CONFIG_PACKAGE_kmod-qca-nss-drv-pppoe=y
+            CONFIG_PACKAGE_luci=y
+          EOF
+
+        fi
         # echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
         make defconfig
     - name: Download package
