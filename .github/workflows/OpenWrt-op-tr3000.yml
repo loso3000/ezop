@@ -51,8 +51,8 @@ on:
     
   
 env:
-  REPO_OP: https://github.com/openwrt/openwrt
   REPO_IM: https://github.com/immortalwrt/immortalwrt
+  REPO_PI: https://github.com/immortalwrt/immortalwrt-mt798x
   REPO_PA: https://github.com/padavanonly/immortalwrt-mt798x-24.10
   FEEDS_CONF: feeds.conf
   DIY_P1_SH: diy
@@ -165,7 +165,7 @@ jobs:
         if [[ ${{env.REPO_BRANCH}} == 'openwrt-24.10' ]]; then
             git clone $REPO_IM -b openwrt-24.10 openwrt
         elif [[ ${{env.REPO_BRANCH}} == 'openwrt-23.05' ]]; then
-            git clone $REPO_OP -b openwrt-24.10 openwrt
+            git clone $REPO_PI -b openwrt-24.10 openwrt
         elSe
             git clone $REPO_PA openwrt
         fi
