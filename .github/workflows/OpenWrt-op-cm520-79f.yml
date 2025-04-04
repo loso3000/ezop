@@ -206,7 +206,7 @@ jobs:
       run: |
         cd openwrt
         cat  ./ipq40xx/${TARGET_DEVICE}  > .config
-        if [[ ${{env.REPO_BRANCH}} =='ipq50xx-mainline-kernel-5.15-openwrt-23.05'; then
+        if [[ ${{env.REPO_BRANCH}} == 'ipq50xx-mainline-kernel-5.15-openwrt-23.05' ]]; then
           cat <<EOF | sed -E 's/^  //' >.config
             CONFIG_TARGET_ipq50xx=y
             CONFIG_TARGET_ipq50xx_arm=y
