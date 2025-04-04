@@ -163,11 +163,11 @@ jobs:
       run: |
       
         if [[ ${{env.REPO_BRANCH}} == 'openwrt-24.10' ]]; then
-            git clone --depth 1  $REPO_IM -b $REPO_BRANCH openwrt
+            git clone --depth 1 $REPO_IM -b openwrt-24.10 openwrt
         elif [[ ${{env.REPO_BRANCH}} == 'openwrt-21.02' ]]; then
-            git clone --depth 1  $REPO_HA -b $REPO_BRANCH openwrt
+            git clone --depth 1 $REPO_HA -b openwrt-21.02 openwrt
         elSe
-            git clone --depth 1  $REPO_PA  -b $REPO_BRANCH openwrt
+            git clone --depth 1 $REPO_PA -b ${{env.REPO_BRANCH}} openwrt
         fi
         git clone https://github.com/loso3000/lede lede
         cp -Rf ./lede/* openwrt
