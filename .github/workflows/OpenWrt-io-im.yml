@@ -182,6 +182,7 @@ jobs:
         echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
         chmod +x $DIY_P1_SH  || true
          [ -e $DIY_P1_SH ] &&  ./$DIY_P1_SH ||  ../$DIY_P1_SH
+         ./scripts/feeds update -a && ./scripts/feeds install -a
          chmod -R 755 .
     - name: Cache
       id: cache
@@ -194,9 +195,7 @@ jobs:
     - name: defconfig
       run: |
         cd openwrt
-        echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
         make defconfig
-
     - name: Download package
       id: package
       run: |
