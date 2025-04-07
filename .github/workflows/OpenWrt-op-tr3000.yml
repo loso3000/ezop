@@ -163,9 +163,9 @@ jobs:
       run: |
       
         if [ $REPO_BRANCH == 'openwrt-24.10' ]; then
-          git clone -b $REPO_BRANCH --single-branch --filter=blob:none $REPO_IM openwrt
+          git clone -b $REPO_BRANCH  $REPO_IM openwrt
         elif [ $REPO_BRANCH == 'openwrt-21.02' ]; then
-          git clone -b openwrt-21.02 --single-branch --filter=blob:none $REPO_HA openwrt
+          git clone -b openwrt-21.02  $REPO_HA openwrt
         else
           git clone -b cudy --single-branch --filter=blob:none $REPO_PA openwrt
         fi
@@ -191,7 +191,7 @@ jobs:
         echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
         chmod +x $DIY_P1_SH  || true
          [ -e $DIY_P1_SH ] &&  ./$DIY_P1_SH ||  ../$DIY_P1_SH
-         ./scripts/feeds update -a && ./scripts/feeds install -a
+         # ./scripts/feeds update -a && ./scripts/feeds install -a
          chmod -R 755 .
     - name: Cache
       id: cache
@@ -221,7 +221,7 @@ jobs:
          cd openwrt
          echo -e "$(nproc) thread compile"
          rm -rf ./dl/gcc-* ./build_dir/toolchain-*  # 清除旧工具链
-         make -j1 V=s
+         # make -j1 V=s
          make tools/compile -j$(nproc) || make tools/compile -j72
          make toolchain/compile -j$(nproc) || make toolchain/compile -j72
          make target/compile -j$(nproc) || make target/compile -j72 IGNORE_ERRORS=1
