@@ -165,9 +165,11 @@ jobs:
         if [ $REPO_BRANCH == 'openwrt-24.10' ]; then
           git clone -b $REPO_BRANCH  $REPO_IM openwrt
         elif [ $REPO_BRANCH == 'openwrt-21.02' ]; then
-          git clone -b openwrt-21.02  $REPO_HA openwrt
-        else
-          git clone -b cudy --single-branch --filter=blob:none $REPO_PA openwrt
+          git clone -b $REPO_BRANCH $REPO_HA openwrt
+        elif [ $REPO_BRANCH == '2410' ]; then
+          git clone -b $REPO_BRANCH $REPO_PA openwrt
+        elif [ $REPO_BRANCH == 'cudy' ]; then
+          git clone -b $REPO_BRANCH --single-branch --filter=blob:none $REPO_PA openwrt
         fi
         git clone https://github.com/loso3000/lede lede
         cp -Rf ./lede/* openwrt
