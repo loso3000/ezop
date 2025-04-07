@@ -224,14 +224,14 @@ jobs:
          echo -e "$(nproc) thread compile"
          rm -rf ./dl/gcc-* ./build_dir/toolchain-*  # 清除旧工具链
          # make -j1 V=s
-         make tools/compile -j$(nproc) || make tools/compile -j72
-         make toolchain/compile -j$(nproc) || make toolchain/compile -j72
-         make target/compile -j$(nproc) || make target/compile -j72 IGNORE_ERRORS=1
-         toolchain/install -j1 V=s             # 单独编译工具链
-         make diffconfig
-         make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
-         make package/index
-         bash  bakkmod.sh
+         # make tools/compile -j$(nproc) || make tools/compile -j72
+         # make toolchain/compile -j$(nproc) || make toolchain/compile -j72
+         # make target/compile -j$(nproc) || make target/compile -j72 IGNORE_ERRORS=1
+         # toolchain/install -j1 V=s             # 单独编译工具链
+         # make diffconfig
+         # make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
+         # make package/index
+         # bash  bakkmod.sh
          echo "status=success" >> $GITHUB_OUTPUT
     - name: Generate Firmware
       id: compile
@@ -239,12 +239,18 @@ jobs:
       run: |
          df -h
          cd openwrt 
+         shopt -s extglob
+         echo -e "$(($(nproc)+1)) thread compile"
+         make -j$(($(nproc)+1)) || make V=s &>build.log 
+         sed -i "s/# CONFIG_IB is not set/CONFIG_IB=y/" .config
+         df -hT
+        
          rm -rf ./dl
-          make package/install -j$(nproc) || make package/install -j1 V=s
-          make target/install -j$(nproc) || make target/install -j1 V=s
-          make json_overview_image_info
-          make checksum
-         bash buildmd5.sh
+         #  make package/install -j$(nproc) || make package/install -j1 V=s
+         #  make target/install -j$(nproc) || make target/install -j1 V=s
+         #  make json_overview_image_info
+         #  make checksum
+         # bash buildmd5.sh
          echo "TAG=$(cat ./package/base-files/files/etc/ezopenwrt_version  | cut -d _ -f 1)" >>$GITHUB_ENV
          echo "status=success" >> $GITHUB_OUTPUT
          rm -rf staging_dir/toolchain-*/bin/*openwrt-linux-musl-lto-dump
