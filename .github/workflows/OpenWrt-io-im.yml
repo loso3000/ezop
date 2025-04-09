@@ -209,6 +209,8 @@ jobs:
       id: compileopenwrt
       run: |
          df -h
+         
+         shopt -s extglob
          cd openwrt
          echo -e "$(nproc) thread compile"
          # make -j$(nproc)  || make -j1 V=s
@@ -225,6 +227,8 @@ jobs:
       if: steps.compileopenwrt.outputs.status  == 'success'
       run: |
          df -h
+
+         shopt -s extglob
          cd openwrt 
          rm -rf ./dl
           make package/install -j$(nproc) || make package/install -j1 V=s
