@@ -248,7 +248,7 @@ jobs:
       if: env.UPLOAD_FIRMWARE == 'true' && steps.compile.outputs.status  == 'success'
       run: |
         cd openwrt/bin/targets/*/*
-        rm -rf packages
+        mv -f packages  ../../../packages
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
     - name: Generate release tag
