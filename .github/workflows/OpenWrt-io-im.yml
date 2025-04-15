@@ -163,11 +163,7 @@ jobs:
         git clone ${{ secrets.IOURL }} lede
         cp -Rf ./lede/* openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
-        if [[ $DATE_S == 'default' ]]; then
-          echo "DATA=`date +%Y%m%d_%H%M`" >> $GITHUB_ENV
-        else 
-          echo "DATA=$DATE_S" >>$GITHUB_ENV
-        fi
+
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
 
@@ -252,7 +248,14 @@ jobs:
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.status  == 'success'
       run: |
-        echo "release_tag=$(cat openwrt/package/base-files/files/etc/ezopenwrt_version  | cut -d _ -f 1)" >> $GITHUB_OUTPUT
+
+        . ./ezopenwrt_version
+        if [[ $DATE_S == 'default' ]]; then
+          echo "DATA=$EZDATE" >> $GITHUB_ENV
+        else 
+          echo "DATA=$DATE_S" >>$GITHUB_ENV
+        fi
+        echo "release_tag=$EZVER" >> $GITHUB_OUTPUT
         echo -e "\n* The stable source code has been updated." >> release.txt
         sed -i '1i ## Firmware Update Log' release.txt
         touch release.txt
