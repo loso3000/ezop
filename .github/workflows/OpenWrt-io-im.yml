@@ -239,8 +239,11 @@ jobs:
       id: organize
       if:  steps.compile.outputs.status  == 'success'
       run: |
+         ls -a ./
+         ls -a ./openwrt 
       
-         . ./ezopenwrt_version
+         . ./ezopenwrt_version  || true
+         . ../ezopenwrt_version  || true
          if [[ $DATE_S == 'default' ]]; then
           echo "DATA=$EZDATE" >> $GITHUB_ENV
          else 
