@@ -225,6 +225,8 @@ jobs:
          make package/index
          bash  bakkmod.sh
          echo "status=success" >> $GITHUB_OUTPUT
+         ls -a ./ 
+         ls -a ../
     - name: Generate Firmware
       id: compile
       if: steps.compileopenwrt.outputs.status  == 'success'
@@ -239,12 +241,15 @@ jobs:
           make checksum
          bash buildmd5.sh
 
+         ls -a ./ 
+         ls -a ../
          echo "status=success" >> $GITHUB_OUTPUT
     - name: Organize files
       id: organize
       if: steps.compile.outputs.status  == 'success'
       run: |
-         . ./ezopenwrt_version
+         . ./ezopenwrt_version  || true
+         . ../ezopenwrt_version  || true
          if [[ $DATE_S == 'default' ]]; then
           echo "DATA=$EZDATE" >> $GITHUB_ENV
          else 
