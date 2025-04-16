@@ -219,6 +219,7 @@ jobs:
          
          ls -a ./
          ls -a ./openwrt 
+         . ../ezopenwrt_version  || true
          echo OPENWRTROOT$OPENWRTROOT
       
          ls -a ./openwrt/bin
@@ -287,7 +288,15 @@ jobs:
       with:
         name: ${{ env.TAG }}-EzOpWrt-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-bin
         path: ./openwrt/bin/
-
+    - name: Git push assets to "ver" branch
+      run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan ver || git checkout ver || true
+          git add ezopenwrt_version
+          git commit -m "${{ env.TAG }}" || echo "No changes to commit"
+          git push -f https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git ver
+          
     - name: Upload firmware to release
       uses: softprops/action-gh-release@v2
       if: steps.tag.outputs.status == 'success' && !cancelled()
