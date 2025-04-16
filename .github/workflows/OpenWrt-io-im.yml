@@ -216,6 +216,21 @@ jobs:
          make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
          make package/index
          bash  bakkmod.sh
+         
+         ls -a ./
+         ls -a ./openwrt 
+         echo OPENWRTROOT$OPENWRTROOT
+      
+         ls -a ./openwrt/bin
+         . ./ezopenwrt_version  || true
+         . ./openwrt/ezopenwrt_version  || true
+         . ./openwrt/bin/ezopenwrt_version  || true
+         if [[ $DATE_S == 'default' ]]; then
+          echo "DATA=$EZDATE" >> $GITHUB_ENV
+         else 
+          echo "DATA=$DATE_S" >>$GITHUB_ENV
+         fi
+         echo "release_tag=$EZVER" >> $GITHUB_OUTPUT
          echo "status=success" >> $GITHUB_OUTPUT
     - name: Generate Firmware
       id: compile
@@ -239,19 +254,6 @@ jobs:
       id: organize
       if:  steps.compile.outputs.status  == 'success'
       run: |
-         ls -a ./
-         ls -a ./openwrt 
-      
-         ls -a ./openwrt/bin
-         . ./ezopenwrt_version  || true
-         . ./openwrt/ezopenwrt_version  || true
-         . ./openwrt/bin/ezopenwrt_version  || true
-         if [[ $DATE_S == 'default' ]]; then
-          echo "DATA=$EZDATE" >> $GITHUB_ENV
-         else 
-          echo "DATA=$DATE_S" >>$GITHUB_ENV
-         fi
-         echo "release_tag=$EZVER" >> $GITHUB_OUTPUT
          cd openwrt/bin/targets/*/*
 
           mv -f packages ../../../packages/
