@@ -242,8 +242,10 @@ jobs:
          ls -a ./
          ls -a ./openwrt 
       
+         ls -a ./openwrt/bin
          . ./ezopenwrt_version  || true
          . ./openwrt/ezopenwrt_version  || true
+         . ./openwrt/bin/ezopenwrt_version  || true
          if [[ $DATE_S == 'default' ]]; then
           echo "DATA=$EZDATE" >> $GITHUB_ENV
          else 
