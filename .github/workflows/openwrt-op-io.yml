@@ -225,14 +225,11 @@ jobs:
          make package/index
          bash  bakkmod.sh
          echo "status=success" >> $GITHUB_OUTPUT
-         ls -a ./ 
-         ls -a ../
     - name: Generate Firmware
       id: compile
       if: steps.compileopenwrt.outputs.status  == 'success'
       run: |
          df -h
-         
          cd openwrt 
          rm -rf ./dl
           make package/install -j$(nproc) || make package/install -j1 V=s
@@ -240,15 +237,12 @@ jobs:
           make json_overview_image_info
           make checksum
          bash buildmd5.sh
-
-         ls -a ./ 
-         ls -a ../
          echo "status=success" >> $GITHUB_OUTPUT
     - name: Organize files
       id: organize
       if: steps.compile.outputs.status  == 'success'
       run: |
-         . ./ezopenwrt_version  || true
+
          . ../ezopenwrt_version  || true
          if [[ $DATE_S == 'default' ]]; then
           echo "DATA=$EZDATE" >> $GITHUB_ENV
@@ -292,7 +286,7 @@ jobs:
 
     - name: Upload firmware to release
       uses: softprops/action-gh-release@v2
-      if: steps.tag.outputs.status == 'success' && !cancelled()
+      if: UPLOAD_RELEASE == 'true' && steps.tag.outputs.status == 'success' && !cancelled()
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
       with:
