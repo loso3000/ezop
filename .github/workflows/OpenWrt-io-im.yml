@@ -166,18 +166,20 @@ jobs:
 
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
-
     - name: Install feeds
+
+      working-directory: /builder
       run: cd openwrt && ./scripts/feeds install -a
     - name: Load custom feeds
       run: |
-        [ -e $FEEDS_CONF ] && mv -f $FEEDS_CONF openwrt/feeds.conf.default
+        # [ -e $FEEDS_CONF ] && mv -f $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x $DIY_P1_SH || true
+        ls $GITHUB_WORKSPACE
         cd openwrt
         echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
         echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
         chmod +x $DIY_P1_SH  || true
-         [ -e $DIY_P1_SH ] &&  ./$DIY_P1_SH ||  ../$DIY_P1_SH
+         [ -e $DIY_P1_SH ] &&  ./$DIY_P1_SH ||  $GITHUB_WORKSPACE/$DIY_P1_SH
          # ./scripts/feeds update -a && ./scripts/feeds install -a
          ./scripts/feeds update -i && ./scripts/feeds install -i
          chmod -R 755 .
@@ -202,6 +204,7 @@ jobs:
         find dl -size -1024c -exec rm -f {} \;
 
     - name: Compile Packages
+    
       id: compileopenwrt
       run: |
          df -h
@@ -216,11 +219,9 @@ jobs:
          make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
          make package/index
          bash  bakkmod.sh
-         
-         ls -a ../
-         . ../ezopenwrt_version  || true
-         echo OPENWRTROOT$OPENWRTROOT
-         . $GITHUB_WORKSPACE/ezopenwrt_version  || true 
+         ls $GITHUB_WORKSPACE
+         ls -a /builder
+         . /builder/ezopenwrt_version  || true
          if [[ $DATE_S == 'default' ]]; then
           echo "DATA=$EZDATE" >> $GITHUB_ENV
          else 
