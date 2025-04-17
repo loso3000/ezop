@@ -246,15 +246,13 @@ jobs:
       id: organize
       if: steps.compile.outputs.status  == 'success'
       run: |
-      
-         ls  /builder
          . /builder/ezopenwrt_version  || true
          if [[ $DATE_S == 'default' ]]; then
           echo "DATA=$DATE_S" >> $GITHUB_ENV
          else 
-          echo "DATA=`echo  $(date -d "$EZ_DATE" "+%F_%H") `" >>$GITHUB_ENV
+          echo "DATA=`echo  $(date -d "$EZDATE" "+%F_%H") `" >>$GITHUB_ENV
          fi
-         echo "release_tag=$EZVER" >> $GITHUB_OUTPUT
+         echo "release_tag=$EZVER" >> $GITHUB_ENV
          cd openwrt/bin/targets/*/*
          mv -f packages  ../../../packages
          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
