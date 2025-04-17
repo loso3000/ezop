@@ -167,17 +167,16 @@ jobs:
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
     - name: Install feeds
-
-      working-directory: /builder
       run: cd openwrt && ./scripts/feeds install -a
     - name: Load custom feeds
+      working-directory: /builder
       run: |
         # [ -e $FEEDS_CONF ] && mv -f $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x $DIY_P1_SH || true
         ls $GITHUB_WORKSPACE
         cd openwrt
-        echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
-        echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
+        #echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
+        #echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
         chmod +x $DIY_P1_SH  || true
          [ -e $DIY_P1_SH ] &&  ./$DIY_P1_SH ||  $GITHUB_WORKSPACE/$DIY_P1_SH
          # ./scripts/feeds update -a && ./scripts/feeds install -a
@@ -204,7 +203,7 @@ jobs:
         find dl -size -1024c -exec rm -f {} \;
 
     - name: Compile Packages
-    
+      working-directory: /builder
       id: compileopenwrt
       run: |
          df -h
@@ -219,15 +218,6 @@ jobs:
          make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
          make package/index
          bash  bakkmod.sh
-         ls $GITHUB_WORKSPACE
-         ls -a /builder
-         . /builder/ezopenwrt_version  || true
-         if [[ $DATE_S == 'default' ]]; then
-          echo "DATA=$EZDATE" >> $GITHUB_ENV
-         else 
-          echo "DATA=$DATE_S" >>$GITHUB_ENV
-         fi
-         echo "release_tag=$EZVER" >> $GITHUB_OUTPUT
          echo "status=success" >> $GITHUB_OUTPUT
     - name: Generate Firmware
       id: compile
@@ -251,8 +241,18 @@ jobs:
       id: organize
       if:  steps.compile.outputs.status  == 'success'
       run: |
+      
+         ls -a /builder
+         ls $GITHUB_WORKSPACE
+         . /builder/ezopenwrt_version  || true
+         if [[ $DATE_S == 'default' ]]; then
+          echo "DATA=$EZDATE" >> $GITHUB_ENV
+         else 
+          echo "DATA=$DATE_S" >>$GITHUB_ENV
+         fi
+         echo "release_tag=$EZVER" >> $GITHUB_OUTPUT
          cd openwrt/bin/targets/*/*
-
+         ls
           mv -f packages ../../../packages/
          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
          echo "status=success" >> $GITHUB_OUTPUT
