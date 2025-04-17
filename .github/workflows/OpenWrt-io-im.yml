@@ -246,9 +246,9 @@ jobs:
          ls $GITHUB_WORKSPACE
          . /builder/ezopenwrt_version  || true
          if [[ $DATE_S == 'default' ]]; then
-          echo "DATA=$EZDATE" >> $GITHUB_ENV
+          echo "DATA=$DATE_S" >> $GITHUB_ENV
          else 
-          echo "DATA=$DATE_S" >>$GITHUB_ENV
+          echo "DATA=$EZDATE" >>$GITHUB_ENV
          fi
          echo "release_tag=$EZVER" >> $GITHUB_OUTPUT
          cd openwrt/bin/targets/*/*
