@@ -217,12 +217,9 @@ jobs:
          make package/index
          bash  bakkmod.sh
          
-         ls -a ./
-         ls -a ./openwrt 
+         ls -a ../
          . ../ezopenwrt_version  || true
          echo OPENWRTROOT$OPENWRTROOT
-      
-         ls -a ./openwrt/bin
          . $GITHUB_WORKSPACE/ezopenwrt_version  || true 
          if [[ $DATE_S == 'default' ]]; then
           echo "DATA=$EZDATE" >> $GITHUB_ENV
