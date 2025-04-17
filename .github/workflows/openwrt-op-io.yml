@@ -169,7 +169,7 @@ jobs:
             git clone $REPO_IO -b ${{env.REPO_BRANCH}} openwrt
             git clone ${{ secrets.IOURL }} lede
         fi
-        cp -Rf ./lede/* openwrt
+        cp -Rf ./lede/* /builder/openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
 
     - name: Update feeds
@@ -179,6 +179,7 @@ jobs:
            ./scripts/feeds install -a
 
     - name: Load custom feeds
+      working-directory: /builder
       run: |
         # [ -e $FEEDS_CONF ] && mv -f $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x $DIY_P1_SH || true
@@ -197,12 +198,16 @@ jobs:
         skip_saving: 'true'
         prefix: /builder/openwrt
     - name: defconfig
+
+      working-directory: /builder
       run: |
         cd openwrt
         # echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
         make defconfig
 
     - name: Download package
+
+      working-directory: /builder
       id: package
       run: |
         cd openwrt
@@ -211,6 +216,7 @@ jobs:
         find dl -size -1024c -exec rm -f {} \;
 
     - name: Compile Packages
+      working-directory: /builder
       id: compileopenwrt
       run: |
          df -h
@@ -243,7 +249,7 @@ jobs:
       if: steps.compile.outputs.status  == 'success'
       run: |
 
-         . ../ezopenwrt_version  || true
+         . ./builder/ezopenwrt_version  || true
          if [[ $DATE_S == 'default' ]]; then
           echo "DATA=$EZDATE" >> $GITHUB_ENV
          else 
@@ -300,7 +306,7 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout -b ver
-          git add ezopenwrt_version
+          git add /builder/ezopenwrt_version
           git commit -m "${{ env.TAG }}"
           git remote add origin "https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}"
           git push -f -u origin ver
