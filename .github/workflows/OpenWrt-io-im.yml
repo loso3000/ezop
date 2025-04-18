@@ -148,6 +148,7 @@ jobs:
         sudo apt-get install -y build-essential flex bison clang-17 cmake g++ gawk gcc-multilib g++-multilib gettext git libfuse-dev libncurses5-dev libssl-dev python3 python3-pip python3-ply python3-distutils python3-pyelftools rsync unzip zlib1g-dev file wget subversion patch upx-ucl autoconf automake curl asciidoc binutils bzip2 lib32gcc-s1 libc6-dev-i386 uglifyjs msmtp texinfo libreadline-dev libglib2.0-dev xmlto libelf-dev libtool autopoint antlr3 gperf ccache swig coreutils haveged scons libpython3-dev rename
         sudo apt-get clean
         git config --global user.name 'GitHub Actions' && git config --global user.email 'noreply@github.com'
+        df -Th
           sudo timedatectl set-timezone "$TZ"
           sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 
@@ -232,12 +233,12 @@ jobs:
           make checksum
          bash buildmd5.sh
          
-         ls $GITHUB_WORKSPACE
-         . $GITHUB_WORKSPACE/ezopenwrt_version  || true
-         if [[ $DATE_S == 'default' ]]; then
-          echo "DATA=`echo  $(date -d "$EZDATE" "+%F_%H") `" >>$GITHUB_ENV
+         . $GITHUB_WORKSPACE/ezopenwrt_version
+         if [[ $DATE_S = 'default' ]]; then
+              echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
+              # echo "DATA=`echo  $(date -d "$EZDATE" "+%F_%H") `" >>$GITHUB_ENV
          else 
-          echo "DATA=$DATE_S" >> $GITHUB_ENV
+             echo "DATA=$DATE_S" >> $GITHUB_ENV
          fi
          echo "TAG=$EZVER" >> $GITHUB_ENV
          echo "status=success" >> $GITHUB_OUTPUT
