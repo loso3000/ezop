@@ -179,7 +179,6 @@ jobs:
            ./scripts/feeds install -a
 
     - name: Load custom feeds
-      working-directory: /builder
       run: |
         # [ -e $FEEDS_CONF ] && mv -f $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x $DIY_P1_SH || true
@@ -214,7 +213,6 @@ jobs:
         find dl -size -1024c -exec rm -f {} \;
 
     - name: Compile Packages
-      working-directory: /builder
       id: compileopenwrt
       run: |
          df -h
@@ -252,14 +250,14 @@ jobs:
          echo "status=success" >> $GITHUB_OUTPUT
     - name: Generate release tag
       id: tag
-      if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.status  == 'success'
+      if:  steps.compile.outputs.status  == 'success'
       run: |
-      
-         . /builder/ezopenwrt_version  || true
+         ls $GITHUB_WORKSPACE
+         . $GITHUB_WORKSPACE/ezopenwrt_version
          if [[ $DATE_S == 'default' ]]; then
-          echo "DATA=$DATE_S" >> $GITHUB_ENV
-         else 
           echo "DATA=`echo  $(date -d "$EZDATE" "+%F_%H") `" >>$GITHUB_ENV
+         else 
+          echo "DATA=$DATE_S" >> $GITHUB_ENV
          fi
          echo "TAG=$EZVER" >> $GITHUB_ENV
          echo "release_tag=$EZVER" >> $GITHUB_OUTPUT
@@ -272,21 +270,21 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.organize.outputs.status == 'success' && env.UPLOAD_FIRMWARE == 'true'
       with:
-        name: ${{ env.DATA }}-${{ env.TAG }}-EzOpWrt-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-opFirmware
+        name: ${{ env.DATA }}-${{ env.TAG }}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-opFirmware
         path: ${{ env.FIRMWARE }}
 
     - name: Upload IPK directory
       uses: actions/upload-artifact@main
       if: env.UPLOAD_IPK_DIR == 'true' && steps.organize.outputs.status == 'success'
       with:
-        name: ${{ env.DATA }}-${{ env.TAG }}-EzOpWrt-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-ipk
+        name: ${{ env.DATA }}-${{ env.TAG }}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-ipk
         path: ./openwrt/bin/packages/
  
     - name: Upload bin directory
       uses: actions/upload-artifact@main
       if: env.UPLOAD_BIN_DIR == 'true' && steps.organize.outputs.status == 'success'
       with:
-        name: ${{ env.DATA }}-${{ env.TAG }}-EzOpWrt-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-bin
+        name: ${{ env.DATA }}-${{ env.TAG }}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-bin
         path: ./openwrt/bin/
 
     - name: Upload firmware to release
