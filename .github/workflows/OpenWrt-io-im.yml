@@ -250,7 +250,8 @@ jobs:
       id: tag
       if: steps.compile.outputs.status  == 'success'
       run: |
-         . /builder/ezopenwrt_version  || true
+         ls $GITHUB_WORKSPACE
+         . $GITHUB_WORKSPACE/ezopenwrt_version  || true
          if [[ $DATE_S == 'default' ]]; then
           echo "DATA=`echo  $(date -d "$EZDATE" "+%F_%H") `" >>$GITHUB_ENV
          else 
@@ -299,7 +300,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git checkout --orphan ver || git checkout ver || true
-          git add /builder/ezopenwrt_version
+          git add $GITHUB_WORKSPACE/ezopenwrt_version
           git commit -m "${{ env.DATA }}" || echo "No changes to commit"
           git push -f https://${{ github.actor }}:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git ver
        
