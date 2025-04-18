@@ -203,7 +203,6 @@ jobs:
         find dl -size -1024c -exec rm -f {} \;
 
     - name: Compile Packages
-      working-directory: /builder
       id: compileopenwrt
       run: |
          df -h
@@ -232,6 +231,15 @@ jobs:
           make json_overview_image_info
           make checksum
          bash buildmd5.sh
+         
+         ls $GITHUB_WORKSPACE
+         . $GITHUB_WORKSPACE/ezopenwrt_version  || true
+         if [[ $DATE_S == 'default' ]]; then
+          echo "DATA=`echo  $(date -d "$EZDATE" "+%F_%H") `" >>$GITHUB_ENV
+         else 
+          echo "DATA=$DATE_S" >> $GITHUB_ENV
+         fi
+         echo "TAG=$EZVER" >> $GITHUB_ENV
          echo "status=success" >> $GITHUB_OUTPUT
     - name: Check space usage
       if: (!cancelled())
@@ -250,15 +258,6 @@ jobs:
       id: tag
       if: steps.compile.outputs.status  == 'success'
       run: |
-         ls $GITHUB_WORKSPACE
-         . $GITHUB_WORKSPACE/ezopenwrt_version  || true
-         if [[ $DATE_S == 'default' ]]; then
-          echo "DATA=`echo  $(date -d "$EZDATE" "+%F_%H") `" >>$GITHUB_ENV
-         else 
-          echo "DATA=$DATE_S" >> $GITHUB_ENV
-         fi
-         echo "TAG=$EZVER" >> $GITHUB_ENV
-         echo "release_tag=$EZVER" >> $GITHUB_OUTPUT
          echo -e "\n* The stable source code has been updated." >> release.txt
          sed -i '1i ## Firmware Update Log' release.txt
          touch release.txt
