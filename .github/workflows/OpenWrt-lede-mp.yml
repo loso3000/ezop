@@ -183,7 +183,8 @@ jobs:
         cd openwrt
         cat  ./seed/${CONFIG_S} > .config
         echo -e 'CONFIG_GRUB_IMAGES=y\n' >> .config 
-        cat  ./seed/comm >> .config
+        echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
+        # cat  ./seed/comm >> .config
         make defconfig 
     - name: Download package
       run: |
@@ -204,8 +205,9 @@ jobs:
          make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
          make package/index
          bash  bakkmod.sh
-         [ -d files/etc/opkg ] || mkdir -p files/etc/opkg
-         [ -f files/etc/opkg/distfeeds.conf ] || curl -fsSL  https://raw.githubusercontent.com/sirpdboy/other/master/patch/distfeeds.conf > ./files/etc/opkg/distfeeds.conf
+ 
+         # [ -d files/etc/opkg ] || mkdir -p files/etc/opkg
+         # [ -f files/etc/opkg/distfeeds.conf ] || curl -fsSL  https://raw.githubusercontent.com/sirpdboy/other/master/patch/distfeeds.conf > ./files/etc/opkg/distfeeds.conf
          echo "status=success" >> $GITHUB_OUTPUT
     - name: Generate Firmware
       id: compile
@@ -218,21 +220,27 @@ jobs:
           make json_overview_image_info
          make checksum
          bash buildmd5.sh
+         .  $GITHUB_WORKSPACE/ezopenwrt_version
+         if [[ $DATE_S == 'default' ]]; then
+              echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
+              # echo "DATA=`echo  $(date -d "$EZDATE" "+%F_%H") `" >>$GITHUB_ENV
+         else 
+            echo "DATA=$DATE_S" >> $GITHUB_ENV
+         fi
+         echo "TAG=$EZVER" >> $GITHUB_ENV
          echo "status=success" >> $GITHUB_OUTPUT
     - name: Organize files
       id: organize
       if: env.UPLOAD_FIRMWARE == 'true' && steps.compile.outputs.status  == 'success' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
-        rm -rf packages
+         mv -f packages  ../../../packages
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
     - name: Generate release tag
       id: tag
       if: steps.compile.outputs.status  == 'success' && !cancelled()
       run: |
-        echo "release_tag=$(cat openwrt/package/base-files/files/etc/ezopenwrt_version  | cut -d _ -f 1)" >> $GITHUB_OUTPUT
-         echo "TAG=$(cat openwrt/package/base-files/files/etc/ezopenwrt_version  | cut -d _ -f 1)" >>$GITHUB_ENV
         echo -e "\n* The stable source code has been updated." >> release.txt
         sed -i '1i ## Firmware Update Log' release.txt
         touch release.txt
@@ -265,7 +273,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
       with:
-        tag_name: ${{ steps.tag.outputs.release_tag }}
+        tag_name: ${{ env.TAG }}
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
 
