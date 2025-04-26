@@ -52,6 +52,7 @@ on:
   
 env:
   REPO_IO: https://github.com/istoreos/istoreos
+  REPO_OP: https://github.com/openwrt/openwrt
   REPO_IM: https://github.com/immortalwrt/immortalwrt
   FEEDS_CONF: feeds.conf
   DIY_P1_SH: diy
@@ -158,6 +159,8 @@ jobs:
         
         if [[ ${{env.REPO_BRANCH}} == 'istoreos-24.10' ]]; then
             git clone $REPO_IO -b ${{env.REPO_BRANCH}} openwrt
+        elif [[ ${{env.REPO_BRANCH}} == 'master' ]]; then
+             git clone $REPO_OP -b openwrt-24.10 openwrt
         else
             git clone $REPO_IM -b ${{env.REPO_BRANCH}} openwrt
         fi
