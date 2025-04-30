@@ -209,7 +209,7 @@ jobs:
     - name: defconfig
       run: |
         cd openwrt
-        cat  ./ipq40xx/${TARGET_DEVICE}  > .config
+        cat  ./seed/${TARGET_DEVICE}  > .config
         echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
         make defconfig
     - name: Download package
@@ -246,7 +246,14 @@ jobs:
           make json_overview_image_info
           make checksum
          bash buildmd5.sh
-         echo "TAG=$(cat ./package/base-files/files/etc/ezopenwrt_version  | cut -d _ -f 1)" >>$GITHUB_ENV
+         . $GITHUB_WORKSPACE/ezopenwrt_version
+         if [[ $DATE_S == 'default' ]]; then
+              echo "DATA=`date +%Y%m%d_%H -d +"5"hour`" >> $GITHUB_ENV
+              # echo "DATA=`echo  $(date -d "$EZDATE" "+%F_%H") `" >>$GITHUB_ENV
+         else 
+          echo "DATA=$DATE_S" >> $GITHUB_ENV
+         fi
+         echo "TAG=$EZVER" >> $GITHUB_ENV
          echo "status=success" >> $GITHUB_OUTPUT
          rm -rf staging_dir/toolchain-*/bin/*openwrt-linux-musl-lto-dump
          rm -rf staging_dir/toolchain-*/initial
@@ -263,7 +270,6 @@ jobs:
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && steps.compile.outputs.status  == 'success'
       run: |
-        echo "release_tag=$(cat openwrt/package/base-files/files/etc/ezopenwrt_version  | cut -d _ -f 1)" >> $GITHUB_OUTPUT
         echo -e "\n* The stable source code has been updated." >> release.txt
         sed -i '1i ## Firmware Update Log' release.txt
         touch release.txt
@@ -296,7 +302,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
       with:
-        tag_name: ${{ steps.tag.outputs.release_tag }}
+        tag_name: ${{ env.TAG  }}
         body_path: release.txt
         files: ${{ env.FIRMWARE }}/*
 
