@@ -42,7 +42,7 @@ on:
         default: 'cm520-79f'
         required: true
         type: choice
-        options: [ cm520-79f,rm2100 ]
+        options: [ cm520-79f,rm2100 ,glmt6000 ]
 
       date_s:
         description: '固件日期'
