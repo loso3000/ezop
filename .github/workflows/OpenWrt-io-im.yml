@@ -175,7 +175,6 @@ jobs:
     - name: Load custom feeds
       working-directory: /builder
       run: |
-        # [ -e $FEEDS_CONF ] && mv -f $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x $DIY_P1_SH || true
         ls $GITHUB_WORKSPACE
         cd openwrt
