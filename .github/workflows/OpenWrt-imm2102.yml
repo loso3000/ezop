@@ -19,7 +19,7 @@ on:
         default: 'openwrt-21.02'
         required: true
         type: choice
-        options: [ openwrt-24.10,openwrt-21.02,24.10,21.02 ]
+        options: [ openwrt-24.10,openwrt-21.02,2410,21.02 ]
       config_s:
         description: '配置文件'
         default: 'Vip-Bypass'
@@ -166,14 +166,14 @@ jobs:
             git clone ${{ secrets.IOURL }} lede
         elif [ "${{env.REPO_BRANCH}}" == "openwrt-21.02" ]; then
             # git clone $REPO_HZ -b ${{env.REPO_BRANCH}} openwrt
-            git clone -b openwrt-21.02 --single-branch --filter=blob:none $REPO_IM openwrt
-            git clone https://github.com/fkuetgjfbj/lede.git lede
-        elif [ "${{env.REPO_BRANCH}}" == "21.02" ]; then
             git clone -b openwrt-21.02 --single-branch --filter=blob:none $REPO_HA openwrt
             git clone https://github.com/fkuetgjfbj/lede.git lede
-        else
-            git clone -b ${{env.REPO_BRANCH}} --single-branch --filter=blob:none $REPO_PA openwrt
+        elif [ "${{env.REPO_BRANCH}}" == "2410" ]; then
+            git clone -b 2410 --single-branch --filter=blob:none $REPO_PA openwrt
             git clone ${{ secrets.IOURL }} lede
+        else
+            git clone -b openwrt-21.02 --single-branch --filter=blob:none $REPO_IM openwrt
+            git clone https://github.com/fkuetgjfbj/lede.git lede
         fi
         cp -Rf ./lede/* openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
@@ -190,10 +190,10 @@ jobs:
     - name: Load custom feeds
       run: |
         # [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        chmod +x diypart1.sh || true
+        chmod +x diy || true
         cd openwrt
-        chmod +x diypart1.sh || true
-         [ -e diypart1.sh ] && bash ./diypart1.sh || bash ../diypart1.sh
+        chmod +x diy || true
+         [ -e diy ] && bash ./diy || bash ../diy
          chmod -R 755 .
          df -h
  
