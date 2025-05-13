@@ -19,7 +19,7 @@ on:
         default: 'openwrt-21.02'
         required: true
         type: choice
-        options: [ openwrt-21.02 ]
+        options: [ openwrt-24.10,openwrt-21.02,24.10,21.02 ]
       config_s:
         description: '配置文件'
         default: 'Vip-Bypass'
@@ -50,7 +50,11 @@ on:
         default: 'default'
         required: false
 env:
-  REPO_URL: https://github.com/immortalwrt/immortalwrt
+  # REPO_OP: https://github.com/openwrt/openwrt
+  REPO_IM: https://github.com/immortalwrt/immortalwrt
+  # REPO_HZ: https://github.com/hzyitc/openwrt-redmi-ax3000
+  REPO_HA: https://github.com/hanwckf/immortalwrt-mt798x
+  REPO_PA: https://github.com/padavanonly/immortalwrt-mt798x-24.10
   #REPO_BRANCH: openwrt-21.02
   FEEDS_CONF: feeds.conf.default
   DIY_P1_SH: diypart1.sh
@@ -156,8 +160,21 @@ jobs:
       working-directory: /builder
       run: |
         df -hT $PWD
-        git clone $REPO_URL -b $REPO_BRANCH openwrt
-        git clone https://github.com/fkuetgjfbj/lede.git lede
+        if [ "${{env.REPO_BRANCH}}" == "openwrt-24.10" ]; then
+            # git clone $REPO_IM -b openwrt-24.10 openwrt
+            git clone -b openwrt-24.10 --single-branch --filter=blob:none $REPO_IM openwrt
+            git clone ${{ secrets.IOURL }} lede
+        elif [ "${{env.REPO_BRANCH}}" == "openwrt-21.02" ]; then
+            # git clone $REPO_HZ -b ${{env.REPO_BRANCH}} openwrt
+            git clone -b openwrt-21.02 --single-branch --filter=blob:none $REPO_IM openwrt
+            git clone https://github.com/fkuetgjfbj/lede.git lede
+        elif [ "${{env.REPO_BRANCH}}" == "21.02" ]; then
+            git clone -b openwrt-21.02 --single-branch --filter=blob:none $REPO_HA openwrt
+            git clone https://github.com/fkuetgjfbj/lede.git lede
+        else
+            git clone -b ${{env.REPO_BRANCH}} --single-branch --filter=blob:none $REPO_PA openwrt
+            git clone ${{ secrets.IOURL }} lede
+        fi
         cp -Rf ./lede/* openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
         if [[ $DATE_S == 'default' ]]; then
