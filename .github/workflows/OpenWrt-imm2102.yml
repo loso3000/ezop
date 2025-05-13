@@ -8,7 +8,7 @@
 # Description: Build OpenWrt using GitHub Actions
 #
 
-name: OpenWrt-imm
+name: OpenWrt-imm2102
 
 on:
   repository_dispatch:
@@ -19,10 +19,10 @@ on:
         default: 'openwrt-21.02'
         required: true
         type: choice
-        options: [ openwrt-21.02, master, openwrt-23.05 ]
+        options: [ openwrt-21.02 ]
       config_s:
         description: '配置文件'
-        default: 'Super'
+        default: 'Vip-Bypass'
         required: true
         type: choice
         options: [ Vip-Dz,  Vip-Super,  Vip-Bypass ]
