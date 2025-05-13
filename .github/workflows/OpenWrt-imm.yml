@@ -25,7 +25,7 @@ on:
         default: 'Super'
         required: true
         type: choice
-        options: [ Free-Super, Free-Bypass,  Vip-Super,  Vip-Bypass ]
+        options: [ Vip-Dz,  Vip-Super,  Vip-Bypass ]
   
       cpu_s:
         description: 'CPU优选'
@@ -43,7 +43,7 @@ on:
         default: 'x86_64'
         required: true
         type: choice
-        options: [ rm2100, glmt6000 ]
+        options: [ x86_64,rm2100, glmt6000 ]
 
       date_s:
         description: '固件日期'
