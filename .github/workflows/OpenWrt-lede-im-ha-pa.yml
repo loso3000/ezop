@@ -187,9 +187,9 @@ jobs:
 
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
-    - name: Load custom feeds
+      
+    - name: Load custom scrift
       run: |
-        # [ -e $FEEDS_CONF ] && mv -f $FEEDS_CONF openwrt/feeds.conf.default
         chmod +x $DIY_P1_SH || true
         cd openwrt
         echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
