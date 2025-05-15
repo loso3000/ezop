@@ -43,7 +43,7 @@ on:
         default: 'x86_64'
         required: true
         type: choice
-        options: [ x86_64,rm2100, glmt6000 ]
+        options: [ x86_64,rm2100, glmt6000,mt7986 ]
 
       date_s:
         description: '固件日期'
