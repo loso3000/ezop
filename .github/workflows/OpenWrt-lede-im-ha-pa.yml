@@ -178,8 +178,12 @@ jobs:
             git clone https://github.com/fkuetgjfbj/lede.git lede
         else [ "${{env.REPO_BRANCH}}" == "2410" ]; then
             # git clone $REPO_PA -b ${{env.REPO_BRANCH}} openwrt
+            git clone -b 2410 --single-branch --filter=blob:none $REPO_PA openwrt
+            git clone https://github.com/loso3000/lede lede
+        else 
             git clone -b ${{env.REPO_BRANCH}} --single-branch --filter=blob:none $REPO_PA openwrt
             git clone https://github.com/loso3000/lede lede
+            
         fi
 
         cp -Rf ./lede/* openwrt
