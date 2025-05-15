@@ -189,11 +189,13 @@ jobs:
     - name: Load custom feeds
       run: |
         # [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+        chmod +x $DIY_P1_SH  || true
         cd openwrt
         echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
         echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
         chmod +x $DIY_P1_SH  || true
          [ -e $DIY_P1_SH ] &&  ./$DIY_P1_SH ||  $GITHUB_WORKSPACE/$DIY_P1_SH
+         ls -a
          chmod -R 755 .
          df -h
  
@@ -210,6 +212,7 @@ jobs:
       run: |
         cd openwrt
         cat  ./seed/${TARGET_DEVICE}  > .config
+        ls  -a
         echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
         make defconfig
     - name: Download package
