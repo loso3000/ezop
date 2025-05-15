@@ -167,21 +167,22 @@ jobs:
         if [ "${{env.REPO_BRANCH}}" == "openwrt-24.10" ]; then
             # git clone $REPO_IM -b openwrt-24.10 openwrt
             git clone -b openwrt-24.10 --single-branch --filter=blob:none $REPO_IM openwrt
-            git clone ${{ secrets.IOURL }} lede
+            git clone https://github.com/loso3000/lede lede
         elif [ "${{env.REPO_BRANCH}}" == "openwrt-21.02" ]; then
             # git clone $REPO_HZ -b ${{env.REPO_BRANCH}} openwrt
             git clone -b openwrt-21.02 --single-branch --filter=blob:none $REPO_HA openwrt
-            git clone https://github.com/loso3000/lede lede
+            git clone https://github.com/fkuetgjfbj/lede.git lede
             
         else [ "${{env.REPO_BRANCH}}" == "2102" ]; then
             # git clone $REPO_PA -b ${{env.REPO_BRANCH}} openwrt
             git clone -b ${{env.REPO_BRANCH}} --single-branch --filter=blob:none $REPO_PA openwrt
-            git clone https://github.com/loso3000/lede lede
-        else
+            git clone https://github.com/fkuetgjfbj/lede.git lede
+        else [ "${{env.REPO_BRANCH}}" == "2410" ]; then
             # git clone $REPO_PA -b ${{env.REPO_BRANCH}} openwrt
             git clone -b ${{env.REPO_BRANCH}} --single-branch --filter=blob:none $REPO_PA openwrt
-            git clone ${{ secrets.IOURL }} lede
+            git clone https://github.com/loso3000/lede lede
         fi
+
         cp -Rf ./lede/* openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
         if [[ $DATE_S == 'default' ]]; then
@@ -198,6 +199,7 @@ jobs:
     - name: Load custom scrift
       run: |
         cd openwrt
+        ls 
         echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
         echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
         chmod +x $DIY_P1_SH  || true
