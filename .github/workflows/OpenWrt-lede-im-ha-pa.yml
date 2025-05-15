@@ -19,7 +19,7 @@ on:
         default: 'openwrt-24.10'
         required: true
         type: choice
-        options: [ openwrt-24.10, openwrt-21.02 ,2410 ]
+        options: [ openwrt-24.10, openwrt-21.02 ,2102 ,2410 ]
       config_s:
         description: '配置文件'
         default: 'Vip-Super'
@@ -167,14 +167,21 @@ jobs:
         if [ "${{env.REPO_BRANCH}}" == "openwrt-24.10" ]; then
             # git clone $REPO_IM -b openwrt-24.10 openwrt
             git clone -b openwrt-24.10 --single-branch --filter=blob:none $REPO_IM openwrt
+            git clone ${{ secrets.IOURL }} lede
         elif [ "${{env.REPO_BRANCH}}" == "openwrt-21.02" ]; then
             # git clone $REPO_HZ -b ${{env.REPO_BRANCH}} openwrt
             git clone -b openwrt-21.02 --single-branch --filter=blob:none $REPO_HA openwrt
+            git clone https://github.com/loso3000/lede lede
+            
+        else [ "${{env.REPO_BRANCH}}" == "2102" ]; then
+            # git clone $REPO_PA -b ${{env.REPO_BRANCH}} openwrt
+            git clone -b ${{env.REPO_BRANCH}} --single-branch --filter=blob:none $REPO_PA openwrt
+            git clone https://github.com/loso3000/lede lede
         else
             # git clone $REPO_PA -b ${{env.REPO_BRANCH}} openwrt
             git clone -b ${{env.REPO_BRANCH}} --single-branch --filter=blob:none $REPO_PA openwrt
+            git clone ${{ secrets.IOURL }} lede
         fi
-        git clone https://github.com/loso3000/lede lede
         cp -Rf ./lede/* openwrt
         ln -sf /builder/openwrt $GITHUB_WORKSPACE/openwrt
         if [[ $DATE_S == 'default' ]]; then
