@@ -190,6 +190,8 @@ jobs:
       run: |
         # [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
         cd openwrt
+        echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
+        echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
         chmod +x $DIY_P1_SH  || true
          [ -e $DIY_P1_SH ] &&  ./$DIY_P1_SH ||  $GITHUB_WORKSPACE/$DIY_P1_SH
          chmod -R 755 .
@@ -218,7 +220,7 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
     - name: Compile Packages
-      id: compile
+      id: compileopenwrt
       run: |
          df -h
          cd openwrt
@@ -230,26 +232,50 @@ jobs:
          make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
          make package/index
          bash  bakkmod.sh
+  
+         cd $OPENWRTROOT/bin/packages/*
+         PLATFORM=$(basename `pwd`)
+         echo "PLATFORM=$PLATFORM" >> $GITHUB_ENV
+         echo "::set-output name=PLATFORM::$(echo $PLATFORM)"
+         cd $OPENWRTROOT/bin/targets/*
+         TARGET=$(basename `pwd`)
+         echo "TARGET=$TARGET" >> $GITHUB_ENV
+         echo "::set-output name=TARGET::$(echo $TARGET)"
+         cd *
+         SUBTARGET=$(basename `pwd`)
+         echo "SUBTARGET=$SUBTARGET" >> $GITHUB_ENV
+         echo "::set-output name=SUBTARGET::$(echo $SUBTARGET)"
+         echo "status=success" >> $GITHUB_OUTPUT
     - name: Generate Firmware
+      id: compile
+      if: steps.compileopenwrt.outputs.status  == 'success'
       run: |
          df -h
-         cd openwrt 
+         shopt -s extglob
+         cd $OPENWRTROOT
+         rm -rf ./dl
+         sed -i "s/subtarget/$SUBTARGET/g" files/etc/opkg/distfeeds.conf.server
+         sed -i "s/target\//$TARGET\//g" files/etc/opkg/distfeeds.conf.server
+         sed -i "s/platform/$PLATFORM/g" files/etc/opkg/distfeeds.conf.server
+         cp files/etc/opkg/distfeeds.conf.server files/etc/opkg/distfeeds.conf.mirror
          make package/install -j$(nproc) || make package/install -j1 V=s
          make target/install -j$(nproc) || make target/install -j1 V=s
          make checksum
          bash buildmd5.sh
+         echo "status=success" >> $GITHUB_OUTPUT
     - name: Check space usage
       if: (!cancelled())
       run: df -h
 
     - name: Organize files
       id: organize
-      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+      if:  steps.compile.outputs.status  == 'success'
       run: |
+      
         cd openwrt/bin/targets/*/*
-        rm -rf packages
-        echo "FIRMWARE=$PWD" >> $GITHUB_ENV
-        echo "status=success" >> $GITHUB_OUTPUT
+         mv -f packages ../../../packages/
+         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+         echo "status=success" >> $GITHUB_OUTPUT
     - name: Upload firmware directory
       uses: actions/upload-artifact@main
       if: steps.organize.outputs.status == 'success' && !cancelled()
