@@ -172,11 +172,11 @@ jobs:
             # git clone $REPO_HZ -b ${{env.REPO_BRANCH}} openwrt
             git clone -b openwrt-21.02 --single-branch --filter=blob:none $REPO_HA openwrt
             git clone https://github.com/fkuetgjfbj/lede.git lede
-        else [ "${{env.REPO_BRANCH}}" == "2102" ]; then
+        elif  [ "${{env.REPO_BRANCH}}" == "2102" ]; then
             # git clone $REPO_PA -b ${{env.REPO_BRANCH}} openwrt
             git clone -b openwrt-21.02 --single-branch --filter=blob:none $REPO_PA openwrt
             git clone https://github.com/fkuetgjfbj/lede.git lede
-        else [ "${{env.REPO_BRANCH}}" == "2410" ]; then
+        elif  [ "${{env.REPO_BRANCH}}" == "2410" ]; then
             # git clone $REPO_PA -b ${{env.REPO_BRANCH}} openwrt
             git clone -b 2410 --single-branch --filter=blob:none $REPO_PA openwrt
             git clone https://github.com/loso3000/lede lede
