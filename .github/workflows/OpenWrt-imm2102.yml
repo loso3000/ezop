@@ -171,7 +171,7 @@ jobs:
             git clone -b 2410 --single-branch --filter=blob:none $REPO_PA openwrt
             git clone https://github.com/loso3000/lede lede
         else
-            git clone -b openwrt-21.02 --single-branch --filter=blob:none $REPO_IM openwrt
+            git clone -b openwrt-21.02 --single-branch --filter=blob:none https://github.com/padavanonly/immortalwrt-mt798x openwrt
             git clone https://github.com/fkuetgjfbj/lede.git lede
         fi
         cp -Rf ./lede/* openwrt
