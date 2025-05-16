@@ -223,15 +223,15 @@ jobs:
          cd $OPENWRTROOT/bin/packages/*
          PLATFORM=$(basename `pwd`)
          echo "PLATFORM=$PLATFORM" >> $GITHUB_ENV
-         echo "::set-output name=PLATFORM::$(echo $PLATFORM)"
+         echo "PLATFORM=$PLATFORM" >> $GITHUB_OUTPUT
          cd $OPENWRTROOT/bin/targets/*
          TARGET=$(basename `pwd`)
          echo "TARGET=$TARGET" >> $GITHUB_ENV
-         echo "::set-output name=TARGET::$(echo $TARGET)"
+         echo "TARGET=$TARGET" >> $GITHUB_OUTPUT
          cd *
          SUBTARGET=$(basename `pwd`)
          echo "SUBTARGET=$SUBTARGET" >> $GITHUB_ENV
-         echo "::set-output name=SUBTARGET::$(echo $SUBTARGET)"
+         echo "SUBTARGET=$SUBTARGET" >> $GITHUB_OUTPUT
          echo "status=success" >> $GITHUB_OUTPUT
     - name: Generate Firmware
       id: compile
