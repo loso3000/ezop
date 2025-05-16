@@ -22,7 +22,7 @@ on:
         options: [ openwrt-24.10,openwrt-21.02,2410,21.02 ]
       config_s:
         description: '配置文件'
-        default: 'Vip-Bypass'
+        default: 'Vip-Dz'
         required: true
         type: choice
         options: [ Vip-Dz,  Vip-Super,  Vip-Bypass ]
@@ -40,10 +40,10 @@ on:
           
       target:
         description: '选择要生成的机型：'
-        default: 'x86_64'
+        default: 'mt7986'
         required: true
         type: choice
-        options: [ x86_64,rm2100, glmt6000,mt7986 ]
+        options: [ x86_64,rm2100, glmt6000,mt7986,mt7986-ax6000 ]
 
       date_s:
         description: '固件日期'
