@@ -201,6 +201,7 @@ jobs:
       
     - name: Load custom scrift
       run: |
+        chmod +x $DIY_P1_SH  || true
         cd openwrt
         ls 
         echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
@@ -221,7 +222,7 @@ jobs:
       run: |
         cd openwrt
         cat  ./seed/${TARGET_DEVICE}  > .config
-        echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
+        # echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
         make defconfig
     - name: Download package
       id: package
