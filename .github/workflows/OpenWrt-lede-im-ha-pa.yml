@@ -19,7 +19,7 @@ on:
         default: 'openwrt-24.10'
         required: true
         type: choice
-        options: [ openwrt-24.10, openwrt-21.02 ,2102 ,2410 ]
+        options: [ openwrt-24.10, openwrt-23.05 ,2410 ]
       config_s:
         description: '配置文件'
         default: 'Vip-Super'
@@ -168,10 +168,10 @@ jobs:
             # git clone $REPO_IM -b openwrt-24.10 openwrt
             git clone -b openwrt-24.10 --single-branch --filter=blob:none $REPO_IM openwrt
             git clone https://github.com/loso3000/lede lede
-        elif [ "${{env.REPO_BRANCH}}" == "openwrt-21.02" ]; then
+        elif [ "${{env.REPO_BRANCH}}" == "openwrt-23.05" ]; then
             # git clone $REPO_HZ -b ${{env.REPO_BRANCH}} openwrt
-            git clone -b openwrt-21.02 --single-branch --filter=blob:none $REPO_HA openwrt
-            git clone https://github.com/fkuetgjfbj/lede.git lede
+            git clone -b openwrt-23.05 --single-branch --filter=blob:none $REPO_IM openwrt
+            git clone https://github.com/loso3000/lede lede
         elif  [ "${{env.REPO_BRANCH}}" == "2102" ]; then
             # git clone $REPO_PA -b ${{env.REPO_BRANCH}} openwrt
             git clone -b openwrt-21.02 --single-branch --filter=blob:none $REPO_PA openwrt
@@ -204,7 +204,7 @@ jobs:
         cd openwrt
         ls 
         echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
-        echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
+        echo "OPENWRTROOT=$PWD" >> $GITHUB_OUTPUT
         chmod +x $DIY_P1_SH  || true
          [ -e $DIY_P1_SH ] &&  ./$DIY_P1_SH ||  $GITHUB_WORKSPACE/$DIY_P1_SH
          ./scripts/feeds update -a && ./scripts/feeds install -a
@@ -244,18 +244,19 @@ jobs:
          make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
          make package/index
          bash  bakkmod.sh
+         
          cd $OPENWRTROOT/bin/packages/*
          PLATFORM=$(basename `pwd`)
          echo "PLATFORM=$PLATFORM" >> $GITHUB_ENV
-         echo "::set-output name=PLATFORM::$(echo $PLATFORM)"
+         echo "PLATFORM=$PLATFORM" >> $GITHUB_OUTPUT
          cd $OPENWRTROOT/bin/targets/*
          TARGET=$(basename `pwd`)
          echo "TARGET=$TARGET" >> $GITHUB_ENV
-         echo "::set-output name=TARGET::$(echo $TARGET)"
+         echo "TARGET=$TARGET" >> $GITHUB_OUTPUT
          cd *
          SUBTARGET=$(basename `pwd`)
          echo "SUBTARGET=$SUBTARGET" >> $GITHUB_ENV
-         echo "::set-output name=SUBTARGET::$(echo $SUBTARGET)"
+         echo "SUBTARGET=$SUBTARGET" >> $GITHUB_OUTPUT
          echo "status=success" >> $GITHUB_OUTPUT
     - name: Generate Firmware
       id: compile
