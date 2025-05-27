@@ -177,6 +177,8 @@ jobs:
       run: |
          cd openwrt
          chmod +x ./${DIY_P1_SH}  &&./$DIY_P1_SH
+         echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
+         echo "OPENWRTROOT=$PWD"   >> $GITHUB_OUTPUT
          chmod -R 755 .
     - name: defconfig
       run: |
@@ -184,8 +186,13 @@ jobs:
         cat  ./seed/${CONFIG_S} > .config
         echo -e 'CONFIG_GRUB_IMAGES=y\n' >> .config 
         echo -e 'CONFIG_DEVEL=y\nCONFIG_CCACHE=y' >> .config #Cache.Speedup
+         case "${CONFIG_S}" in
+        "Vip"*)        
         # cat  ./seed/comm >> .config
-        make defconfig 
+        ;;
+        esac
+        make defconfig
+        df -h
     - name: Download package
       run: |
         cd openwrt
@@ -205,16 +212,31 @@ jobs:
          make package/compile -j$(nproc) IGNORE_ERRORS=1 || make package/compile -j72 IGNORE_ERRORS=1
          make package/index
          bash  bakkmod.sh
- 
-         # [ -d files/etc/opkg ] || mkdir -p files/etc/opkg
-         # [ -f files/etc/opkg/distfeeds.conf ] || curl -fsSL  https://raw.githubusercontent.com/sirpdboy/other/master/patch/distfeeds.conf > ./files/etc/opkg/distfeeds.conf
+           cd $OPENWRTROOT/bin/packages/*
+         PLATFORM=$(basename `pwd`)
+         echo "PLATFORM=$PLATFORM" >> $GITHUB_ENV
+         echo "PLATFORM=$PLATFORM" >> $GITHUB_OUTPUT
+         cd $OPENWRTROOT/bin/targets/*
+         TARGET=$(basename `pwd`)
+         echo "TARGET=$TARGET" >> $GITHUB_ENV
+         echo "TARGET=$TARGET" >> $GITHUB_OUTPUT
+         cd *
+         SUBTARGET=$(basename `pwd`)
+         echo "SUBTARGET=$SUBTARGET" >> $GITHUB_ENV
+         echo "SUBTARGET=$SUBTARGET" >> $GITHUB_OUTPUT
          echo "status=success" >> $GITHUB_OUTPUT
     - name: Generate Firmware
       id: compile
       if: steps.compileopenwrt.outputs.status  == 'success' && !cancelled()
       run: |
-         cd openwrt 
+        df -h
+         shopt -s extglob
+         cd $OPENWRTROOT
          rm -rf ./dl
+         sed -i "s/subtarget/$SUBTARGET/g" files/etc/opkg/distfeeds.conf.server
+         sed -i "s/target\//$TARGET\//g" files/etc/opkg/distfeeds.conf.server
+         sed -i "s/platform/$PLATFORM/g" files/etc/opkg/distfeeds.conf.server
+         cp files/etc/opkg/distfeeds.conf.server files/etc/opkg/distfeeds.conf.mirror
          make package/install -j$(nproc) || make package/install -j1 V=s
          make target/install -j$(nproc) || make target/install -j1 V=s
           make json_overview_image_info
@@ -222,7 +244,7 @@ jobs:
          bash buildmd5.sh
          .  $GITHUB_WORKSPACE/ezopenwrt_version
          if [[ $DATE_S == 'default' ]]; then
-              echo "DATA=`date +%Y%m%d_%H -d +"12"hour`" >> $GITHUB_ENV
+              echo "DATA=`date +%Y%m%d_%H -d +"5"hour`" >> $GITHUB_ENV
               # echo "DATA=`echo  $(date -d "$EZDATE" "+%F_%H") `" >>$GITHUB_ENV
          else 
             echo "DATA=$DATE_S" >> $GITHUB_ENV
