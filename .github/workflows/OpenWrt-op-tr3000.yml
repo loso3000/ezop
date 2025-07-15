@@ -19,7 +19,7 @@ on:
         default: 'openwrt-24.10'
         required: true
         type: choice
-        options: [ openwrt-24.10, openwrt-21.02, 2410 , cudy ]
+        options: [ openwrt-24.10, openwrt-21.02, openwrt-24.10-6.6 , cudy ]
       config_s:
         description: '配置文件'
         default: 'Vip-Super'
@@ -42,7 +42,7 @@ on:
         default: 'tr3000'
         required: true
         type: choice
-        options: [ tr3000 ]
+        options: [ tr3000,ax6000 ]
 
       date_s:
         description: '固件日期'
@@ -53,7 +53,7 @@ on:
 env:
   REPO_IM: https://github.com/immortalwrt/immortalwrt
   REPO_HA: https://github.com/hanwckf/immortalwrt-mt798x
-  REPO_PA: https://github.com/padavanonly/immortalwrt-mt798x-24.10
+  REPO_PA: https://github.com/padavanonly/immortalwrt-mt798x-6.6
   FEEDS_CONF: feeds.conf
   DIY_P1_SH: diy
   UPLOAD_BIN_DIR: true
@@ -166,7 +166,7 @@ jobs:
           git clone -b $REPO_BRANCH  $REPO_IM openwrt
         elif [ $REPO_BRANCH == 'openwrt-21.02' ]; then
           git clone -b $REPO_BRANCH $REPO_HA openwrt
-        elif [ $REPO_BRANCH == '2410' ]; then
+        elif [ $REPO_BRANCH == 'openwrt-24.10-6.6' ]; then
           git clone -b $REPO_BRANCH $REPO_PA openwrt
         elif [ $REPO_BRANCH == 'cudy' ]; then
           git clone -b $REPO_BRANCH --single-branch --filter=blob:none $REPO_PA openwrt
