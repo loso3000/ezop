@@ -42,7 +42,7 @@ on:
         default: 'tr3000'
         required: true
         type: choice
-        options: [ tr3000,ax6000 ]
+        options: [ tr3000,ax6000,jdax6000 ]
 
       date_s:
         description: '固件日期'
