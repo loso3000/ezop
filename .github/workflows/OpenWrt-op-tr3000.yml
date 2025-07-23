@@ -42,7 +42,7 @@ on:
         default: 'tr3000'
         required: true
         type: choice
-        options: [ tr3000,ax6000,jdax6000 ]
+        options: [ tr3000,ax6000,jdax6000,jdcloud_re-cp-03 ]
 
       date_s:
         description: '固件日期'
