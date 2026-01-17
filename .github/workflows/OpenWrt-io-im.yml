@@ -179,7 +179,7 @@ jobs:
         ls $GITHUB_WORKSPACE
         cd openwrt
         echo "OPENWRTROOT=$PWD" >> $GITHUB_ENV
-        echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
+        # echo "::set-output name=OPENWRTROOT::$(echo $PWD)"
         chmod +x $DIY_P1_SH  || true
          [ -e $DIY_P1_SH ] &&  ./$DIY_P1_SH ||  $GITHUB_WORKSPACE/$DIY_P1_SH
          # ./scripts/feeds update -a && ./scripts/feeds install -a
