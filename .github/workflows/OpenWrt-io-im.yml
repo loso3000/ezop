@@ -264,6 +264,7 @@ jobs:
       if: (!cancelled())
       run: df -hT
 
+        
     - name: Organize files
       id: organize
       if:  steps.compile.outputs.status  == 'success'
@@ -273,6 +274,14 @@ jobs:
          mv -f packages ../../../packages/
          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
          echo "status=success" >> $GITHUB_OUTPUT
+         mkdir -p /builder/assets
+         gzip -dc EzOpWrt*.gz > "/builder/assets/ezopwrt.img"
+    - name: Build ISO
+      uses: sirpdboy/openwrt-installer-iso@main
+      with:
+        INPUT_IMG: "/builder/assets/ezopwrt.img"
+        OUTPUT_DIR: "${{ env.FIRMWARE }}"
+        OUTPUT_ISO_NAME: "${{ env.DATA }}-${{ env.TAG }}-${{env.TARGET_DEVICE}}-${{env.REPO_BRANCH}}-installer.iso"
     - name: Generate release tag
       id: tag
       if: steps.compile.outputs.status  == 'success'
