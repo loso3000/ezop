@@ -86,11 +86,6 @@ jobs:
         git config --global user.email 'action@github.com'
         echo build_dir="/builder" >> "$GITHUB_ENV"
         
-    - uses: actions/checkout@v6
-    - uses: actions/setup-go@v6
-      with: 
-         go-version: '1.23'
-        
     - name: Set time zone
       run: sudo timedatectl set-timezone 'Asia/Shanghai'
     
@@ -105,6 +100,10 @@ jobs:
     - name: Install LLVM
       uses: sirpdboy/actions@install-llvm
 
+    - uses: actions/setup-go@v6
+      with: 
+         go-version: '1.23'
+         
     - name: Restore Cached
       uses: actions/cache/restore@v5
       with:
