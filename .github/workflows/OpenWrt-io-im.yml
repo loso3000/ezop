@@ -95,9 +95,9 @@ jobs:
       run: sudo timedatectl set-timezone 'Asia/Shanghai'
     
     - name: Free disk space
-      uses: sbwml/actions@free-disk
+      uses: sirpdboy/actions@free-disk
       with:
-        build-mount-path: /builder
+        build-workdir: /builder
 
     - name: Build System Setup
       uses: sirpdboy/actions@build-setup
