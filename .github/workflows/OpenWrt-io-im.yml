@@ -234,7 +234,7 @@ jobs:
          mkdir -p /builder/assets
          gzip -dc EzOpWrt*.gz > "/builder/assets/ezopwrt.img"
     - name: Build ISO
-      uses: sirpdboy/openwrt-installer-iso@main
+      uses: sirpdboy/openwrt-installer-iso@v2
       with:
         INPUT_IMG: "/builder/assets/ezopwrt.img"
         OUTPUT_DIR: "${{ env.FIRMWARE }}"
