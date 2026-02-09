@@ -231,6 +231,7 @@ jobs:
          mv -f packages ../../../packages/
          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
          echo "status=success" >> $GITHUB_OUTPUT
+         cp $GITHUB_WORKSPACE/openwrt/.config config
          mkdir -p /builder/assets
          gzip -dc EzOpWrt*.gz > "/builder/assets/ezopwrt.img"
     - name: Build ISO
