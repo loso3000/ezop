@@ -207,8 +207,10 @@ jobs:
           make json_overview_image_info
           make checksum
          bash buildmd5.sh
-         
+         ls -a $GITHUB_WORKSPACE
+         cat $GITHUB_WORKSPACE/ezopenwrt_version
          . $GITHUB_WORKSPACE/ezopenwrt_version
+         
          if [[ $DATE_S = 'default' ]]; then
               echo "DATA=`date +%Y%m%d_%H -d +"6"hour`" >> $GITHUB_ENV
               # echo "DATA=`echo  $(date -d "$EZDATE" "+%F_%H") `" >>$GITHUB_ENV
@@ -219,7 +221,9 @@ jobs:
          echo "status=success" >> $GITHUB_OUTPUT
     - name: Check space usage
       if: (!cancelled())
-      run: df -hT
+      run: |
+          df -hT
+          ls -l
 
         
     - name: Organize files
