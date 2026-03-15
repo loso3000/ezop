@@ -114,12 +114,12 @@ jobs:
       working-directory: /builder
       run: |
         
-        if [[ ${{env.REPO_BRANCH}} == 'istoreos-24.10' ]]; then
+        if [[ ${{env.REPO_BRANCH}} == 'openwrt-24.10' ]]; then
             git clone $REPO_IO -b ${{env.REPO_BRANCH}} openwrt
         #elif [[ ${{env.REPO_BRANCH}} == 'master' ]]; then
         #     git clone $REPO_OP -b openwrt-24.10 openwrt
         else
-            git clone $REPO_IM -b ${{env.REPO_BRANCH}} openwrt
+            git clone $REPO_OP -b ${{env.REPO_BRANCH}} openwrt
         fi
         git clone ${{ secrets.IOURL }} lede
         cp -Rf ./lede/* openwrt
