@@ -191,10 +191,10 @@ jobs:
          shopt -s extglob
          cd $OPENWRTROOT
          rm -rf ./dl
-         sed -i "s/subtarget/$SUBTARGET/g" files/etc/opkg/distfeeds.conf.server
-         sed -i "s/target\//$TARGET\//g" files/etc/opkg/distfeeds.conf.server
-         sed -i "s/platform/$PLATFORM/g" files/etc/opkg/distfeeds.conf.server
-         cp files/etc/opkg/distfeeds.conf.server files/etc/opkg/distfeeds.conf.mirror
+         # sed -i "s/subtarget/$SUBTARGET/g" files/etc/opkg/distfeeds.conf.server
+         # sed -i "s/target\//$TARGET\//g" files/etc/opkg/distfeeds.conf.server
+         # sed -i "s/platform/$PLATFORM/g" files/etc/opkg/distfeeds.conf.server
+         # cp files/etc/opkg/distfeeds.conf.server files/etc/opkg/distfeeds.conf.mirror
          rm -rf ./dl
           make package/install -j$(nproc) || make package/install -j1 V=s
           make target/install -j$(nproc) || make target/install -j1 V=s
@@ -218,6 +218,7 @@ jobs:
          mv -f packages ../../../packages/
          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
          echo "status=success" >> $GITHUB_OUTPUT
+         cp $OPENWRTROOT/.config config
 
          mkdir -p /builder/assets
          gzip -dc EzOpWrt*.gz > "/builder/assets/ezopwrt.img"
